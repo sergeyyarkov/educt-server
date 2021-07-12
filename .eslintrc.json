@@ -17,8 +17,12 @@
     "ecmaVersion": 2018,
     "sourceType": "module",
     "project": "./tsconfig.json",
+    "tsconfigRootDir": "server",
     "include": ["src/**/*.ts", "src/**/*.js", "test/**/*.ts"]
   },
   "plugins": ["@typescript-eslint"],
-  "rules": {}
+  "rules": {
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error"]
+  }
 }

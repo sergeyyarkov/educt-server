@@ -20,6 +20,12 @@
 
 import Route from '@ioc:Adonis/Core/Route';
 
-Route.get('/', async () => {
-  return { hello: 'world' };
-});
+Route.get('/', () => `API REST Server.`);
+
+Route.group(() => {
+  Route.resource('users', 'UsersController').apiOnly();
+  // Route.get('/users', 'UsersController.index');
+  // Route.get('/users/:id', 'UsersController.show');
+  // Route.post('/users', 'UsersController.store');
+  // Route.put('/users/:id', 'UsersController.update');
+}).prefix('api');
