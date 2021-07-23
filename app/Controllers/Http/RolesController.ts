@@ -4,6 +4,7 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import Role from 'App/Models/Role';
 import User from 'App/Models/User';
 import AddRoleToUserValidator from 'App/Validators/AddRoleToUserValidator';
+import DelRoleFromUserValidator from 'App/Validators/DelRoleFromUserValidator';
 
 export default class RolesController {
   private readonly user: typeof User;
@@ -62,6 +63,8 @@ export default class RolesController {
    *
    */
   public async destroy({ request, params }: HttpContextContract): Promise<Role[]> {
+    await request.validate(DelRoleFromUserValidator);
+
     const input = request.input('roles');
     const user = await this.user.query().preload('roles').where('id', params.id).firstOrFail();
 
@@ -74,6 +77,19 @@ export default class RolesController {
     }
 
     const roles = await this.findRolesBySlug(input);
+
+    /**
+     * Check if role is attached to user before detach
+     */
+    roles.forEach(role => {
+      if (!user.roles.map(r => r.id).includes(role.id)) {
+        throw new Exception(
+          `Role "${role.slug}" does not attached to that user.`,
+          400,
+          'E_ROLE_NOT_ATTACHED'
+        );
+      }
+    });
 
     user.related('roles').detach(roles.map(r => r.id));
     await user.load('roles');
