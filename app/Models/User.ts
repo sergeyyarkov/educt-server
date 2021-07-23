@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable no-param-reassign */
 import { DateTime } from 'luxon';
 import {
@@ -5,36 +6,46 @@ import {
   beforeCreate,
   beforeSave,
   column,
+  HasOne,
+  hasOne,
+  ManyToMany,
+  manyToMany,
 } from '@ioc:Adonis/Lucid/Orm';
 import Hash from '@ioc:Adonis/Core/Hash';
 import { nanoid } from 'nanoid';
+import Role from './Role';
+import Contact from './Contact';
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
   public id: string;
 
   @column()
-  public name: string;
+  public first_name: string;
 
   @column()
-  public surname: string;
+  public last_name: string;
 
-  @column()
-  public patronymic: string;
-
-  @column()
+  @column({ serializeAs: null })
   public login: string;
-
-  @column()
-  public email: string;
 
   @column({ serializeAs: null })
   public password: string;
 
-  @column.dateTime({ autoCreate: true })
+  @hasOne(() => Contact, {
+    foreignKey: 'user_id',
+  })
+  public contacts: HasOne<typeof Contact>;
+
+  @manyToMany(() => Role, {
+    pivotTable: 'users_roles',
+  })
+  public roles: ManyToMany<typeof Role>;
+
+  @column.dateTime({ autoCreate: true, serializeAs: null })
   public createdAt: DateTime;
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, serializeAs: null })
   public updatedAt: DateTime;
 
   @beforeCreate()

@@ -1,13 +1,21 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+import Role from 'App/Models/Role';
 import User from 'App/Models/User';
+import Contact from 'App/Models/Contact';
 import CreateUserValidator from 'App/Validators/CreateUserValidator';
 import UpdateUserValidator from 'App/Validators/UpdateUserValidator';
 
 export default class UsersController {
-  private readonly userModel: typeof User;
+  private readonly user: typeof User;
+
+  private readonly role: typeof Role;
+
+  private readonly contact: typeof Contact;
 
   constructor() {
-    this.userModel = User;
+    this.user = User;
+    this.role = Role;
+    this.contact = Contact;
   }
 
   /**
@@ -18,7 +26,7 @@ export default class UsersController {
    */
 
   public async index(): Promise<User[]> {
-    const users = this.userModel.all();
+    const users = await this.user.query().preload('contacts').preload('roles');
     return users;
   }
 
@@ -31,7 +39,11 @@ export default class UsersController {
    */
 
   public async show({ params }: HttpContextContract): Promise<User> {
-    const user = await this.userModel.findOrFail(params.user_id);
+    const user = await this.user.findOrFail(params.id);
+
+    await user.load('contacts');
+    await user.load('roles');
+
     return user;
   }
 
@@ -45,21 +57,27 @@ export default class UsersController {
 
   public async store({ request }: HttpContextContract): Promise<User> {
     await request.validate(CreateUserValidator);
-    const user = await this.userModel.create({
-      name: request.input('name'),
-      surname: request.input('surname'),
-      patronymic: request.input('patronymic'),
+
+    const roles = await this.role.query().whereIn('slug', request.input('roles'));
+    const user = await this.user.create({
+      first_name: request.input('first_name'),
+      last_name: request.input('last_name'),
       login: request.input('login'),
-      email: request.input('email'),
       password: request.input('password'),
     });
+
+    await user.related('contacts').create({ email: request.input('email') });
+    await user.related('roles').attach(roles.map(r => r.id));
+
+    await user.load('roles');
+    await user.load('contacts');
 
     return user;
   }
 
   /**
    * Update a user in a system by "id".
-   * PUT /users
+   * PATCH /users/:id
    *
    * @param {HttpContextContract} context
    * @returns {Promise<User>}
@@ -67,14 +85,35 @@ export default class UsersController {
 
   public async update({ request, params }: HttpContextContract): Promise<User> {
     await request.validate(UpdateUserValidator);
-    const user = await this.userModel.findOrFail(params.id);
-    user.name = request.input('name');
-    user.surname = request.input('surname');
-    user.patronymic = request.input('patronymic');
+
+    /**
+     * User update
+     */
+    const user = await this.user.findOrFail(params.id);
+    user.first_name = request.input('first_name');
+    user.last_name = request.input('last_name');
     user.login = request.input('login');
-    user.email = request.input('email');
     user.password = request.input('password');
+
+    // await user.load('roles');
+
+    /**
+     * Contacts update
+     */
+    const contacts = await this.contact.findByOrFail('user_id', params.id);
+    contacts.email = request.input('email');
+
+    /**
+     * Save the updated data
+     */
     await user.save();
+    await contacts.save();
+
+    /**
+     * Load the updated data to return
+     */
+    await user.load('roles');
+    await user.load('contacts');
 
     return user;
   }
@@ -88,7 +127,7 @@ export default class UsersController {
    */
 
   public async destroy({ params }: HttpContextContract): Promise<User> {
-    const user = await this.userModel.findOrFail(params.id);
+    const user = await this.user.findOrFail(params.id);
     await user.delete();
 
     return user;

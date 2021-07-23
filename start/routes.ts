@@ -23,9 +23,18 @@ import Route from '@ioc:Adonis/Core/Route';
 Route.get('/', () => `API REST Server.`);
 
 Route.group(() => {
-  Route.resource('users', 'UsersController').apiOnly();
-  // Route.get('/users', 'UsersController.index');
-  // Route.get('/users/:id', 'UsersController.show');
-  // Route.post('/users', 'UsersController.store');
-  // Route.put('/users/:id', 'UsersController.update');
+  /* Auth */
+  Route.post('login', 'AuthController.login');
+  Route.post('logout', 'AuthController.logout').middleware('auth');
+
+  /* API */
+  Route.group(() => {
+    Route.get('users', 'UsersController.index').middleware('role:admin,teacher,student');
+    Route.get('users/:id', 'UsersController.show').middleware('role:admin,teacher,student');
+    Route.post('users', 'UsersController.store').middleware('role:admin');
+    Route.patch('users/:id', 'UsersController.update').middleware('role:admin');
+    Route.delete('users', 'UsersController.destroy').middleware('role:admin');
+    Route.post('users/:id/roles', 'RolesController.store').middleware('role:admin');
+    Route.delete('users/:id/roles', 'RolesController.destroy').middleware('role:admin');
+  }).middleware('auth');
 }).prefix('api');
