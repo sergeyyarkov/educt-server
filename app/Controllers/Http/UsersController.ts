@@ -1,10 +1,17 @@
 import { AuthenticationException } from '@adonisjs/auth/build/standalone';
 import { Exception } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+import Hash from '@ioc:Adonis/Core/Hash';
+import Logger from '@ioc:Adonis/Core/Logger';
+
+/* Models */
 import Contact from 'App/Models/Contact';
 import Role from 'App/Models/Role';
 import User from 'App/Models/User';
+
+/* Validators */
 import AddRoleToUserValidator from 'App/Validators/AddRoleToUserValidator';
+import ChangePasswordValidator from 'App/Validators/ChangePasswordValidator';
 import CreateUserValidator from 'App/Validators/CreateUserValidator';
 import DelRoleFromUserValidator from 'App/Validators/DelRoleFromUserValidator';
 import UpdateUserValidator from 'App/Validators/UpdateUserValidator';
@@ -185,6 +192,50 @@ export default class UsersController {
       message: 'Roles detached',
       data: user.roles,
     });
+  }
+
+  /**
+   * Change password of authenticated user
+   * PATCH /users/me/password
+   */
+  public async changePassword({ request, response, auth }: HttpContextContract) {
+    await request.validate(ChangePasswordValidator);
+
+    const userId = auth.use('api').token?.userId;
+
+    if (userId) {
+      const user = await this.user.findOrFail(userId);
+      const oldPassword: string = request.input('oldPassword');
+      const newPassword: string = request.input('newPassword');
+
+      if (oldPassword === newPassword) {
+        throw new Exception('The new password is the same as the old one.', 400, 'E_PASSWORD_VALUES');
+      }
+
+      /**
+       * Verify old password
+       */
+      if (!(await Hash.verify(user.password, oldPassword))) {
+        throw new Exception('Invalid credentials.', 403, 'E_INVALID_CREDENTIALS');
+      }
+
+      /**
+       * Update user password
+       */
+      user.password = newPassword;
+      await user.save();
+
+      Logger.info(`Password of user with id: "${user.id}" was updated.`);
+
+      return response.ok({
+        message: 'The password was successfully changed to the new value.',
+      });
+    }
+
+    /**
+     * Unauthorized user
+     */
+    throw new AuthenticationException('Unauthorized access', 'E_UNAUTHORIZED_ACCESS', 'api');
   }
 
   /**

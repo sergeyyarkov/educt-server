@@ -24,7 +24,7 @@ export default class AuthController {
     const user = await this.user.query().preload('roles').where('login', login).firstOrFail();
 
     if (!(await Hash.verify(user.password, password))) {
-      throw new Exception('Invalid credentials.', 401, 'E_INVALID_CREDENTIALS');
+      throw new Exception('Invalid credentials.', 403, 'E_INVALID_CREDENTIALS');
     }
 
     const token = await auth.use(this.guard).generate(user, {

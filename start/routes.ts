@@ -40,6 +40,12 @@ Route.group(() => {
     Route.post('users/:id/attach-roles', 'UsersController.attachRoles').middleware('role:admin').as('attachUserRole');
     Route.delete('users/:id/detach-roles', 'UsersController.detachRoles').middleware('role:admin').as('detachUserRole');
     Route.get('users/me', 'UsersController.showMe').middleware('role:admin,teacher,student').as('showMe');
+    Route.patch('users/me/password', 'UsersController.changePassword')
+      .middleware('role:admin,teacher,student')
+      .as('changePassword');
+    Route.patch('users/me/contacts', 'UsersController.updateContacts')
+      .middleware('role:admin,teacher,student')
+      .as('updateContacts');
   }).middleware('auth');
 })
   .prefix('/api/v1')
