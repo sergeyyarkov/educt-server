@@ -47,7 +47,7 @@ Route.group(() => {
     Route.patch('me/password', 'MeController.changePassword')
       .middleware('role:admin,teacher,student')
       .as('changePassword');
-    Route.patch('me/contacts', 'MeController.updateContacts')
+    Route.put('me/contacts', 'MeController.updateContacts')
       .middleware('role:admin,teacher,student')
       .as('updateContacts');
   }).middleware('auth');

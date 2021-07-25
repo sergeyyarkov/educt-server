@@ -78,7 +78,7 @@ export default class UsersController {
     await request.validate(UpdateUserValidator);
 
     const user = await this.user.findOrFail(params.id);
-    const dataInput: Pick<User, 'first_name' | 'last_name' | 'login' | 'password'> = {
+    const input: Pick<User, 'first_name' | 'last_name' | 'login' | 'password'> = {
       first_name: request.input('first_name'),
       last_name: request.input('last_name'),
       login: request.input('login'),
@@ -86,11 +86,11 @@ export default class UsersController {
     };
 
     /**
-     * Update only provided input roles value.
+     * Update roles
      */
-    Object.keys(dataInput).forEach(k => {
-      if (dataInput[k] !== undefined) {
-        user[k] = dataInput[k];
+    Object.keys(input).forEach(k => {
+      if (input[k] !== undefined) {
+        user[k] = input[k];
       }
     });
 

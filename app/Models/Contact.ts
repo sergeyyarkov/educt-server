@@ -12,16 +12,16 @@ export default class Contact extends BaseModel {
   public email: string;
 
   @column()
-  public phone_number: string;
+  public phone_number: string | null;
 
   @column()
-  public vk_id: string;
+  public vk_id: string | null;
 
   @column()
-  public twitter_id: string;
+  public twitter_id: string | null;
 
   @column()
-  public telegram_id: string;
+  public telegram_id: string | null;
 
   @column.dateTime({ autoCreate: true, serializeAs: null })
   public createdAt: DateTime;

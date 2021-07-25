@@ -4,6 +4,7 @@ import Hash from '@ioc:Adonis/Core/Hash';
 import Logger from '@ioc:Adonis/Core/Logger';
 import ChangePasswordValidator from 'App/Validators/ChangePasswordValidator';
 import Contact from 'App/Models/Contact';
+import UpdateContactsValidator from 'App/Validators/UpdateContactsValidator';
 
 export default class MeController {
   private readonly guard: 'api';
@@ -69,5 +70,25 @@ export default class MeController {
    * Update contacts of authenticated user
    * PATCH /me/contacts
    */
-  // public async updateContacts({ request, response, auth }: HttpContextContract) {}
+  public async updateContacts({ request, response, auth }: HttpContextContract) {
+    const payload = await request.validate(UpdateContactsValidator);
+    const user = await auth.use(this.guard).authenticate();
+    const contacts = await this.contact.findByOrFail('user_id', user.id);
+
+    /**
+     * Update contacts
+     */
+    if (payload.email) contacts.email = payload.email;
+    contacts.phone_number = payload.phone_number ?? null;
+    contacts.vk_id = payload.vk_id ?? null;
+    contacts.twitter_id = payload.twitter_id ?? null;
+    contacts.telegram_id = payload.telegram_id ?? null;
+
+    await contacts.save();
+
+    return response.ok({
+      message: `Contacts has been successfully updated.`,
+      data: contacts,
+    });
+  }
 }

@@ -5,11 +5,16 @@ export default class UpdateContactsValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public schema = schema.create({
-    email: schema.string.optional({}, [rules.email(), rules.unique({ table: 'contacts', column: 'email' })]),
-    phone_number: schema.string.optional(),
-    vk_id: schema.string.optional(),
-    twitter_id: schema.string.optional(),
-    telegram_id: schema.string.optional(),
+    email: schema.string.optional({}, [rules.email()]),
+    phone_number: schema.string.optional({}, [
+      rules.mobile({
+        locales: ['ru-RU', 'en-US'],
+        strict: true,
+      }),
+    ]),
+    vk_id: schema.string.optional({}, [rules.regex(/^[a-zA-Z0-9_]+$/)]),
+    twitter_id: schema.string.optional({}, [rules.regex(/^[a-zA-Z0-9_]+$/)]),
+    telegram_id: schema.string.optional({}, [rules.regex(/^[a-zA-Z0-9_]+$/)]),
   });
 
   public messages = {};
