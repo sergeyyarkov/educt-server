@@ -32,18 +32,22 @@ Route.group(() => {
     /**
      * Users controller
      */
-    Route.get('users', 'UsersController.showAll').middleware('role:admin,teacher,student').as('showAllUsers');
-    Route.get('users/:id', 'UsersController.show').middleware('role:admin,teacher,student').as('showUserById');
+    Route.get('users', 'UsersController.index').middleware('role:admin,teacher,student').as('showAllUsers');
     Route.post('users', 'UsersController.create').middleware('role:admin').as('createUser');
+    Route.get('users/:id', 'UsersController.show').middleware('role:admin,teacher,student').as('showUserById');
     Route.patch('users/:id', 'UsersController.update').middleware('role:admin').as('updateUser');
     Route.delete('users/:id', 'UsersController.destroy').middleware('role:admin').as('deleteUser');
     Route.post('users/:id/attach-roles', 'UsersController.attachRoles').middleware('role:admin').as('attachUserRole');
     Route.delete('users/:id/detach-roles', 'UsersController.detachRoles').middleware('role:admin').as('detachUserRole');
-    Route.get('users/me', 'UsersController.showMe').middleware('role:admin,teacher,student').as('showMe');
-    Route.patch('users/me/password', 'UsersController.changePassword')
+
+    /**
+     * Me controller
+     */
+    Route.get('me', 'MeController.index').middleware('role:admin,teacher,student').as('showMe');
+    Route.patch('me/password', 'MeController.changePassword')
       .middleware('role:admin,teacher,student')
       .as('changePassword');
-    Route.patch('users/me/contacts', 'UsersController.updateContacts')
+    Route.patch('me/contacts', 'MeController.updateContacts')
       .middleware('role:admin,teacher,student')
       .as('updateContacts');
   }).middleware('auth');
