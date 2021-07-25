@@ -20,21 +20,25 @@
 
 import Route from '@ioc:Adonis/Core/Route';
 
-Route.get('/', () => `API REST Server.`);
+Route.get('/', () => `Educt Backend API.`);
 
 Route.group(() => {
-  /* Auth */
+  /* Auth controller */
   Route.post('login', 'AuthController.login');
   Route.post('logout', 'AuthController.logout').middleware('auth');
 
   /* API */
   Route.group(() => {
+    /**
+     * Users controller
+     */
+    Route.get('users/me', 'UsersController.me').middleware('role:admin,teacher,student');
     Route.get('users', 'UsersController.index').middleware('role:admin,teacher,student');
     Route.get('users/:id', 'UsersController.show').middleware('role:admin,teacher,student');
     Route.post('users', 'UsersController.store').middleware('role:admin');
     Route.patch('users/:id', 'UsersController.update').middleware('role:admin');
-    Route.delete('users', 'UsersController.destroy').middleware('role:admin');
-    Route.post('users/:id/roles', 'RolesController.store').middleware('role:admin');
-    Route.delete('users/:id/roles', 'RolesController.destroy').middleware('role:admin');
+    Route.delete('users/:id', 'UsersController.destroy').middleware('role:admin');
+    Route.post('users/:id/attach_roles', 'UsersController.attach_roles').middleware('role:admin');
+    Route.delete('users/:id/detach_roles', 'UsersController.detach_roles').middleware('role:admin');
   }).middleware('auth');
 }).prefix('api');

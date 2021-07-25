@@ -16,9 +16,6 @@ export default class AuthController {
   /**
    * Creates a new token for user and returns it.
    * POST /login
-   *
-   * @param {HttpContextContract} context
-   * @returns {object} - Token data
    */
 
   public async login({ auth, request }: HttpContextContract) {
@@ -43,13 +40,10 @@ export default class AuthController {
   /**
    * Revoke a token if user logged in.
    * POST /logout
-   *
-   * @param {HttpContextContract} context
-   * @returns {object} - Revoked message
    */
 
-  public async logout({ auth }: HttpContextContract) {
+  public async logout({ response, auth }: HttpContextContract) {
     await auth.use(this.guard).revoke();
-    return { message: 'REVOKED' };
+    return response.noContent();
   }
 }

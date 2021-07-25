@@ -1,8 +1,11 @@
+import { Exception } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+import Contact from 'App/Models/Contact';
 import Role from 'App/Models/Role';
 import User from 'App/Models/User';
-import Contact from 'App/Models/Contact';
+import AddRoleToUserValidator from 'App/Validators/AddRoleToUserValidator';
 import CreateUserValidator from 'App/Validators/CreateUserValidator';
+import DelRoleFromUserValidator from 'App/Validators/DelRoleFromUserValidator';
 import UpdateUserValidator from 'App/Validators/UpdateUserValidator';
 
 export default class UsersController {
@@ -19,27 +22,51 @@ export default class UsersController {
   }
 
   /**
-   * Show a list of all users.
-   * GET /users
-   *
-   * @returns {Promise<User[]>}
+   * Attach array of roles to user
+   * POST /users/:id/attach_roles
    */
+  public async attach_roles({ request, response, params }: HttpContextContract) {
+    await request.validate(AddRoleToUserValidator);
 
-  public async index(): Promise<User[]> {
-    const users = await this.user.query().preload('contacts').preload('roles');
-    return users;
+    const input: string[] | undefined = request.input('roles');
+    const user = await this.user.query().preload('roles').where('id', params.id).firstOrFail();
+    const roles = await this.findRolesBySlug(input);
+
+    await this.user.attachRoles(user, roles);
+
+    return response.ok({
+      message: 'Roles attached',
+      data: user.roles,
+    });
   }
 
   /**
-   * Show a current user by "id" parameter.
-   * GET /users/:id
-   *
-   * @param {HttpContextContract} context
-   * @returns {Promise<User>}
+   * Detach array of roles from user
+   * DELETE /users/:id/detach_roles
    */
+  public async detach_roles({ request, response, params }: HttpContextContract) {
+    await request.validate(DelRoleFromUserValidator);
 
-  public async show({ params }: HttpContextContract): Promise<User> {
-    const user = await this.user.findOrFail(params.id);
+    const input: string[] | undefined = request.input('roles');
+    const user = await this.user.query().preload('roles').where('id', params.id).firstOrFail();
+    const roles = await this.findRolesBySlug(input);
+
+    await this.user.detachRoles(user, roles);
+
+    return response.ok({
+      message: 'Roles detached',
+      data: user.roles,
+    });
+  }
+
+  /**
+   * Shows user info of the access token resource owner.
+   * GET /users/me
+   */
+  public async me({ auth: { user } }: HttpContextContract): Promise<User> {
+    if (!user) {
+      throw new AuthenticationException('Unauthorized access', 'E_UNAUTHORIZED_ACCESS');
+    }
 
     await user.load('contacts');
     await user.load('roles');
@@ -48,17 +75,44 @@ export default class UsersController {
   }
 
   /**
-   * Creates a new user in a system.
-   * POST /users
-   *
-   * @param {HttpContextContract} context
-   * @returns {Promise<User>} - Created user.
+   * Show a list of all users.
+   * GET /users
    */
 
-  public async store({ request }: HttpContextContract): Promise<User> {
+  public async index({ response }: HttpContextContract) {
+    const users = await this.user.query().preload('contacts').preload('roles');
+
+    return response.ok({
+      message: 'Fetched all users.',
+      data: users,
+    });
+  }
+
+  /**
+   * Show a current user by "id" parameter.
+   * GET /users/:id
+   */
+
+  public async show({ response, params }: HttpContextContract) {
+    const user = await this.user.findOrFail(params.id);
+
+    await user.load('contacts');
+    await user.load('roles');
+
+    return response.ok({
+      message: `Fetched user with id: "${user.id}"`,
+      data: user,
+    });
+  }
+
+  /**
+   * Creates a new user in a system.
+   * POST /users
+   */
+
+  public async store({ response, request }: HttpContextContract) {
     await request.validate(CreateUserValidator);
 
-    const roles = await this.role.query().whereIn('slug', request.input('roles'));
     const user = await this.user.create({
       first_name: request.input('first_name'),
       last_name: request.input('last_name'),
@@ -67,69 +121,94 @@ export default class UsersController {
     });
 
     await user.related('contacts').create({ email: request.input('email') });
-    await user.related('roles').attach(roles.map(r => r.id));
-
-    await user.load('roles');
     await user.load('contacts');
 
-    return user;
+    return response.created({ message: 'Successfully created.', data: user });
   }
 
   /**
    * Update a user in a system by "id".
    * PATCH /users/:id
-   *
-   * @param {HttpContextContract} context
-   * @returns {Promise<User>}
    */
 
-  public async update({ request, params }: HttpContextContract): Promise<User> {
+  public async update({ request, response, params }: HttpContextContract) {
     await request.validate(UpdateUserValidator);
 
-    /**
-     * User update
-     */
     const user = await this.user.findOrFail(params.id);
-    user.first_name = request.input('first_name');
-    user.last_name = request.input('last_name');
-    user.login = request.input('login');
-    user.password = request.input('password');
-
-    // await user.load('roles');
-
-    /**
-     * Contacts update
-     */
-    const contacts = await this.contact.findByOrFail('user_id', params.id);
-    contacts.email = request.input('email');
+    const dataInput: Pick<User, 'first_name' | 'last_name' | 'login' | 'password'> = {
+      first_name: request.input('first_name'),
+      last_name: request.input('last_name'),
+      login: request.input('login'),
+      password: request.input('password'),
+    };
 
     /**
-     * Save the updated data
+     * Update only provided input roles value.
      */
+    Object.keys(dataInput).forEach(k => {
+      if (dataInput[k] !== undefined) {
+        user[k] = dataInput[k];
+      }
+    });
+
     await user.save();
-    await contacts.save();
-
-    /**
-     * Load the updated data to return
-     */
     await user.load('roles');
     await user.load('contacts');
 
-    return user;
+    return response.ok({
+      message: `User with id: "${user.id}" was successfully updated.`,
+      data: user,
+    });
   }
 
   /**
    * Delete a user by "id".
-   * DELETE /users
-   *
-   * @param {HttpContextContract} context
-   * @returns {Promise<User>}
+   * DELETE /users/:id
    */
 
-  public async destroy({ params }: HttpContextContract): Promise<User> {
-    const user = await this.user.findOrFail(params.id);
+  public async destroy({ response, params }: HttpContextContract) {
+    const user = await this.user
+      .query()
+      .preload('contacts')
+      .preload('roles')
+      .where('id', params.id)
+      .firstOrFail();
+
     await user.delete();
 
-    return user;
+    return response.ok({
+      message: `Used with id: "${user.id}" was successfully deleted.`,
+      data: user,
+    });
+  }
+
+  /**
+   * Finds roles by input value and throw error if role does not exist.
+   *
+   * @param input Array of roles to find them
+   * @returns Finded roles
+   */
+  private async findRolesBySlug(input: string[] | undefined): Promise<Role[]> {
+    if (!input) {
+      throw new Exception(
+        'Unable to find "roles" field in input.',
+        400,
+        'E_ROLES_FIELD_NOT_PROVIDED'
+      );
+    }
+
+    const roles = await this.role.query().whereIn('slug', input);
+
+    input.forEach(val => {
+      if (!roles.map(r => r.slug).includes(val)) {
+        throw new Exception(
+          `Unable to find role: "${val}" using input value "roles"`,
+          404,
+          'E_ROLE_NOT_FOUND'
+        );
+      }
+    });
+
+    return roles;
   }
 }
