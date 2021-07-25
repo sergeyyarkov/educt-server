@@ -1,3 +1,4 @@
+import { AuthenticationException } from '@adonisjs/auth/build/standalone';
 import { Exception } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import Contact from 'App/Models/Contact';
@@ -25,15 +26,24 @@ export default class UsersController {
    * Shows user info of the access token resource owner.
    * GET /users/me
    */
-  public async me({ auth: { user } }: HttpContextContract): Promise<User> {
-    if (!user) {
-      throw new AuthenticationException('Unauthorized access', 'E_UNAUTHORIZED_ACCESS');
+  public async showMe({ response, auth }: HttpContextContract) {
+    const userId = auth.use('api').token?.userId;
+
+    if (userId) {
+      const user = await this.user.findOrFail(userId);
+      await user.load('contacts');
+      await user.load('roles');
+
+      return response.ok({
+        message: 'Fetched data about me.',
+        data: user,
+      });
     }
 
-    await user.load('contacts');
-    await user.load('roles');
-
-    return user;
+    /**
+     * Unauthorized user
+     */
+    throw new AuthenticationException('Unauthorized access', 'E_UNAUTHORIZED_ACCESS', 'api');
   }
 
   /**
@@ -41,7 +51,7 @@ export default class UsersController {
    * GET /users
    */
 
-  public async index({ response }: HttpContextContract) {
+  public async showAll({ response }: HttpContextContract) {
     const users = await this.user.query().preload('contacts').preload('roles');
 
     return response.ok({
@@ -72,7 +82,7 @@ export default class UsersController {
    * POST /users
    */
 
-  public async store({ response, request }: HttpContextContract) {
+  public async create({ response, request }: HttpContextContract) {
     await request.validate(CreateUserValidator);
 
     const user = await this.user.create({
@@ -129,12 +139,7 @@ export default class UsersController {
    */
 
   public async destroy({ response, params }: HttpContextContract) {
-    const user = await this.user
-      .query()
-      .preload('contacts')
-      .preload('roles')
-      .where('id', params.id)
-      .firstOrFail();
+    const user = await this.user.query().preload('contacts').preload('roles').where('id', params.id).firstOrFail();
 
     await user.delete();
 
@@ -190,22 +195,14 @@ export default class UsersController {
    */
   private async findRolesBySlug(input: string[] | undefined): Promise<Role[]> {
     if (!input) {
-      throw new Exception(
-        'Unable to find "roles" field in input.',
-        400,
-        'E_ROLES_FIELD_NOT_PROVIDED'
-      );
+      throw new Exception('Unable to find "roles" field in input.', 400, 'E_ROLES_FIELD_NOT_PROVIDED');
     }
 
     const roles = await this.role.query().whereIn('slug', input);
 
     input.forEach(val => {
       if (!roles.map(r => r.slug).includes(val)) {
-        throw new Exception(
-          `Unable to find role: "${val}" using input value "roles"`,
-          404,
-          'E_ROLE_NOT_FOUND'
-        );
+        throw new Exception(`Unable to find role: "${val}" using input value "roles"`, 404, 'E_ROLE_NOT_FOUND');
       }
     });
 

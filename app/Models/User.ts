@@ -14,8 +14,8 @@ import {
 } from '@ioc:Adonis/Lucid/Orm';
 import Hash from '@ioc:Adonis/Core/Hash';
 import { nanoid } from 'nanoid';
-import Role from './Role';
-import Contact from './Contact';
+import Role from 'App/Models/Role';
+import Contact from 'App/Models/Contact';
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -80,11 +80,7 @@ export default class User extends BaseModel {
   public static async detachRoles(user: User, inputRoles: Role[]): Promise<void> {
     inputRoles.forEach(role => {
       if (!user.roles.map(r => r.id).includes(role.id)) {
-        throw new Exception(
-          `Role "${role.slug}" not attached to that user.`,
-          400,
-          'E_ROLE_NOT_ATTACHED'
-        );
+        throw new Exception(`Role "${role.slug}" not attached to that user.`, 400, 'E_ROLE_NOT_ATTACHED');
       }
     });
 

@@ -32,14 +32,14 @@ Route.group(() => {
     /**
      * Users controller
      */
-    Route.get('users', 'UsersController.index').middleware('role:admin,teacher,student').as('showAllUsers');
-    Route.get('users/me', 'UsersController.me').middleware('role:admin,teacher,student').as('showMe');
+    Route.get('users', 'UsersController.showAll').middleware('role:admin,teacher,student').as('showAllUsers');
     Route.get('users/:id', 'UsersController.show').middleware('role:admin,teacher,student').as('showUserById');
-    Route.post('users', 'UsersController.store').middleware('role:admin').as('createUser');
+    Route.post('users', 'UsersController.create').middleware('role:admin').as('createUser');
     Route.patch('users/:id', 'UsersController.update').middleware('role:admin').as('updateUser');
     Route.delete('users/:id', 'UsersController.destroy').middleware('role:admin').as('deleteUser');
     Route.post('users/:id/attach-roles', 'UsersController.attachRoles').middleware('role:admin').as('attachUserRole');
     Route.delete('users/:id/detach-roles', 'UsersController.detachRoles').middleware('role:admin').as('detachUserRole');
+    Route.get('users/me', 'UsersController.showMe').middleware('role:admin,teacher,student').as('showMe');
   }).middleware('auth');
 })
   .prefix('/api/v1')
