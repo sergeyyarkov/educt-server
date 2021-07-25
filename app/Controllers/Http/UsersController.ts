@@ -22,44 +22,6 @@ export default class UsersController {
   }
 
   /**
-   * Attach array of roles to user
-   * POST /users/:id/attach_roles
-   */
-  public async attach_roles({ request, response, params }: HttpContextContract) {
-    await request.validate(AddRoleToUserValidator);
-
-    const input: string[] | undefined = request.input('roles');
-    const user = await this.user.query().preload('roles').where('id', params.id).firstOrFail();
-    const roles = await this.findRolesBySlug(input);
-
-    await this.user.attachRoles(user, roles);
-
-    return response.ok({
-      message: 'Roles attached',
-      data: user.roles,
-    });
-  }
-
-  /**
-   * Detach array of roles from user
-   * DELETE /users/:id/detach_roles
-   */
-  public async detach_roles({ request, response, params }: HttpContextContract) {
-    await request.validate(DelRoleFromUserValidator);
-
-    const input: string[] | undefined = request.input('roles');
-    const user = await this.user.query().preload('roles').where('id', params.id).firstOrFail();
-    const roles = await this.findRolesBySlug(input);
-
-    await this.user.detachRoles(user, roles);
-
-    return response.ok({
-      message: 'Roles detached',
-      data: user.roles,
-    });
-  }
-
-  /**
    * Shows user info of the access token resource owner.
    * GET /users/me
    */
@@ -179,6 +141,44 @@ export default class UsersController {
     return response.ok({
       message: `Used with id: "${user.id}" was successfully deleted.`,
       data: user,
+    });
+  }
+
+  /**
+   * Attach array of roles to user
+   * POST /users/:id/attach_roles
+   */
+  public async attachRoles({ request, response, params }: HttpContextContract) {
+    await request.validate(AddRoleToUserValidator);
+
+    const input: string[] | undefined = request.input('roles');
+    const user = await this.user.query().preload('roles').where('id', params.id).firstOrFail();
+    const roles = await this.findRolesBySlug(input);
+
+    await this.user.attachRoles(user, roles);
+
+    return response.ok({
+      message: 'Roles attached',
+      data: user.roles,
+    });
+  }
+
+  /**
+   * Detach array of roles from user
+   * DELETE /users/:id/detach_roles
+   */
+  public async detachRoles({ request, response, params }: HttpContextContract) {
+    await request.validate(DelRoleFromUserValidator);
+
+    const input: string[] | undefined = request.input('roles');
+    const user = await this.user.query().preload('roles').where('id', params.id).firstOrFail();
+    const roles = await this.findRolesBySlug(input);
+
+    await this.user.detachRoles(user, roles);
+
+    return response.ok({
+      message: 'Roles detached',
+      data: user.roles,
     });
   }
 

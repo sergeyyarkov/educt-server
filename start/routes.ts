@@ -24,21 +24,23 @@ Route.get('/', () => `Educt Backend API.`);
 
 Route.group(() => {
   /* Auth controller */
-  Route.post('login', 'AuthController.login');
-  Route.post('logout', 'AuthController.logout').middleware('auth');
+  Route.post('login', 'AuthController.login').as('login');
+  Route.post('logout', 'AuthController.logout').middleware('auth').as('logout');
 
   /* API */
   Route.group(() => {
     /**
      * Users controller
      */
-    Route.get('users/me', 'UsersController.me').middleware('role:admin,teacher,student');
-    Route.get('users', 'UsersController.index').middleware('role:admin,teacher,student');
-    Route.get('users/:id', 'UsersController.show').middleware('role:admin,teacher,student');
-    Route.post('users', 'UsersController.store').middleware('role:admin');
-    Route.patch('users/:id', 'UsersController.update').middleware('role:admin');
-    Route.delete('users/:id', 'UsersController.destroy').middleware('role:admin');
-    Route.post('users/:id/attach_roles', 'UsersController.attach_roles').middleware('role:admin');
-    Route.delete('users/:id/detach_roles', 'UsersController.detach_roles').middleware('role:admin');
+    Route.get('users', 'UsersController.index').middleware('role:admin,teacher,student').as('showAllUsers');
+    Route.get('users/me', 'UsersController.me').middleware('role:admin,teacher,student').as('showMe');
+    Route.get('users/:id', 'UsersController.show').middleware('role:admin,teacher,student').as('showUserById');
+    Route.post('users', 'UsersController.store').middleware('role:admin').as('createUser');
+    Route.patch('users/:id', 'UsersController.update').middleware('role:admin').as('updateUser');
+    Route.delete('users/:id', 'UsersController.destroy').middleware('role:admin').as('deleteUser');
+    Route.post('users/:id/attach-roles', 'UsersController.attachRoles').middleware('role:admin').as('attachUserRole');
+    Route.delete('users/:id/detach-roles', 'UsersController.detachRoles').middleware('role:admin').as('detachUserRole');
   }).middleware('auth');
-}).prefix('api');
+})
+  .prefix('/api/v1')
+  .as('api');
