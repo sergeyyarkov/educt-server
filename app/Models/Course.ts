@@ -1,9 +1,11 @@
 /* eslint-disable no-param-reassign */
 import { nanoid } from 'nanoid';
 import { DateTime } from 'luxon';
-import { BaseModel, beforeCreate, column, HasOne, hasOne } from '@ioc:Adonis/Lucid/Orm';
-import User from './User';
+import { BaseModel, beforeCreate, BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm';
 import Category from './Category';
+import Lesson from './Lesson';
+import User from './User';
+// eslint-disable-next-line import/no-cycle
 
 export default class Course extends BaseModel {
   @column({ isPrimary: true })
@@ -19,13 +21,22 @@ export default class Course extends BaseModel {
   public teacher_id: string;
 
   @column()
-  public category_id: number;
+  public category_id: string;
 
-  @hasOne(() => User)
-  public teacher: HasOne<typeof User>;
+  @belongsTo(() => Category, {
+    foreignKey: 'category_id',
+  })
+  public category: BelongsTo<typeof Category>;
 
-  @hasOne(() => Category)
-  public category: HasOne<typeof Category>;
+  @belongsTo(() => User, {
+    foreignKey: 'teacher_id',
+  })
+  public teacher: BelongsTo<typeof User>;
+
+  @hasMany(() => Lesson, {
+    foreignKey: 'course_id',
+  })
+  public lessons: HasMany<typeof Lesson>;
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime;
@@ -35,7 +46,7 @@ export default class Course extends BaseModel {
 
   /**
    * Assign id to course by nanoid.
-   * @param user User
+   * @param course Course
    */
   @beforeCreate()
   public static assignCourseId(course: Course) {

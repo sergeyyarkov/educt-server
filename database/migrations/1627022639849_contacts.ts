@@ -6,7 +6,7 @@ export default class Contacts extends BaseSchema {
   public async up() {
     this.schema.createTable(this.tableName, table => {
       table.increments('id');
-      table.string('user_id', 21).unsigned().references('users.id').onDelete('CASCADE');
+      table.string('user_id', 21).unsigned().references('users.id').unique().onDelete('CASCADE');
       table.string('email').unique().notNullable();
       table.string('phone_number').unique();
       table.string('vk_id').unique();

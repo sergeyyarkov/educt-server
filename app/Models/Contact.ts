@@ -6,7 +6,7 @@ export default class Contact extends BaseModel {
   public id: number;
 
   @column({ serializeAs: null })
-  user_id: string;
+  public user_id: string;
 
   @column()
   public email: string;
