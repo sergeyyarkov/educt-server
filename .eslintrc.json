@@ -3,11 +3,7 @@
     "es6": true,
     "node": true
   },
-  "extends": [
-    "airbnb-typescript/base",
-    "prettier",
-    "plugin:prettier/recommended"
-  ],
+  "extends": ["airbnb-typescript/base", "prettier", "plugin:prettier/recommended"],
   "globals": {
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
@@ -17,7 +13,6 @@
     "ecmaVersion": 2018,
     "sourceType": "module",
     "project": "./tsconfig.json",
-    "tsconfigRootDir": "server",
     "include": ["src/**/*.ts", "src/**/*.js", "test/**/*.ts"]
   },
   "plugins": ["@typescript-eslint"],

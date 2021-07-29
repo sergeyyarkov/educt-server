@@ -16,7 +16,7 @@ export const UserFactory = Factory.define(User, ({ faker }) => {
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),
     login: `${faker.lorem.word(6)}${faker.datatype.number(10)}`,
-    password: faker.internet.password(6),
+    password: '12345',
   };
 })
   .relation('contacts', () => ContactFactory)

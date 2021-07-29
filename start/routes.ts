@@ -47,9 +47,34 @@ Route.group(() => {
     Route.patch('me/password', 'MeController.changePassword')
       .middleware('role:admin,teacher,student')
       .as('changePassword');
+
     Route.put('me/contacts', 'MeController.updateContacts')
       .middleware('role:admin,teacher,student')
       .as('updateContacts');
+
+    /**
+     * Courses controller
+     */
+    Route.get('courses', 'CoursesController.index').middleware('role:admin,teacher,student').as('showAllCourses');
+    Route.post('courses', 'CoursesController.create').middleware('role:admin,teacher').as('createCourse');
+    Route.get('courses/:id', 'CoursesController.show').middleware('role:admin,teacher,student').as('showCourseById');
+    Route.delete('courses/:id', 'CoursesController.destroy').middleware('role:admin,teacher').as('deleteCourseById');
+    Route.patch('courses/:id', 'CoursesController.update').middleware('role:admin,teacher').as('updateCourse');
+    Route.get('courses/:id/teacher', 'CoursesController.showTeacher')
+      .middleware('role:admin,teacher,student')
+      .as('showCourseTeacher');
+
+    Route.get('courses/:id/category', 'CoursesController.showCategory')
+      .middleware('role:admin,teacher,student')
+      .as('showCourseCategory');
+
+    Route.get('courses/:id/lessons', 'CoursesController.showLessons')
+      .middleware('role:admin,teacher,student')
+      .as('showCourseLessons');
+
+    Route.get('courses/:id/students', 'CourseController.showStudents')
+      .middleware('role:admin,teacher,student')
+      .as('showCourseStudents');
   }).middleware('auth');
 })
   .prefix('/api/v1')
