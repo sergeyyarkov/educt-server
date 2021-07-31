@@ -1,10 +1,20 @@
 /* eslint-disable no-param-reassign */
 import { nanoid } from 'nanoid';
 import { DateTime } from 'luxon';
-import { BaseModel, beforeCreate, BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm';
-import Category from './Category';
-import Lesson from './Lesson';
-import User from './User';
+import {
+  BaseModel,
+  beforeCreate,
+  BelongsTo,
+  belongsTo,
+  column,
+  HasMany,
+  hasMany,
+  ManyToMany,
+  manyToMany,
+} from '@ioc:Adonis/Lucid/Orm';
+import Category from 'App/Models/Category';
+import Lesson from 'App/Models/Lesson';
+import User from 'App/Models/User';
 // eslint-disable-next-line import/no-cycle
 
 export default class Course extends BaseModel {
@@ -37,6 +47,11 @@ export default class Course extends BaseModel {
     foreignKey: 'course_id',
   })
   public lessons: HasMany<typeof Lesson>;
+
+  @manyToMany(() => User, {
+    pivotTable: 'users_courses',
+  })
+  public students: ManyToMany<typeof User>;
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime;

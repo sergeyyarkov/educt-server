@@ -72,9 +72,17 @@ Route.group(() => {
       .middleware('role:admin,teacher,student')
       .as('showCourseLessons');
 
-    Route.get('courses/:id/students', 'CourseController.showStudents')
+    Route.get('courses/:id/students', 'CoursesController.showStudents')
       .middleware('role:admin,teacher,student')
       .as('showCourseStudents');
+
+    Route.post('courses/:id/attach-student', 'CoursesController.attachStudent')
+      .middleware('role:admin,teacher')
+      .as('attachUserCourse');
+
+    Route.delete('courses/:id/detach-student', 'CoursesController.detachStudent')
+      .middleware('role:admin,teacher')
+      .as('detachUserCourse');
   }).middleware('auth');
 })
   .prefix('/api/v1')

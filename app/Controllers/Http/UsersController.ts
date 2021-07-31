@@ -122,7 +122,7 @@ export default class UsersController {
 
   /**
    * Attach array of roles to user
-   * POST /users/:id/attach_roles
+   * POST /users/:id/attach-roles
    */
   public async attachRoles({ request, response, params }: HttpContextContract) {
     await request.validate(AddRoleToUserValidator);
@@ -141,7 +141,7 @@ export default class UsersController {
 
   /**
    * Detach array of roles from user
-   * DELETE /users/:id/detach_roles
+   * DELETE /users/:id/detach-roles
    */
   public async detachRoles({ request, response, params }: HttpContextContract) {
     await request.validate(DelRoleFromUserValidator);

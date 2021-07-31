@@ -2,7 +2,9 @@ import { Exception } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import Course from 'App/Models/Course';
 import User from 'App/Models/User';
+import AddCourseToUserValidator from 'App/Validators/AddCourseToUserValidator';
 import CreateCourseValidator from 'App/Validators/CreateCourseValidator';
+import DelCourseFromUserValidator from 'App/Validators/DelCourseFromUserValidator';
 import UpdateCourseValidator from 'App/Validators/UpdateCourseValidator';
 
 export default class CoursesController {
@@ -95,8 +97,16 @@ export default class CoursesController {
 
   /**
    * Show Students of Course with "id"
+   * GET /courses/:id/students
    */
-  public async showStudents({ response, params }: HttpContextContract) {}
+  public async showStudents({ response, params }: HttpContextContract) {
+    const course = await this.Course.query().preload('students').where('id', params.id).firstOrFail();
+
+    return response.ok({
+      message: `Fetched students from course with id: "${course.id}"`,
+      data: course.students,
+    });
+  }
 
   /**
    * Create new Course in a system
@@ -176,6 +186,60 @@ export default class CoursesController {
     return response.ok({
       message: `Course with id: "${course.id}" was successfully updated.`,
       data: course,
+    });
+  }
+
+  /**
+   * Attach student to course
+   * POST /courses/:id/attach-student
+   */
+  async attachStudent({ response, request, params }: HttpContextContract) {
+    try {
+      const payload = await request.validate(AddCourseToUserValidator);
+      const student = await this.User.findOrFail(payload.student_id);
+      const course = await this.Course.findOrFail(params.id);
+
+      await course.load('students');
+      await student.load('roles');
+
+      const studentRoles = student.roles.map(r => r.slug);
+
+      if (!studentRoles.includes('student')) {
+        throw new Exception(`User cannot be attached to the course without "student" role.`, 400, 'E_USER_ROLE');
+      }
+
+      await course.related('students').attach([student.id]);
+
+      return response.ok({
+        message: 'Student attached',
+        data: 'SUCCESS',
+      });
+    } catch (error) {
+      if (error?.code === '23505')
+        throw new Exception('Student already attached to that course', 400, 'E_STUDENT_ATTACHED');
+
+      throw error;
+    }
+  }
+
+  /**
+   * Detach student from course
+   */
+  async detachStudent({ response, request, params }: HttpContextContract) {
+    const payload = await request.validate(DelCourseFromUserValidator);
+    const course = await this.Course.query().preload('students').where('id', params.id).firstOrFail();
+    const candidate = course.students.find(student => student.id === payload.student_id);
+
+    if (!candidate) {
+      throw new Exception('Student not attached to that course', 400, 'E_STUDENT_NOT_ATTACHED');
+    }
+
+    const student = await this.User.findOrFail(payload.student_id);
+    await course.related('students').detach([student.id]);
+
+    return response.ok({
+      message: 'Student detached',
+      data: 'SUCCESS',
     });
   }
 }

@@ -16,6 +16,7 @@ import Hash from '@ioc:Adonis/Core/Hash';
 import { nanoid } from 'nanoid';
 import Role from 'App/Models/Role';
 import Contact from 'App/Models/Contact';
+import Course from 'App/Models/Course';
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -42,6 +43,11 @@ export default class User extends BaseModel {
     pivotTable: 'users_roles',
   })
   public roles: ManyToMany<typeof Role>;
+
+  @manyToMany(() => Course, {
+    pivotTable: 'users_courses',
+  })
+  public courses: ManyToMany<typeof Course>;
 
   @column.dateTime({ autoCreate: true, serializeAs: null })
   public createdAt: DateTime;
