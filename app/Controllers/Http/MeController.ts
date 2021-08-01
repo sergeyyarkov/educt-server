@@ -2,24 +2,32 @@ import { Exception } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import Hash from '@ioc:Adonis/Core/Hash';
 import Logger from '@ioc:Adonis/Core/Logger';
-import ChangePasswordValidator from 'App/Validators/ChangePasswordValidator';
+
+/**
+ * Models
+ */
 import Contact from 'App/Models/Contact';
+
+/**
+ * Validators
+ */
+import ChangePasswordValidator from 'App/Validators/ChangePasswordValidator';
 import UpdateContactsValidator from 'App/Validators/UpdateContactsValidator';
 
 export default class MeController {
   private readonly guard: 'api';
 
-  private readonly contact: typeof Contact;
+  private readonly Contact: typeof Contact;
 
   constructor() {
-    this.contact = Contact;
+    this.Contact = Contact;
   }
 
   /**
    * Shows user info of the access token resource owner.
    * GET /me
    */
-  public async index({ response, auth }: HttpContextContract) {
+  public async show({ response, auth }: HttpContextContract) {
     const user = await auth.use(this.guard).authenticate();
 
     await user.load('contacts');
@@ -73,7 +81,7 @@ export default class MeController {
   public async updateContacts({ request, response, auth }: HttpContextContract) {
     const payload = await request.validate(UpdateContactsValidator);
     const user = await auth.use(this.guard).authenticate();
-    const contacts = await this.contact.findByOrFail('user_id', user.id);
+    const contacts = await this.Contact.findByOrFail('user_id', user.id);
 
     /**
      * Update contacts

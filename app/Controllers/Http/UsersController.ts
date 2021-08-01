@@ -1,20 +1,28 @@
 import { Exception } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+
+/**
+ * Models
+ */
 import Role from 'App/Models/Role';
 import User from 'App/Models/User';
+
+/**
+ * Validators
+ */
 import AddRoleToUserValidator from 'App/Validators/AddRoleToUserValidator';
 import CreateUserValidator from 'App/Validators/CreateUserValidator';
 import DelRoleFromUserValidator from 'App/Validators/DelRoleFromUserValidator';
 import UpdateUserValidator from 'App/Validators/UpdateUserValidator';
 
 export default class UsersController {
-  private readonly user: typeof User;
+  private readonly User: typeof User;
 
-  private readonly role: typeof Role;
+  private readonly Role: typeof Role;
 
   constructor() {
-    this.user = User;
-    this.role = Role;
+    this.User = User;
+    this.Role = Role;
   }
 
   /**
@@ -22,8 +30,8 @@ export default class UsersController {
    * GET /users
    */
 
-  public async index({ response }: HttpContextContract) {
-    const users = await this.user.query().preload('contacts').preload('roles');
+  public async list({ response }: HttpContextContract) {
+    const users = await this.User.query().preload('contacts').preload('roles');
 
     return response.ok({
       message: 'Fetched all users.',
@@ -37,7 +45,7 @@ export default class UsersController {
    */
 
   public async show({ response, params }: HttpContextContract) {
-    const user = await this.user.findOrFail(params.id);
+    const user = await this.User.findOrFail(params.id);
 
     await user.load('contacts');
     await user.load('roles');
@@ -56,7 +64,7 @@ export default class UsersController {
   public async create({ response, request }: HttpContextContract) {
     await request.validate(CreateUserValidator);
 
-    const user = await this.user.create({
+    const user = await this.User.create({
       first_name: request.input('first_name'),
       last_name: request.input('last_name'),
       login: request.input('login'),
@@ -77,7 +85,7 @@ export default class UsersController {
   public async update({ request, response, params }: HttpContextContract) {
     await request.validate(UpdateUserValidator);
 
-    const user = await this.user.findOrFail(params.id);
+    const user = await this.User.findOrFail(params.id);
     const input: Pick<User, 'first_name' | 'last_name' | 'login' | 'password'> = {
       first_name: request.input('first_name'),
       last_name: request.input('last_name'),
@@ -109,8 +117,8 @@ export default class UsersController {
    * DELETE /users/:id
    */
 
-  public async destroy({ response, params }: HttpContextContract) {
-    const user = await this.user.query().preload('contacts').preload('roles').where('id', params.id).firstOrFail();
+  public async delete({ response, params }: HttpContextContract) {
+    const user = await this.User.query().preload('contacts').preload('roles').where('id', params.id).firstOrFail();
 
     await user.delete();
 
@@ -128,10 +136,10 @@ export default class UsersController {
     await request.validate(AddRoleToUserValidator);
 
     const input: string[] | undefined = request.input('roles');
-    const user = await this.user.query().preload('roles').where('id', params.id).firstOrFail();
+    const user = await this.User.query().preload('roles').where('id', params.id).firstOrFail();
     const roles = await this.findRolesBySlug(input);
 
-    await this.user.attachRoles(user, roles);
+    await this.User.attachRoles(user, roles);
 
     return response.ok({
       message: 'Roles attached',
@@ -147,10 +155,10 @@ export default class UsersController {
     await request.validate(DelRoleFromUserValidator);
 
     const input: string[] | undefined = request.input('roles');
-    const user = await this.user.query().preload('roles').where('id', params.id).firstOrFail();
+    const user = await this.User.query().preload('roles').where('id', params.id).firstOrFail();
     const roles = await this.findRolesBySlug(input);
 
-    await this.user.detachRoles(user, roles);
+    await this.User.detachRoles(user, roles);
 
     return response.ok({
       message: 'Roles detached',
@@ -169,7 +177,7 @@ export default class UsersController {
       throw new Exception('Unable to find "roles" field in input.', 400, 'E_ROLES_FIELD_NOT_PROVIDED');
     }
 
-    const roles = await this.role.query().whereIn('slug', input);
+    const roles = await this.Role.query().whereIn('slug', input);
 
     input.forEach(val => {
       if (!roles.map(r => r.slug).includes(val)) {

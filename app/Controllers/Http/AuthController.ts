@@ -1,16 +1,20 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import Logger from '@ioc:Adonis/Core/Logger';
 import Hash from '@ioc:Adonis/Core/Hash';
-import User from 'App/Models/User';
 import { Exception } from '@adonisjs/core/build/standalone';
 
+/**
+ * Models
+ */
+import User from 'App/Models/User';
+
 export default class AuthController {
-  private user: typeof User;
+  private User: typeof User;
 
   private guard: 'api';
 
   constructor() {
-    this.user = User;
+    this.User = User;
   }
 
   /**
@@ -21,7 +25,7 @@ export default class AuthController {
   public async login({ auth, request }: HttpContextContract) {
     const login = request.input('login');
     const password = request.input('password');
-    const user = await this.user.query().preload('roles').where('login', login).firstOrFail();
+    const user = await this.User.query().preload('roles').where('login', login).firstOrFail();
 
     if (!(await Hash.verify(user.password, password))) {
       throw new Exception('Invalid credentials.', 403, 'E_INVALID_CREDENTIALS');

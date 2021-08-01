@@ -1,7 +1,15 @@
 import { Exception } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+
+/**
+ * Models
+ */
 import Course from 'App/Models/Course';
 import User from 'App/Models/User';
+
+/**
+ * Validators
+ */
 import AddCourseToUserValidator from 'App/Validators/AddCourseToUserValidator';
 import CreateCourseValidator from 'App/Validators/CreateCourseValidator';
 import DelCourseFromUserValidator from 'App/Validators/DelCourseFromUserValidator';
@@ -21,7 +29,7 @@ export default class CoursesController {
    * List of all Courses
    * GET /courses
    */
-  public async index({ response }: HttpContextContract) {
+  public async list({ response }: HttpContextContract) {
     const courses = await this.Course.query().preload('teacher').preload('category').preload('lessons');
 
     return response.ok({
@@ -145,7 +153,7 @@ export default class CoursesController {
    * Delete Course by "id"
    * DELETE /courses/:id
    */
-  async destroy({ response, params }: HttpContextContract) {
+  public async delete({ response, params }: HttpContextContract) {
     const course = await this.Course.query()
       .preload('teacher')
       .preload('category')
@@ -165,7 +173,7 @@ export default class CoursesController {
    * Update Course by "id"
    * PATCH /courses/:id
    */
-  async update({ response, request, params }: HttpContextContract) {
+  public async update({ response, request, params }: HttpContextContract) {
     const payload = await request.validate(UpdateCourseValidator);
     const course = await this.Course.findOrFail(params.id);
 
@@ -193,7 +201,7 @@ export default class CoursesController {
    * Attach student to course
    * POST /courses/:id/attach-student
    */
-  async attachStudent({ response, request, params }: HttpContextContract) {
+  public async attachStudent({ response, request, params }: HttpContextContract) {
     try {
       const payload = await request.validate(AddCourseToUserValidator);
       const student = await this.User.findOrFail(payload.student_id);
@@ -225,7 +233,7 @@ export default class CoursesController {
   /**
    * Detach student from course
    */
-  async detachStudent({ response, request, params }: HttpContextContract) {
+  public async detachStudent({ response, request, params }: HttpContextContract) {
     const payload = await request.validate(DelCourseFromUserValidator);
     const course = await this.Course.query().preload('students').where('id', params.id).firstOrFail();
     const candidate = course.students.find(student => student.id === payload.student_id);
