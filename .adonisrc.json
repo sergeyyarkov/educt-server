@@ -7,11 +7,24 @@
     "@adonisjs/lucid/build/commands"
   ],
   "exceptionHandlerNamespace": "App/Exceptions/Handler",
+  "namespaces": {
+    "models": "App/Models",
+    "middleware": "App/Middleware",
+    "exceptions": "App/Exceptions",
+    "validators": "App/Validators",
+    "httpControllers": "App/Controllers/Http",
+    "eventListeners": "App/Listeners",
+    "redisListeners": "App/Listeners"
+  },
   "aliases": {
     "App": "app",
     "Config": "config",
     "Database": "database",
     "Contracts": "contracts"
+  },
+  "commandsAliases": {
+    "migrate": "migration:run",
+    "seed": "db:seed"
   },
   "preloads": ["./routes/index", "./start/kernel"],
   "providers": ["./providers/AppProvider", "@adonisjs/core", "@adonisjs/lucid", "@adonisjs/auth", "@adonisjs/redis"],
