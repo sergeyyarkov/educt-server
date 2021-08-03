@@ -1,3 +1,4 @@
+import { Exception } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 
 /**
@@ -103,7 +104,20 @@ export default class LessonsController extends BaseController {
    * GET /lessons/:id/content
    */
   public async getContent(ctx: HttpContextContract) {
-    const lesson = await this.Lesson.query().preload('content').where('id', ctx.params.id).firstOrFail();
+    const user = await ctx.auth.use('api').authenticate();
+    const lesson = await this.Lesson.query()
+      .preload('content')
+      .preload('course')
+      .where('id', ctx.params.id)
+      .firstOrFail();
+
+    await user.load('courses');
+
+    const userHasCourse = user.courses.find(course => course.id === lesson.course.id);
+
+    if (!userHasCourse) {
+      throw new Exception('The user is not a student of this course.', 403, 'E_ACCESS_DENIED');
+    }
 
     return this.sendResponse(ctx, lesson.content, 'Lesson content fetched.');
   }

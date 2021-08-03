@@ -8,7 +8,7 @@ export default class CreateLessonValidator {
     course_id: schema.string({}, [rules.exists({ table: 'courses', column: 'id' })]),
     title: schema.string({}, [rules.maxLength(255)]),
     description: schema.string(),
-    video_url: schema.string(),
+    video_url: schema.string({}, [rules.url()]),
   });
 
   public messages = {};
