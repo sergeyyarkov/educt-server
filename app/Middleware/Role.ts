@@ -5,14 +5,14 @@ export default class Role {
   error: {
     message: string;
     status: number;
-    errorCode: string;
+    code: string;
   };
 
   constructor() {
     this.error = {
       message: 'You dont have permission to perform that action.',
       status: 403,
-      errorCode: 'E_ACCESS_DENIED',
+      code: 'E_ACCESS_DENIED',
     };
   }
 
@@ -28,7 +28,7 @@ export default class Role {
       /**
        * Failed to verify user rights
        */
-      throw new Exception(this.error.message, this.error.status, this.error.errorCode);
+      throw new Exception(this.error.message, this.error.status, this.error.code);
     }
   }
 

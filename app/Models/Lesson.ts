@@ -1,7 +1,9 @@
 /* eslint-disable no-param-reassign */
 import { DateTime } from 'luxon';
 import { nanoid } from 'nanoid';
-import { BaseModel, beforeCreate, column } from '@ioc:Adonis/Lucid/Orm';
+import { BaseModel, beforeCreate, BelongsTo, belongsTo, column, HasOne, hasOne } from '@ioc:Adonis/Lucid/Orm';
+import Course from './Course';
+import LessonContent from './LessonContent';
 
 export default class Lesson extends BaseModel {
   @column({ isPrimary: true })
@@ -15,6 +17,16 @@ export default class Lesson extends BaseModel {
 
   @column()
   public description: string;
+
+  @belongsTo(() => Course, {
+    foreignKey: 'course_id',
+  })
+  public course: BelongsTo<typeof Course>;
+
+  @hasOne(() => LessonContent, {
+    foreignKey: 'lesson_id',
+  })
+  public content: HasOne<typeof LessonContent>;
 
   @column.dateTime({ autoCreate: true, serializeAs: null })
   public createdAt: DateTime;

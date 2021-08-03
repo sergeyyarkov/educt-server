@@ -10,17 +10,20 @@ import User from 'App/Models/User';
 /**
  * Validators
  */
-import AddRoleToUserValidator from 'App/Validators/AddRoleToUserValidator';
-import CreateUserValidator from 'App/Validators/CreateUserValidator';
-import DelRoleFromUserValidator from 'App/Validators/DelRoleFromUserValidator';
-import UpdateUserValidator from 'App/Validators/UpdateUserValidator';
+import AddRoleToUserValidator from 'App/Validators/User/AddRoleToUserValidator';
+import CreateUserValidator from 'App/Validators/User/CreateUserValidator';
+import DelRoleFromUserValidator from 'App/Validators/User/DelRoleFromUserValidator';
+import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator';
 
-export default class UsersController {
+import BaseController from '../../BaseController';
+
+export default class UsersController extends BaseController {
   private readonly User: typeof User;
 
   private readonly Role: typeof Role;
 
   constructor() {
+    super();
     this.User = User;
     this.Role = Role;
   }

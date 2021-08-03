@@ -24,7 +24,6 @@ Route.group(() => {
      * Me module
      *
      */
-
     require('./me');
 
     /**
@@ -32,8 +31,14 @@ Route.group(() => {
      * Courses module
      *
      */
-
     require('./courses');
+
+    /**
+     *
+     * Lessons module
+     *
+     */
+    require('./lessons');
   }).middleware('auth');
 })
   .prefix('v1')

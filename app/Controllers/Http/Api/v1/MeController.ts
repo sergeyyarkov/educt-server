@@ -11,8 +11,8 @@ import Contact from 'App/Models/Contact';
 /**
  * Validators
  */
-import ChangePasswordValidator from 'App/Validators/ChangePasswordValidator';
-import UpdateContactsValidator from 'App/Validators/UpdateContactsValidator';
+import ChangePasswordValidator from 'App/Validators/Password/ChangePasswordValidator';
+import UpdateContactsValidator from 'App/Validators/Contacts/UpdateContactsValidator';
 
 export default class MeController {
   private readonly guard: 'api';

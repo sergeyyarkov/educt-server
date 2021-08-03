@@ -2,6 +2,11 @@ import { Exception } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 
 /**
+ * Datatype
+ */
+import Role from 'App/Datatype/Role';
+
+/**
  * Models
  */
 import Course from 'App/Models/Course';
@@ -10,10 +15,10 @@ import User from 'App/Models/User';
 /**
  * Validators
  */
-import AddCourseToUserValidator from 'App/Validators/AddCourseToUserValidator';
-import CreateCourseValidator from 'App/Validators/CreateCourseValidator';
-import DelCourseFromUserValidator from 'App/Validators/DelCourseFromUserValidator';
-import UpdateCourseValidator from 'App/Validators/UpdateCourseValidator';
+import AddCourseToUserValidator from 'App/Validators/Course/AddCourseToUserValidator';
+import CreateCourseValidator from 'App/Validators/Course/CreateCourseValidator';
+import DelCourseFromUserValidator from 'App/Validators/Course/DelCourseFromUserValidator';
+import UpdateCourseValidator from 'App/Validators/Course/UpdateCourseValidator';
 
 export default class CoursesController {
   private readonly Course: typeof Course;
@@ -130,7 +135,7 @@ export default class CoursesController {
      * Check user on role Teacher
      */
     const roles = teacher.roles.map(r => r.slug);
-    if (!roles.includes('teacher')) {
+    if (!roles.includes(Role.TEACHER)) {
       throw new Exception(`User with id "${teacher.id}" not teacher.`, 400, 'ERR_USER_NOT_TEACHER');
     }
 
@@ -212,7 +217,7 @@ export default class CoursesController {
 
       const studentRoles = student.roles.map(r => r.slug);
 
-      if (!studentRoles.includes('student')) {
+      if (!studentRoles.includes(Role.STUDENT)) {
         throw new Exception(`User cannot be attached to the course without "student" role.`, 400, 'E_USER_ROLE');
       }
 

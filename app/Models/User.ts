@@ -73,7 +73,7 @@ export default class User extends BaseModel {
     });
 
     await user.related('roles').attach(inputRoles.map(r => r.id));
-    await user.load('roles'); // load updated roles
+    await user.load('roles');
   }
 
   /**
