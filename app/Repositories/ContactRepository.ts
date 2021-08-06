@@ -11,7 +11,7 @@ export default class ContactRepository {
   }
 
   /**
-   * Creates user contacts in database
+   * Create user contacts in database
    *
    * @param user User for associate the contacts
    * @param data Data contacts
@@ -27,12 +27,16 @@ export default class ContactRepository {
     return contacts;
   }
 
+  /**
+   * Update user contacts
+   *
+   * @param user User
+   * @param data Data to update
+   * @returns
+   */
   public async update(user: User, data: Pick<UpdateUserValidator['schema']['props'], 'email'>) {
     const contacts = await this.Contact.query().where('user_id', user.id).first();
 
-    /**
-     * Update user contacts
-     */
     if (contacts) {
       contacts.email = data.email;
 

@@ -71,7 +71,7 @@ export default class UserService {
    * Create new user
    *
    * @param data Input for create new user
-   * @returns Response data
+   * @returns Response
    */
   public async createUser(data: CreateUserValidator['schema']['props']): Promise<IResponse> {
     const user = await this.userRepository.create(data);
@@ -87,6 +87,13 @@ export default class UserService {
     };
   }
 
+  /**
+   * Update user
+   *
+   * @param id User id
+   * @param data Data to update
+   * @returns Response
+   */
   public async updateUser(id: string | number, data: UpdateUserValidator['schema']['props']): Promise<IResponse> {
     const user = await this.userRepository.update(id, data);
 
@@ -115,6 +122,12 @@ export default class UserService {
     };
   }
 
+  /**
+   * Delete user
+   *
+   * @param id User id
+   * @returns Response
+   */
   public async deleteUser(id: string | number): Promise<IResponse> {
     const user = await this.userRepository.delete(id);
 
@@ -143,7 +156,7 @@ export default class UserService {
    *
    * @param id User id
    * @param input Roles
-   * @returns Result
+   * @returns Response
    */
   public async attachRolesToUser(id: string | number, input: string[]): Promise<IResponse> {
     const user = await this.userRepository.getById(id);
@@ -204,7 +217,7 @@ export default class UserService {
    *
    * @param id User id
    * @param input Roles
-   * @returns Result
+   * @returns Response
    */
   public async detachRolesFromUser(id: string | number, input: string[]): Promise<IResponse> {
     const user = await this.userRepository.getById(id);

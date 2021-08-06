@@ -10,11 +10,23 @@ export default class UserRepository {
     this.User = User;
   }
 
+  /**
+   * Get user by id
+   *
+   * @param id User id
+   * @returns User or null
+   */
   public async getById(id: string | number) {
     const data = await this.User.query().preload('contacts').preload('roles').where('id', id).first();
     return data;
   }
 
+  /**
+   * Get users by role
+   *
+   * @param role Role
+   * @returns Array of users with role
+   */
   public async getAllByRole(role: string) {
     const data = await this.User.query()
       .preload('contacts')
@@ -23,6 +35,12 @@ export default class UserRepository {
     return data;
   }
 
+  /**
+   * Get list users
+   *
+   * @param params Params to find
+   * @returns Array of users
+   */
   public async getAll(params?: any) {
     const { email, login, first_name, last_name, role }: any = params || {};
     const query = this.User.query();
@@ -51,6 +69,12 @@ export default class UserRepository {
     return data;
   }
 
+  /**
+   * Create user
+   *
+   * @param data Data for create user
+   * @returns Created user
+   */
   public async create(data: CreateUserValidator['schema']['props']) {
     const createdUser = await this.User.create({
       first_name: data.first_name,

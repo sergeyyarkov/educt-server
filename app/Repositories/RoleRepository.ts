@@ -7,6 +7,12 @@ export default class RoleRepository {
     this.Role = Role;
   }
 
+  /**
+   * Get list of roles
+   *
+   * @param params Params to find roles
+   * @returns Array of roles
+   */
   public async getAll(params?: any) {
     const { roles }: any = params || {};
     const query = this.Role.query();
@@ -19,8 +25,14 @@ export default class RoleRepository {
     return data;
   }
 
+  /**
+   * Get role by slug
+   *
+   * @param slug Role slug
+   * @returns Role or null
+   */
   public async getBySlug(slug: string) {
-    const role = await this.Role.query().where('slug', slug);
+    const role = await this.Role.query().where('slug', slug).first();
     return role;
   }
 }
