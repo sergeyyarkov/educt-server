@@ -5,11 +5,11 @@ export default class UpdateUserValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public schema = schema.create({
-    first_name: schema.string.optional({}, [rules.unique({ table: 'users', column: 'first_name' })]),
-    last_name: schema.string.optional({}, [rules.unique({ table: 'users', column: 'last_name' })]),
-    login: schema.string.optional({}, [rules.unique({ table: 'users', column: 'login' })]),
-    email: schema.string.optional({}, [rules.email(), rules.unique({ table: 'contacts', column: 'email' })]),
-    password: schema.string.optional({}, [rules.unique({ table: 'users', column: 'password' })]),
+    first_name: schema.string(),
+    last_name: schema.string(),
+    login: schema.string({}, [rules.unique({ table: 'users', column: 'login' })]),
+    email: schema.string({}, [rules.email(), rules.unique({ table: 'contacts', column: 'email' })]),
+    password: schema.string(),
   });
 
   public messages = {};

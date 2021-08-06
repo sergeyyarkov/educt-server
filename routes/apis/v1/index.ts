@@ -14,6 +14,13 @@ Route.group(() => {
   Route.group(() => {
     /**
      *
+     * Health check
+     *
+     */
+    require('./health');
+
+    /**
+     *
      * Users module
      *
      */

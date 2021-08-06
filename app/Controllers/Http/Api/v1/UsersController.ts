@@ -1,11 +1,10 @@
-import { Exception } from '@adonisjs/core/build/standalone';
+import { Exception, inject, Ioc } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 
 /**
- * Models
+ * Services
  */
-import Role from 'App/Models/Role';
-import User from 'App/Models/User';
+import UserService from 'App/Services/UserService';
 
 /**
  * Validators
@@ -17,15 +16,13 @@ import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator';
 
 import BaseController from '../../BaseController';
 
+@inject()
 export default class UsersController extends BaseController {
-  private readonly User: typeof User;
+  private userService: UserService;
 
-  private readonly Role: typeof Role;
-
-  constructor() {
+  constructor(userService: UserService) {
     super();
-    this.User = User;
-    this.Role = Role;
+    this.userService = userService;
   }
 
   /**
@@ -33,13 +30,14 @@ export default class UsersController extends BaseController {
    * GET /users
    */
 
-  public async list({ response }: HttpContextContract) {
-    const users = await this.User.query().preload('contacts').preload('roles');
+  public async list(ctx: HttpContextContract) {
+    const result = await this.userService.fetchUsers(ctx.request.qs());
 
-    return response.ok({
-      message: 'Fetched all users.',
-      data: users,
-    });
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
@@ -47,16 +45,14 @@ export default class UsersController extends BaseController {
    * GET /users/:id
    */
 
-  public async show({ response, params }: HttpContextContract) {
-    const user = await this.User.findOrFail(params.id);
+  public async show(ctx: HttpContextContract) {
+    const result = await this.userService.fetchUser(ctx.params.id);
 
-    await user.load('contacts');
-    await user.load('roles');
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
 
-    return response.ok({
-      message: `Fetched user with id: "${user.id}"`,
-      data: user,
-    });
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
@@ -64,20 +60,15 @@ export default class UsersController extends BaseController {
    * POST /users
    */
 
-  public async create({ response, request }: HttpContextContract) {
-    await request.validate(CreateUserValidator);
+  public async create(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(CreateUserValidator);
+    const result = await this.userService.createUser(payload);
 
-    const user = await this.User.create({
-      first_name: request.input('first_name'),
-      last_name: request.input('last_name'),
-      login: request.input('login'),
-      password: request.input('password'),
-    });
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
 
-    await user.related('contacts').create({ email: request.input('email') });
-    await user.load('contacts');
-
-    return response.created({ message: 'Successfully created.', data: user });
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
@@ -85,34 +76,15 @@ export default class UsersController extends BaseController {
    * PATCH /users/:id
    */
 
-  public async update({ request, response, params }: HttpContextContract) {
-    await request.validate(UpdateUserValidator);
+  public async update(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(UpdateUserValidator);
+    const result = await this.userService.updateUser(ctx.params.id, payload);
 
-    const user = await this.User.findOrFail(params.id);
-    const input: Pick<User, 'first_name' | 'last_name' | 'login' | 'password'> = {
-      first_name: request.input('first_name'),
-      last_name: request.input('last_name'),
-      login: request.input('login'),
-      password: request.input('password'),
-    };
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
 
-    /**
-     * Update roles
-     */
-    Object.keys(input).forEach(k => {
-      if (input[k] !== undefined) {
-        user[k] = input[k];
-      }
-    });
-
-    await user.save();
-    await user.load('roles');
-    await user.load('contacts');
-
-    return response.ok({
-      message: `User with id: "${user.id}" was successfully updated.`,
-      data: user,
-    });
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
@@ -120,74 +92,45 @@ export default class UsersController extends BaseController {
    * DELETE /users/:id
    */
 
-  public async delete({ response, params }: HttpContextContract) {
-    const user = await this.User.query().preload('contacts').preload('roles').where('id', params.id).firstOrFail();
+  public async delete(ctx: HttpContextContract) {
+    const result = await this.userService.deleteUser(ctx.params.id);
 
-    await user.delete();
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
 
-    return response.ok({
-      message: `Used with id: "${user.id}" was successfully deleted.`,
-      data: user,
-    });
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
    * Attach array of roles to user
    * POST /users/:id/attach-roles
    */
-  public async attachRoles({ request, response, params }: HttpContextContract) {
-    await request.validate(AddRoleToUserValidator);
+  public async attachRoles(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(AddRoleToUserValidator);
+    const result = await this.userService.attachRolesToUser(ctx.params.id, payload.roles);
 
-    const input: string[] | undefined = request.input('roles');
-    const user = await this.User.query().preload('roles').where('id', params.id).firstOrFail();
-    const roles = await this.findRolesBySlug(input);
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
 
-    await this.User.attachRoles(user, roles);
-
-    return response.ok({
-      message: 'Roles attached',
-      data: user.roles,
-    });
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
    * Detach array of roles from user
    * DELETE /users/:id/detach-roles
    */
-  public async detachRoles({ request, response, params }: HttpContextContract) {
-    await request.validate(DelRoleFromUserValidator);
+  public async detachRoles(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(DelRoleFromUserValidator);
+    const result = await this.userService.detachRolesFromUser(ctx.params.id, payload.roles);
 
-    const input: string[] | undefined = request.input('roles');
-    const user = await this.User.query().preload('roles').where('id', params.id).firstOrFail();
-    const roles = await this.findRolesBySlug(input);
-
-    await this.User.detachRoles(user, roles);
-
-    return response.ok({
-      message: 'Roles detached',
-      data: user.roles,
-    });
-  }
-
-  /**
-   * Finds roles by input value and throw error if role does not exist.
-   *
-   * @param input Array of roles to find them
-   * @returns Finded roles
-   */
-  private async findRolesBySlug(input: string[] | undefined): Promise<Role[]> {
-    if (!input) {
-      throw new Exception('Unable to find "roles" field in input.', 400, 'E_ROLES_FIELD_NOT_PROVIDED');
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
     }
 
-    const roles = await this.Role.query().whereIn('slug', input);
-
-    input.forEach(val => {
-      if (!roles.map(r => r.slug).includes(val)) {
-        throw new Exception(`Unable to find role: "${val}" using input value "roles"`, 404, 'E_ROLE_NOT_FOUND');
-      }
-    });
-
-    return roles;
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 }
+
+new Ioc().make(UsersController);

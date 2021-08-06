@@ -4,7 +4,7 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 /**
  * Datatype
  */
-import Role from 'App/Datatype/Role';
+import Role from 'App/Datatypes/Enums/RoleEnum';
 
 /**
  * Models
