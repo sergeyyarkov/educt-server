@@ -1,20 +1,24 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
-import Logger from '@ioc:Adonis/Core/Logger';
-import Hash from '@ioc:Adonis/Core/Hash';
-import { Exception } from '@adonisjs/core/build/standalone';
+import { Exception, inject, Ioc } from '@adonisjs/core/build/standalone';
+import AuthService from 'App/Services/AuthService';
+
+/**
+ * Validators
+ */
+import AuthValidator from 'App/Validators/Auth/AuthValidator';
 
 /**
  * Models
  */
-import User from 'App/Models/User';
+import BaseController from '../../BaseController';
 
-export default class AuthController {
-  private User: typeof User;
+@inject()
+export default class AuthController extends BaseController {
+  private authService: AuthService;
 
-  private guard: 'api';
-
-  constructor() {
-    this.User = User;
+  constructor(authService: AuthService) {
+    super();
+    this.authService = authService;
   }
 
   /**
@@ -22,23 +26,15 @@ export default class AuthController {
    * POST /login
    */
 
-  public async login({ auth, request }: HttpContextContract) {
-    const login = request.input('login');
-    const password = request.input('password');
-    const user = await this.User.query().preload('roles').where('login', login).firstOrFail();
+  public async login(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(AuthValidator);
+    const result = await this.authService.login(payload.login, payload.password, ctx.auth);
 
-    if (!(await Hash.verify(user.password, password))) {
-      throw new Exception('Invalid credentials.', 403, 'E_INVALID_CREDENTIALS');
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
     }
 
-    const token = await auth.use(this.guard).generate(user, {
-      expiresIn: '1d',
-      userRoles: user.roles.map(role => role.slug),
-    });
-
-    Logger.info(`A token for user with id: "${token.user.id}" was successfully generated.`);
-
-    return token.toJSON();
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
@@ -46,8 +42,15 @@ export default class AuthController {
    * POST /logout
    */
 
-  public async logout({ response, auth }: HttpContextContract) {
-    await auth.use(this.guard).revoke();
-    return response.noContent();
+  public async logout(ctx: HttpContextContract) {
+    const result = await this.authService.logout(ctx.auth);
+
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 }
+
+new Ioc().make(AuthController);

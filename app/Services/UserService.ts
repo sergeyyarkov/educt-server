@@ -1,9 +1,25 @@
 import { inject, Ioc } from '@adonisjs/core/build/standalone';
+
+/**
+ * Interfaces
+ */
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
+
+/**
+ * Models
+ */
 import Role from 'App/Models/Role';
+
+/**
+ * Repositories
+ */
 import ContactRepository from 'App/Repositories/ContactRepository';
 import RoleRepository from 'App/Repositories/RoleRepository';
 import UserRepository from 'App/Repositories/UserRepository';
+
+/**
+ * Validators
+ */
 import CreateUserValidator from 'App/Validators/User/CreateUserValidator';
 import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator';
 
@@ -37,7 +53,7 @@ export default class UserService {
         message: 'User not found.',
         data: {},
         error: {
-          code: 'USER_NOT_FOUND',
+          code: 'E_USER_NOT_FOUND',
         },
       };
     }

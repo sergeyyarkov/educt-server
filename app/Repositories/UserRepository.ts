@@ -22,6 +22,18 @@ export default class UserRepository {
   }
 
   /**
+   * Get user by column
+   *
+   * @param column Column name
+   * @param value Comparsion column
+   * @returns User or null
+   */
+  public async getByColumn(column: string, value: string | number) {
+    const data = await this.User.query().preload('contacts').preload('roles').where(column, value).first();
+    return data;
+  }
+
+  /**
    * Get users by role
    *
    * @param role Role
