@@ -6,6 +6,11 @@ import { inject, Ioc } from '@adonisjs/core/build/standalone';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
 
 /**
+ * Enums
+ */
+import StatusCodeEnum from 'App/Datatypes/Enums/StatusCodeEnum';
+
+/**
  * Models
  */
 import Role from 'App/Models/Role';
@@ -13,7 +18,6 @@ import Role from 'App/Models/Role';
 /**
  * Repositories
  */
-import ContactRepository from 'App/Repositories/ContactRepository';
 import RoleRepository from 'App/Repositories/RoleRepository';
 import UserRepository from 'App/Repositories/UserRepository';
 
@@ -27,13 +31,10 @@ import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator';
 export default class UserService {
   private userRepository: UserRepository;
 
-  private contactRepository: ContactRepository;
-
   private roleRepository: RoleRepository;
 
-  constructor(userRepository: UserRepository, contactRepository: ContactRepository, roleRepository: RoleRepository) {
+  constructor(userRepository: UserRepository, roleRepository: RoleRepository) {
     this.userRepository = userRepository;
-    this.contactRepository = contactRepository;
     this.roleRepository = roleRepository;
   }
 
@@ -49,18 +50,18 @@ export default class UserService {
     if (!user) {
       return {
         success: false,
-        status: 404,
+        status: StatusCodeEnum.NOT_FOUND,
         message: 'User not found.',
         data: {},
         error: {
-          code: 'E_USER_NOT_FOUND',
+          code: 'E_NOT_FOUND',
         },
       };
     }
 
     return {
       success: true,
-      status: 200,
+      status: StatusCodeEnum.OK,
       message: 'Fetched user.',
       data: user,
     };
@@ -77,7 +78,7 @@ export default class UserService {
 
     return {
       success: true,
-      status: 200,
+      status: StatusCodeEnum.OK,
       message: 'Fetched all users.',
       data: users,
     };
@@ -92,12 +93,9 @@ export default class UserService {
   public async createUser(data: CreateUserValidator['schema']['props']): Promise<IResponse> {
     const user = await this.userRepository.create(data);
 
-    /* Associate user contacts */
-    await this.contactRepository.create(user, { email: data.email });
-
     return {
       success: true,
-      status: 201,
+      status: StatusCodeEnum.CREATED,
       message: 'User created.',
       data: user,
     };
@@ -116,23 +114,18 @@ export default class UserService {
     if (!user) {
       return {
         success: false,
-        status: 404,
+        status: StatusCodeEnum.NOT_FOUND,
         message: 'User not found.',
         data: {},
         error: {
-          code: 'E_USER_NOT_FOUND',
+          code: 'E_NOT_FOUND',
         },
       };
     }
 
-    /**
-     * Update user contacts
-     */
-    await this.contactRepository.update(user, data);
-
     return {
       success: true,
-      status: 200,
+      status: StatusCodeEnum.OK,
       message: 'User updated.',
       data: user,
     };
@@ -150,18 +143,18 @@ export default class UserService {
     if (!user) {
       return {
         success: false,
-        status: 404,
+        status: StatusCodeEnum.NOT_FOUND,
         message: 'User not found.',
         data: {},
         error: {
-          code: 'E_USER_NOT_FOUND',
+          code: 'E_NOT_FOUND',
         },
       };
     }
 
     return {
       success: true,
-      status: 200,
+      status: StatusCodeEnum.OK,
       message: 'User deleted.',
       data: user,
     };
@@ -180,11 +173,11 @@ export default class UserService {
     if (!user) {
       return {
         success: false,
-        status: 404,
+        status: StatusCodeEnum.NOT_FOUND,
         message: 'User not found.',
         data: {},
         error: {
-          code: 'E_USER_NOT_FOUND',
+          code: 'E_NOT_FOUND',
         },
       };
     }
@@ -208,11 +201,11 @@ export default class UserService {
     if (attachedRole) {
       return {
         success: false,
-        status: 404,
+        status: StatusCodeEnum.BAD_REQUEST,
         message: `Role "${attachedRole.name}" already attached to that user.`,
         data: {},
         error: {
-          code: 'E_ROLE_ATTACHED',
+          code: 'E_BAD_REQUEST',
         },
       };
     }
@@ -222,7 +215,7 @@ export default class UserService {
 
     return {
       success: true,
-      status: 200,
+      status: StatusCodeEnum.OK,
       message: 'Roles attached.',
       data: user.roles,
     };
@@ -241,11 +234,11 @@ export default class UserService {
     if (!user) {
       return {
         success: false,
-        status: 404,
+        status: StatusCodeEnum.NOT_FOUND,
         message: 'User not found.',
         data: {},
         error: {
-          code: 'E_USER_NOT_FOUND',
+          code: 'E_NOT_FOUND',
         },
       };
     }
@@ -266,11 +259,11 @@ export default class UserService {
     if (notAttachedRole) {
       return {
         success: false,
-        status: 404,
+        status: StatusCodeEnum.BAD_REQUEST,
         message: `Role "${notAttachedRole.name}" not attached to that user.`,
         data: {},
         error: {
-          code: 'E_ROLE_NOT_ATTACHED',
+          code: 'E_BAD_REQUEST',
         },
       };
     }
@@ -280,7 +273,7 @@ export default class UserService {
 
     return {
       success: true,
-      status: 200,
+      status: StatusCodeEnum.OK,
       message: 'Roles detached.',
       data: user.roles,
     };

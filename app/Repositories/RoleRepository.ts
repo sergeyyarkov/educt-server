@@ -1,3 +1,6 @@
+/**
+ * Models
+ */
 import Role from 'App/Models/Role';
 
 export default class RoleRepository {

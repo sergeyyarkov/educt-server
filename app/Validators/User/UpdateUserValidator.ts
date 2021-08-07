@@ -8,7 +8,7 @@ export default class UpdateUserValidator {
     first_name: schema.string(),
     last_name: schema.string(),
     login: schema.string({}, [rules.unique({ table: 'users', column: 'login' })]),
-    email: schema.string({}, [rules.email(), rules.unique({ table: 'contacts', column: 'email' })]),
+    email: schema.string({}, [rules.email(), rules.unique({ table: 'users', column: 'email' })]),
     password: schema.string(),
   });
 

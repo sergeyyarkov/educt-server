@@ -9,6 +9,11 @@ import { AuthContract } from '@ioc:Adonis/Addons/Auth';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
 
 /**
+ * Enums
+ */
+import StatusCodeEnum from 'App/Datatypes/Enums/StatusCodeEnum';
+
+/**
  * Reposirories
  */
 import UserRepository from 'App/Repositories/UserRepository';
@@ -17,7 +22,7 @@ import UserRepository from 'App/Repositories/UserRepository';
 export default class AuthService {
   private userRepository: UserRepository;
 
-  private guard: 'api';
+  private authGuard: 'api';
 
   constructor(userRepository: UserRepository) {
     this.userRepository = userRepository;
@@ -37,11 +42,11 @@ export default class AuthService {
     if (!user) {
       return {
         success: false,
-        status: 404,
+        status: StatusCodeEnum.NOT_FOUND,
         message: 'User not found.',
         data: {},
         error: {
-          code: 'E_USER_NOT_FOUND',
+          code: 'E_NOT_FOUND',
         },
       };
     }
@@ -52,7 +57,7 @@ export default class AuthService {
     if (!(await Hash.verify(user.password, password))) {
       return {
         success: false,
-        status: 403,
+        status: StatusCodeEnum.UNAUTHORIZED,
         message: 'Invalid credentials.',
         data: {},
         error: {
@@ -64,7 +69,7 @@ export default class AuthService {
     /**
      * Create new token
      */
-    const token = await auth.use(this.guard).generate(user, {
+    const token = await auth.use(this.authGuard).generate(user, {
       expiresIn: '1d',
       userRoles: user.roles.map(role => role.slug),
     });
@@ -73,7 +78,7 @@ export default class AuthService {
 
     return {
       success: true,
-      status: 200,
+      status: StatusCodeEnum.OK,
       message: 'Login success.',
       data: token.toJSON(),
     };
@@ -86,11 +91,11 @@ export default class AuthService {
    * @returns Logout message
    */
   public async logout(auth: AuthContract): Promise<IResponse> {
-    await auth.use(this.guard).revoke();
+    await auth.use(this.authGuard).revoke();
 
     return {
       success: true,
-      status: 200,
+      status: StatusCodeEnum.OK,
       message: 'Logout success.',
       data: {},
     };

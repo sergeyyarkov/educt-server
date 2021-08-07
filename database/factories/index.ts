@@ -7,7 +7,7 @@ import User from 'App/Models/User';
 
 export const ContactFactory = Factory.define(Contact, ({ faker }) => {
   return {
-    email: faker.internet.exampleEmail(),
+    phone_number: faker.phone.phoneNumber(),
   };
 }).build();
 
@@ -16,6 +16,7 @@ export const UserFactory = Factory.define(User, ({ faker }) => {
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),
     login: `${faker.lorem.word(6)}${faker.datatype.number(10)}`,
+    email: faker.internet.exampleEmail(),
     password: '12345',
   };
 })

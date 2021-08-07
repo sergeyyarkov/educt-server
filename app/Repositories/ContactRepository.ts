@@ -1,7 +1,14 @@
+/**
+ * Models
+ */
 import Contact from 'App/Models/Contact';
 import User from 'App/Models/User';
-import CreateUserValidator from 'App/Validators/User/CreateUserValidator';
-import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator';
+
+/**
+ * Validators
+ */
+import CreateContactsValidator from 'App/Validators/Contacts/CreateContactsValidator';
+import UpdateContactsValidator from 'App/Validators/Contacts/UpdateContactsValidator';
 
 export default class ContactRepository {
   private Contact: typeof Contact;
@@ -11,16 +18,34 @@ export default class ContactRepository {
   }
 
   /**
+   * Get contacts by user id
+   *
+   * @param userId User id
+   * @returns User contacts or null
+   */
+  public async getByUser(userId: string | number): Promise<Contact | null> {
+    const contacts = await this.Contact.query().where('user_id', userId).first();
+    return contacts;
+  }
+
+  /**
    * Create user contacts in database
    *
    * @param user User for associate the contacts
    * @param data Data contacts
    * @returns Created contacts
    */
-  public async create(user: User, data: Pick<CreateUserValidator['schema']['props'], 'email'>) {
+  public async create(user: User, data: CreateContactsValidator['schema']['props']): Promise<Contact> {
     const contacts = await this.Contact.create(data);
 
+    /**
+     * Associate user
+     */
     await contacts.related('user').associate(user);
+
+    /**
+     * Load updated contacts to user
+     */
     await user.load('contacts');
     await user.load('roles');
 
@@ -32,13 +57,16 @@ export default class ContactRepository {
    *
    * @param user User
    * @param data Data to update
-   * @returns
+   * @returns Updated contacts or null
    */
-  public async update(user: User, data: Pick<UpdateUserValidator['schema']['props'], 'email'>) {
+  public async update(user: User, data: UpdateContactsValidator['schema']['props']): Promise<Contact | null> {
     const contacts = await this.Contact.query().where('user_id', user.id).first();
 
     if (contacts) {
-      contacts.email = data.email;
+      contacts.phone_number = data.phone_number ?? null;
+      contacts.telegram_id = data.telegram_id ?? null;
+      contacts.twitter_id = data.twitter_id ?? null;
+      contacts.vk_id = data.vk_id ?? null;
 
       await contacts.save();
       await user.load('contacts');
@@ -46,15 +74,6 @@ export default class ContactRepository {
       return contacts;
     }
 
-    /**
-     * Create new user contacts if contacts doesn't exist
-     */
-    await user.related('contacts').create({
-      email: data.email,
-    });
-
-    await user.load('contacts');
-
-    return user.contacts;
+    return null;
   }
 }

@@ -1,5 +1,15 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+
+import Hash from '@ioc:Adonis/Core/Hash';
+
+/**
+ * Models
+ */
 import User from 'App/Models/User';
+
+/**
+ * Validators
+ */
 import CreateUserValidator from 'App/Validators/User/CreateUserValidator';
 import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator';
 
@@ -16,7 +26,7 @@ export default class UserRepository {
    * @param id User id
    * @returns User or null
    */
-  public async getById(id: string | number) {
+  public async getById(id: string | number): Promise<User | null> {
     const data = await this.User.query().preload('contacts').preload('roles').where('id', id).first();
     return data;
   }
@@ -28,7 +38,7 @@ export default class UserRepository {
    * @param value Comparsion column
    * @returns User or null
    */
-  public async getByColumn(column: string, value: string | number) {
+  public async getByColumn(column: string, value: string | number): Promise<User | null> {
     const data = await this.User.query().preload('contacts').preload('roles').where(column, value).first();
     return data;
   }
@@ -39,7 +49,7 @@ export default class UserRepository {
    * @param role Role
    * @returns Array of users with role
    */
-  public async getAllByRole(role: string) {
+  public async getAllByRole(role: string): Promise<User[]> {
     const data = await this.User.query()
       .preload('contacts')
       .preload('roles')
@@ -53,7 +63,7 @@ export default class UserRepository {
    * @param params Params to find
    * @returns Array of users
    */
-  public async getAll(params?: any) {
+  public async getAll(params?: any): Promise<User[]> {
     const { email, login, first_name, last_name, role }: any = params || {};
     const query = this.User.query();
 
@@ -87,14 +97,8 @@ export default class UserRepository {
    * @param data Data for create user
    * @returns Created user
    */
-  public async create(data: CreateUserValidator['schema']['props']) {
-    const createdUser = await this.User.create({
-      first_name: data.first_name,
-      last_name: data.last_name,
-      login: data.login,
-      password: data.password,
-    });
-
+  public async create(data: CreateUserValidator['schema']['props']): Promise<User> {
+    const createdUser = await this.User.create(data);
     return createdUser;
   }
 
@@ -105,18 +109,11 @@ export default class UserRepository {
    * @param data Data to update
    * @returns User or null if user is not found
    */
-  public async update(id: number | string, data: UpdateUserValidator['schema']['props']) {
+  public async update(id: number | string, data: UpdateUserValidator['schema']['props']): Promise<User | null> {
     const user = await this.User.query().preload('contacts').preload('roles').where('id', id).first();
 
     if (user) {
-      await user
-        .merge({
-          first_name: data.first_name,
-          last_name: data.last_name,
-          login: data.login,
-          password: data.password,
-        })
-        .save();
+      await user.merge(data).save();
       return user;
     }
 
@@ -129,7 +126,7 @@ export default class UserRepository {
    * @param id User id
    * @returns Deleted user or null if user is not found
    */
-  public async delete(id: number | string) {
+  public async delete(id: number | string): Promise<User | null> {
     const user = await this.User.query().preload('contacts').preload('roles').where('id', id).first();
 
     if (user) {
@@ -138,5 +135,10 @@ export default class UserRepository {
     }
 
     return null;
+  }
+
+  public async updatePassword(password: string, id: string | number): Promise<any> {
+    const hashedPass = await Hash.make(password);
+    return this.User.query().where('id', id).update({ password: hashedPass }).first();
   }
 }
