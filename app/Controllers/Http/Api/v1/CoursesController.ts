@@ -1,4 +1,4 @@
-import { Exception } from '@adonisjs/core/build/standalone';
+import { Exception, inject, Ioc } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 
 /**
@@ -11,6 +11,7 @@ import Role from 'App/Datatypes/Enums/RoleEnum';
  */
 import Course from 'App/Models/Course';
 import User from 'App/Models/User';
+import CourseService from 'App/Services/CourseService';
 
 /**
  * Validators
@@ -20,12 +21,19 @@ import CreateCourseValidator from 'App/Validators/Course/CreateCourseValidator';
 import DelCourseFromUserValidator from 'App/Validators/Course/DelCourseFromUserValidator';
 import UpdateCourseValidator from 'App/Validators/Course/UpdateCourseValidator';
 
-export default class CoursesController {
+import BaseController from '../../BaseController';
+
+@inject()
+export default class CoursesController extends BaseController {
+  private courseService: CourseService;
+
   private readonly Course: typeof Course;
 
   private readonly User: typeof User;
 
-  constructor() {
+  constructor(courseService: CourseService) {
+    super();
+    this.courseService = courseService;
     this.Course = Course;
     this.User = User;
   }
@@ -34,144 +42,113 @@ export default class CoursesController {
    * List of all Courses
    * GET /courses
    */
-  public async list({ response }: HttpContextContract) {
-    const courses = await this.Course.query().preload('teacher').preload('category').preload('lessons');
+  public async list(ctx: HttpContextContract) {
+    const result = await this.courseService.fetchCourses();
 
-    return response.ok({
-      message: 'Fetched all courses.',
-      data: courses,
-    });
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
    * Show Course by "id"
    * GET /courses/:id
    */
-  public async show({ response, params }: HttpContextContract) {
-    const course = await this.Course.query()
-      .preload('teacher')
-      .preload('category')
-      .preload('lessons')
-      .where('id', params.id)
-      .firstOrFail();
+  public async show(ctx: HttpContextContract) {
+    const result = await this.courseService.fetchCourse(ctx.params.id);
 
-    return response.ok({
-      message: `Fetched course with id: "${course.id}"`,
-      data: course,
-    });
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
    * Show Teacher of Course with "id"
    * GET /courses/:id/teacher
    */
-  public async showTeacher({ response, params }: HttpContextContract) {
-    const course = await this.Course.query()
-      .select('teacher_id')
-      .preload('teacher', user => user.preload('contacts').preload('roles'))
-      .where('id', params.id)
-      .firstOrFail();
+  public async showTeacher(ctx: HttpContextContract) {
+    const result = await this.courseService.fetchCourseTeacher(ctx.params.id);
 
-    return response.ok({
-      message: `Fetched teacher by courseId: "${params.id}"`,
-      data: course.teacher,
-    });
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
    * Show Category of Course with "id"
    * GET /courses/:id/category
    */
-  public async showCategory({ response, params }: HttpContextContract) {
-    const course = await this.Course.query()
-      .select('category_id')
-      .preload('category')
-      .where('id', params.id)
-      .firstOrFail();
+  public async showCategory(ctx: HttpContextContract) {
+    const result = await this.courseService.fetchCourseCategory(ctx.params.id);
 
-    return response.ok({
-      message: `Fetched category by courseId: "${params.id}"`,
-      data: course.category,
-    });
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
    * Show Lessons of ourse with "id"
    * GET /courses/:id/lessons
    */
-  public async showLessons({ response, params }: HttpContextContract) {
-    const course = await this.Course.query().select('id').preload('lessons').where('id', params.id).firstOrFail();
+  public async showLessons(ctx: HttpContextContract) {
+    const result = await this.courseService.fetchCourseLessons(ctx.params.id);
 
-    return response.ok({
-      message: `Fetched lessons by courseId: "${params.id}"`,
-      data: course.lessons,
-    });
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
    * Show Students of Course with "id"
    * GET /courses/:id/students
    */
-  public async showStudents({ response, params }: HttpContextContract) {
-    const course = await this.Course.query().preload('students').where('id', params.id).firstOrFail();
+  public async showStudents(ctx: HttpContextContract) {
+    const result = await this.courseService.fetchCourseStudents(ctx.params.id);
 
-    return response.ok({
-      message: `Fetched students from course with id: "${course.id}"`,
-      data: course.students,
-    });
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
    * Create new Course in a system
    * POST /courses
    */
-  public async create({ response, request }: HttpContextContract) {
-    const payload = await request.validate(CreateCourseValidator);
+  public async create(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(CreateCourseValidator);
+    const result = await this.courseService.createCourse(payload);
 
-    const teacher = await this.User.findOrFail(payload.teacher_id);
-    await teacher.load('roles');
-
-    /**
-     * Check user on role Teacher
-     */
-    const roles = teacher.roles.map(r => r.slug);
-    if (!roles.includes(Role.TEACHER)) {
-      throw new Exception(`User with id "${teacher.id}" not teacher.`, 400, 'ERR_USER_NOT_TEACHER');
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
     }
 
-    const course = await this.Course.create({
-      title: payload.title,
-      description: payload.description,
-      teacher_id: teacher.id,
-      category_id: payload.category_id,
-    });
-
-    await course.save();
-
-    return response.created({
-      message: 'Course has been created',
-      data: course,
-    });
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
    * Delete Course by "id"
    * DELETE /courses/:id
    */
-  public async delete({ response, params }: HttpContextContract) {
-    const course = await this.Course.query()
-      .preload('teacher')
-      .preload('category')
-      .preload('lessons')
-      .where('id', params.id)
-      .firstOrFail();
+  public async delete(ctx: HttpContextContract) {
+    const result = await this.courseService.deleteCourse(ctx.params.id);
 
-    await course.delete();
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
 
-    return response.ok({
-      message: `Course with id "${params.id}" has been deleted.`,
-      data: course,
-    });
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
@@ -256,3 +233,5 @@ export default class CoursesController {
     });
   }
 }
+
+new Ioc().make(CoursesController);

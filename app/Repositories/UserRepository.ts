@@ -99,6 +99,10 @@ export default class UserRepository {
    */
   public async create(data: CreateUserValidator['schema']['props']): Promise<User> {
     const createdUser = await this.User.create(data);
+
+    await createdUser.load('contacts');
+    await createdUser.load('roles');
+
     return createdUser;
   }
 
