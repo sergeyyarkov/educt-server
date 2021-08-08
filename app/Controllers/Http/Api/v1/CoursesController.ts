@@ -155,28 +155,15 @@ export default class CoursesController extends BaseController {
    * Update Course by "id"
    * PATCH /courses/:id
    */
-  public async update({ response, request, params }: HttpContextContract) {
-    const payload = await request.validate(UpdateCourseValidator);
-    const course = await this.Course.findOrFail(params.id);
+  public async update(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(UpdateCourseValidator);
+    const result = await this.courseService.updateCourse(ctx.params.id, payload);
 
-    /**
-     * Update course
-     */
-    Object.keys(payload).forEach(k => {
-      if (payload[k] !== undefined) {
-        course[k] = payload[k];
-      }
-    });
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
 
-    await course.save();
-    await course.load('category');
-    await course.load('lessons');
-    await course.load('teacher');
-
-    return response.ok({
-      message: `Course with id: "${course.id}" was successfully updated.`,
-      data: course,
-    });
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**

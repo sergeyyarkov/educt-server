@@ -7,7 +7,6 @@ export default class UpdateCourseValidator {
   public schema = schema.create({
     title: schema.string.optional(),
     description: schema.string.optional(),
-    teacher_id: schema.string.optional({}, [rules.exists({ table: 'users', column: 'id' })]),
     category_id: schema.string.optional({}, [rules.exists({ table: 'categories', column: 'id' })]),
   });
 

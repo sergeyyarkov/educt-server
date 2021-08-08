@@ -10,6 +10,7 @@ import User from 'App/Models/User';
  * Validators
  */
 import CreateCourseValidator from 'App/Validators/Course/CreateCourseValidator';
+import UpdateCourseValidator from 'App/Validators/Course/UpdateCourseValidator';
 
 export default class CourseRepository {
   private Course: typeof Course;
@@ -121,6 +122,29 @@ export default class CourseRepository {
 
     if (course) {
       await course.delete();
+      return course;
+    }
+
+    return null;
+  }
+
+  /**
+   * Update course
+   *
+   * @param id Course id
+   * @param data Data to update
+   * @returns Updated course
+   */
+  public async update(id: string | number, data: UpdateCourseValidator['schema']['props']): Promise<Course | null> {
+    const course = await this.Course.query()
+      .preload('teacher')
+      .preload('category')
+      .preload('lessons')
+      .where('id', id)
+      .first();
+
+    if (course) {
+      await course.merge(data).save();
       return course;
     }
 

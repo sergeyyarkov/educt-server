@@ -15,6 +15,7 @@ import CategoryRepository from 'App/Repositories/CategoryRepository';
 import CourseRepository from 'App/Repositories/CourseRepository';
 import UserRepository from 'App/Repositories/UserRepository';
 import CreateCourseValidator from 'App/Validators/Course/CreateCourseValidator';
+import UpdateCourseValidator from 'App/Validators/Course/UpdateCourseValidator';
 
 @inject()
 export default class CourseService {
@@ -219,9 +220,6 @@ export default class CourseService {
       };
     }
 
-    /**
-     * Check teacher on role
-     */
     const isTeacher = RoleHelper.userHasRoles(teacher.roles, [RoleEnum.TEACHER]);
 
     if (!isTeacher) {
@@ -291,6 +289,36 @@ export default class CourseService {
       success: true,
       status: StatusCodeEnum.OK,
       message: 'Course deleted.',
+      data: course,
+    };
+  }
+
+  /**
+   * Update course
+   *
+   * @param id Course id
+   * @param data Data to update
+   * @returns Response
+   */
+  public async updateCourse(id: string | number, data: UpdateCourseValidator['schema']['props']): Promise<IResponse> {
+    const course = await this.courseRepository.update(id, data);
+
+    if (!course) {
+      return {
+        success: false,
+        status: StatusCodeEnum.NOT_FOUND,
+        message: 'Course not found.',
+        data: {},
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    return {
+      success: true,
+      status: StatusCodeEnum.OK,
+      message: 'Course updated.',
       data: course,
     };
   }

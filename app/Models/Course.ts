@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-cycle
 /* eslint-disable no-param-reassign */
 import { nanoid } from 'nanoid';
 import { DateTime } from 'luxon';
@@ -15,7 +16,6 @@ import {
 import Category from 'App/Models/Category';
 import Lesson from 'App/Models/Lesson';
 import User from 'App/Models/User';
-// eslint-disable-next-line import/no-cycle
 
 export default class Course extends BaseModel {
   @column({ isPrimary: true })
