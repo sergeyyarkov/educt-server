@@ -40,6 +40,7 @@ export default class CourseRepository {
       .preload('teacher')
       .preload('category')
       .preload('lessons')
+      .preload('students')
       .where('id', id)
       .first();
 

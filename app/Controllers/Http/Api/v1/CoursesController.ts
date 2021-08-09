@@ -2,11 +2,6 @@ import { Exception, inject, Ioc } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 
 /**
- * Datatype
- */
-import Role from 'App/Datatypes/Enums/RoleEnum';
-
-/**
  * Models
  */
 import Course from 'App/Models/Course';
@@ -170,54 +165,29 @@ export default class CoursesController extends BaseController {
    * Attach student to course
    * POST /courses/:id/attach-student
    */
-  public async attachStudent({ response, request, params }: HttpContextContract) {
-    try {
-      const payload = await request.validate(AddCourseToUserValidator);
-      const student = await this.User.findOrFail(payload.student_id);
-      const course = await this.Course.findOrFail(params.id);
+  public async attachStudent(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(AddCourseToUserValidator);
+    const result = await this.courseService.attachUserCourse(ctx.params.id, payload.student_id);
 
-      await course.load('students');
-      await student.load('roles');
-
-      const studentRoles = student.roles.map(r => r.slug);
-
-      if (!studentRoles.includes(Role.STUDENT)) {
-        throw new Exception(`User cannot be attached to the course without "student" role.`, 400, 'E_USER_ROLE');
-      }
-
-      await course.related('students').attach([student.id]);
-
-      return response.ok({
-        message: 'Student attached',
-        data: 'SUCCESS',
-      });
-    } catch (error) {
-      if (error?.code === '23505')
-        throw new Exception('Student already attached to that course', 400, 'E_STUDENT_ATTACHED');
-
-      throw error;
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
     }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
    * Detach student from course
    */
-  public async detachStudent({ response, request, params }: HttpContextContract) {
-    const payload = await request.validate(DelCourseFromUserValidator);
-    const course = await this.Course.query().preload('students').where('id', params.id).firstOrFail();
-    const candidate = course.students.find(student => student.id === payload.student_id);
+  public async detachStudent(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(DelCourseFromUserValidator);
+    const result = await this.courseService.detachUserCourse(ctx.params.id, payload.student_id);
 
-    if (!candidate) {
-      throw new Exception('Student not attached to that course', 400, 'E_STUDENT_NOT_ATTACHED');
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
     }
 
-    const student = await this.User.findOrFail(payload.student_id);
-    await course.related('students').detach([student.id]);
-
-    return response.ok({
-      message: 'Student detached',
-      data: 'SUCCESS',
-    });
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 }
 

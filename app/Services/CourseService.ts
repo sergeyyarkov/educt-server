@@ -322,6 +322,134 @@ export default class CourseService {
       data: course,
     };
   }
+
+  /**
+   * Attach student to course
+   *
+   * @param id Course id
+   * @param studentId Student id
+   * @returns Response
+   */
+  public async attachUserCourse(id: string | number, studentId: string | number): Promise<IResponse> {
+    const course = await this.courseRepository.getById(id);
+
+    if (!course) {
+      return {
+        success: false,
+        status: StatusCodeEnum.NOT_FOUND,
+        message: 'Course not found.',
+        data: {},
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    const student = await this.userRepository.getById(studentId);
+
+    if (!student) {
+      return {
+        success: false,
+        status: StatusCodeEnum.NOT_FOUND,
+        message: 'Student not found.',
+        data: {},
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    const isStudent = RoleHelper.userHasRoles(student.roles, [RoleEnum.STUDENT]);
+
+    if (!isStudent) {
+      return {
+        success: false,
+        status: StatusCodeEnum.BAD_REQUEST,
+        message: `User cannot be added to the course without "${RoleEnum.STUDENT}" role.`,
+        data: {},
+        error: {
+          code: 'E_BAD_REQUEST',
+        },
+      };
+    }
+
+    try {
+      await course.related('students').attach([student.id]);
+    } catch (error) {
+      if (error.code === '23505') {
+        return {
+          success: false,
+          status: StatusCodeEnum.BAD_REQUEST,
+          message: 'Student already attached to that course.',
+          data: {},
+          error: {
+            code: 'E_BAD_REQUEST',
+          },
+        };
+      }
+      throw new Error(error);
+    }
+
+    return {
+      success: true,
+      status: StatusCodeEnum.OK,
+      message: 'Student attached.',
+      data: {},
+    };
+  }
+
+  public async detachUserCourse(id: string | number, studentId: string | number): Promise<IResponse> {
+    const course = await this.courseRepository.getById(id);
+
+    if (!course) {
+      return {
+        success: false,
+        status: StatusCodeEnum.NOT_FOUND,
+        message: 'Course not found.',
+        data: {},
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    const isAttached = course.students.find(student => student.id === studentId);
+
+    if (!isAttached) {
+      return {
+        success: false,
+        status: StatusCodeEnum.BAD_REQUEST,
+        message: 'Student not attached to that course.',
+        data: {},
+        error: {
+          code: 'E_BAD_REQUEST',
+        },
+      };
+    }
+
+    const student = await this.userRepository.getById(studentId);
+
+    if (!student) {
+      return {
+        success: false,
+        status: StatusCodeEnum.NOT_FOUND,
+        message: 'Student not found.',
+        data: {},
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    await course.related('students').detach([student.id]);
+
+    return {
+      success: true,
+      status: StatusCodeEnum.OK,
+      message: 'Student detached.',
+      data: {},
+    };
+  }
 }
 
 new Ioc().make(CourseService);
