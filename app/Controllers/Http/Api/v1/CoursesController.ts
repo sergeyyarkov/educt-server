@@ -2,10 +2,8 @@ import { Exception, inject, Ioc } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 
 /**
- * Models
+ * Services
  */
-import Course from 'App/Models/Course';
-import User from 'App/Models/User';
 import CourseService from 'App/Services/CourseService';
 
 /**
@@ -22,15 +20,9 @@ import BaseController from '../../BaseController';
 export default class CoursesController extends BaseController {
   private courseService: CourseService;
 
-  private readonly Course: typeof Course;
-
-  private readonly User: typeof User;
-
   constructor(courseService: CourseService) {
     super();
     this.courseService = courseService;
-    this.Course = Course;
-    this.User = User;
   }
 
   /**

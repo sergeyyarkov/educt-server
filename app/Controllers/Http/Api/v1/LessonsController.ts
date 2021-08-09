@@ -1,11 +1,10 @@
-import { Exception } from '@adonisjs/core/build/standalone';
+import { Exception, inject, Ioc } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 
 /**
- * Models
+ * Services
  */
-import Lesson from 'App/Models/Lesson';
-import Course from 'App/Models/Course';
+import LessonService from 'App/Services/LessonService';
 
 /**
  * Validators
@@ -15,15 +14,13 @@ import UpdateLessonValidator from 'App/Validators/Lesson/UpdateLessonValidator';
 
 import BaseController from '../../BaseController';
 
+@inject()
 export default class LessonsController extends BaseController {
-  private readonly Lesson: typeof Lesson;
+  private lessonService: LessonService;
 
-  private readonly Course: typeof Course;
-
-  constructor() {
+  constructor(lessonService: LessonService) {
     super();
-    this.Lesson = Lesson;
-    this.Course = Course;
+    this.lessonService = lessonService;
   }
 
   /**
@@ -31,9 +28,13 @@ export default class LessonsController extends BaseController {
    * GET /lessons
    */
   public async list(ctx: HttpContextContract) {
-    const lessons = await this.Lesson.query();
+    const result = await this.lessonService.fetchLessons();
 
-    return this.sendResponse(ctx, lessons, 'Fetched list lessons.');
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
@@ -41,9 +42,13 @@ export default class LessonsController extends BaseController {
    * GET /lessons/:id
    */
   public async show(ctx: HttpContextContract) {
-    const lesson = await this.Lesson.findOrFail(ctx.params.id);
+    const result = await this.lessonService.fetchLesson(ctx.params.id);
 
-    return this.sendResponse(ctx, lesson, 'Fetched lesson by id.');
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
@@ -52,20 +57,13 @@ export default class LessonsController extends BaseController {
    */
   public async create(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(CreateLessonValidator);
-    const course = await this.Course.findOrFail(payload.course_id);
-    const lesson = await this.Lesson.create({
-      title: payload.title,
-      description: payload.description,
-    });
+    const result = await this.lessonService.createLesson(payload);
 
-    await lesson.related('course').associate(course);
-    await lesson.related('content').create({
-      video_url: payload.video_url,
-    });
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
 
-    await lesson.load('content');
-
-    return this.sendResponse(ctx, lesson, 'Created new lesson.');
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
@@ -73,11 +71,13 @@ export default class LessonsController extends BaseController {
    * DELETE /lessons/:id
    */
   public async delete(ctx: HttpContextContract) {
-    const lesson = await this.Lesson.findOrFail(ctx.params.id);
+    const result = await this.lessonService.deleteLesson(ctx.params.id);
 
-    await lesson.delete();
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
 
-    return this.sendResponse(ctx, lesson, 'Lesson deleted.');
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
@@ -86,17 +86,13 @@ export default class LessonsController extends BaseController {
    */
   public async update(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(UpdateLessonValidator);
-    const lesson = await this.Lesson.firstOrFail(ctx.params.id);
+    const result = await this.lessonService.updateLesson(ctx.params.id, payload);
 
-    await lesson
-      .merge({
-        course_id: payload.course_id,
-        title: payload.title,
-        description: payload.description,
-      })
-      .save();
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
 
-    return this.sendResponse(ctx, lesson, 'Lesson updated.');
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
   /**
@@ -104,21 +100,14 @@ export default class LessonsController extends BaseController {
    * GET /lessons/:id/content
    */
   public async getContent(ctx: HttpContextContract) {
-    const user = await ctx.auth.use('api').authenticate();
-    const lesson = await this.Lesson.query()
-      .preload('content')
-      .preload('course')
-      .where('id', ctx.params.id)
-      .firstOrFail();
+    const result = await this.lessonService.fetchLessonContent(ctx.params.id, ctx.auth);
 
-    await user.load('courses');
-
-    const userHasCourse = user.courses.find(course => course.id === lesson.course.id);
-
-    if (!userHasCourse) {
-      throw new Exception('The user is not a student of this course.', 403, 'E_ACCESS_DENIED');
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
     }
 
-    return this.sendResponse(ctx, lesson.content, 'Lesson content fetched.');
+    return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 }
+
+new Ioc().make(LessonsController);
