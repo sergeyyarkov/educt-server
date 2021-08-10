@@ -181,6 +181,16 @@ export default class CoursesController extends BaseController {
 
     return this.sendResponse(ctx, result.data, result.message, result.status);
   }
+
+  public async studentsCount(ctx: HttpContextContract) {
+    const result = await this.courseService.fetchStudentsCount(ctx.params.id);
+
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
+  }
 }
 
 new Ioc().make(CoursesController);

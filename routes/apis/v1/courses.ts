@@ -22,6 +22,10 @@ Route.group(() => {
     .middleware('role:admin,teacher,student')
     .as('courses.show-students');
 
+  Route.get('/:id/students/count', 'Api/v1/CoursesController.studentsCount')
+    .middleware('role:admin,teacher,student')
+    .as('courses.students-count');
+
   Route.post('/:id/attach-student', 'Api/v1/CoursesController.attachStudent')
     .middleware('role:admin,teacher')
     .as('courses.attach-student');

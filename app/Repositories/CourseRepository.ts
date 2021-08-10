@@ -86,7 +86,7 @@ export default class CourseRepository {
   }
 
   /**
-   * Get students of cours
+   * Get students of course
    *
    * @param id Course id
    * @returns List of users or null
@@ -94,6 +94,18 @@ export default class CourseRepository {
   public async getStudents(id: string | number): Promise<User[] | null> {
     const course = await this.Course.query().preload('students').where('id', id).first();
     return course && course.students;
+  }
+
+  /**
+   * Get count of students
+   *
+   * @param id Course if
+   * @returns Students count
+   */
+  public async getStudentsCount(id: string | number): Promise<{ count: any } | null> {
+    const course = await this.Course.query().where('id', id).withCount('students').first();
+
+    return course && ({ count: course.$extras.students_count } ?? null);
   }
 
   /**
