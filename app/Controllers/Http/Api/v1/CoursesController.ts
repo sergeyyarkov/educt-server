@@ -170,6 +170,7 @@ export default class CoursesController extends BaseController {
 
   /**
    * Detach student from course
+   * DELETE /courses/:id/detach-student
    */
   public async detachStudent(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(DelCourseFromUserValidator);
@@ -182,8 +183,40 @@ export default class CoursesController extends BaseController {
     return this.sendResponse(ctx, result.data, result.message, result.status);
   }
 
+  /**
+   * Fetch count of students of course
+   * GET /courses/:id/students/count
+   */
   public async studentsCount(ctx: HttpContextContract) {
     const result = await this.courseService.fetchStudentsCount(ctx.params.id);
+
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
+  }
+
+  /**
+   * Set like on course by authorized user
+   * PUT /courses/:id/likes
+   */
+  public async setLike(ctx: HttpContextContract) {
+    const result = await this.courseService.attachUserLike(ctx.params.id, ctx.auth);
+
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
+  }
+
+  /**
+   * Unset like on course by authorized user
+   * DELETE /courses/:id/likes
+   */
+  public async unsetLike(ctx: HttpContextContract) {
+    const result = await this.courseService.detachUserLike(ctx.params.id, ctx.auth);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);

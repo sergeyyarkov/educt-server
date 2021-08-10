@@ -33,4 +33,12 @@ Route.group(() => {
   Route.delete('/:id/detach-student', 'Api/v1/CoursesController.detachStudent')
     .middleware('role:admin,teacher')
     .as('courses.detach-student');
+
+  Route.put('/:id/likes', 'Api/v1/CoursesController.setLike')
+    .middleware('role:admin,teacher,student')
+    .as('courses.set-like');
+
+  Route.delete('/:id/likes', 'Api/v1/CoursesController.unsetLike')
+    .middleware('role:admin,teacher,student')
+    .as('courses.unset-like');
 }).prefix('courses');

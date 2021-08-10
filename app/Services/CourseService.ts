@@ -1,4 +1,5 @@
 import { inject, Ioc } from '@adonisjs/core/build/standalone';
+import { AuthContract } from '@ioc:Adonis/Addons/Auth';
 import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
 
 /**
@@ -7,13 +8,17 @@ import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
 import StatusCodeEnum from 'App/Datatypes/Enums/StatusCodeEnum';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
 import RoleHelper from 'App/Helpers/RoleHelper';
-import CategoryRepository from 'App/Repositories/CategoryRepository';
 
 /**
  * Repositories
  */
 import CourseRepository from 'App/Repositories/CourseRepository';
 import UserRepository from 'App/Repositories/UserRepository';
+import CategoryRepository from 'App/Repositories/CategoryRepository';
+
+/**
+ * Validators
+ */
 import CreateCourseValidator from 'App/Validators/Course/CreateCourseValidator';
 import UpdateCourseValidator from 'App/Validators/Course/UpdateCourseValidator';
 
@@ -476,6 +481,77 @@ export default class CourseService {
       success: true,
       status: StatusCodeEnum.OK,
       message: 'Student detached.',
+      data: {},
+    };
+  }
+
+  public async attachUserLike(id: string | number, auth: AuthContract): Promise<any> {
+    const user = await auth.use('api').authenticate();
+    const course = await this.courseRepository.getById(id);
+
+    if (!course) {
+      return {
+        success: false,
+        status: StatusCodeEnum.NOT_FOUND,
+        message: 'Course not found.',
+        data: {},
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    try {
+      await course.related('likes').attach([user.id]);
+    } catch (error) {
+      if (error.code === '23505') {
+        return {
+          success: false,
+          status: StatusCodeEnum.BAD_REQUEST,
+          message: 'You are already liked this course.',
+          data: {},
+          error: {
+            code: 'E_BAD_REQUEST',
+          },
+        };
+      }
+      throw new Error(error);
+    }
+
+    return {
+      success: true,
+      status: StatusCodeEnum.OK,
+      message: 'Like attached.',
+      data: {},
+    };
+  }
+
+  public async detachUserLike(id: string | number, auth: AuthContract): Promise<any> {
+    const user = await auth.use('api').authenticate();
+    const course = await this.courseRepository.getById(id);
+
+    if (!course) {
+      return {
+        success: false,
+        status: StatusCodeEnum.NOT_FOUND,
+        message: 'Course not found.',
+        data: {},
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    try {
+      await course.related('likes').detach([user.id]);
+    } catch (error) {
+      throw new Error(error);
+    }
+
+    return {
+      success: true,
+      status: StatusCodeEnum.OK,
+      message: 'Like detached.',
       data: {},
     };
   }
