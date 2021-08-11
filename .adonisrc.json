@@ -22,10 +22,6 @@
     "Database": "database",
     "Contracts": "contracts"
   },
-  "commandsAliases": {
-    "migrate": "migration:run",
-    "seed": "db:seed"
-  },
   "preloads": ["./routes/index", "./start/kernel"],
   "providers": ["./providers/AppProvider", "@adonisjs/core", "@adonisjs/lucid", "@adonisjs/auth", "@adonisjs/redis"],
   "aceProviders": ["@adonisjs/repl"]
