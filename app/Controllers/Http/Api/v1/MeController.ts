@@ -28,7 +28,7 @@ export default class MeController extends BaseController {
    * GET /me
    */
   public async show(ctx: HttpContextContract) {
-    const result = await this.meService.fetchUserContacts(ctx.auth);
+    const result = await this.meService.fetchUserData(ctx.auth);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);

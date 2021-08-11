@@ -27,7 +27,7 @@ export default class MeService {
    * @param auth AuthContract
    * @returns Response
    */
-  public async fetchUserContacts(auth: AuthContract): Promise<IResponse> {
+  public async fetchUserData(auth: AuthContract): Promise<IResponse> {
     const user = await auth.use(this.authGuard).authenticate();
 
     await user.load('roles');

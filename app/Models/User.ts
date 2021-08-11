@@ -51,6 +51,11 @@ export default class User extends BaseModel {
   })
   public courses: ManyToMany<typeof Course>;
 
+  @manyToMany(() => Course, {
+    pivotTable: 'courses_likes',
+  })
+  public likes: ManyToMany<typeof Course>;
+
   @column.dateTime({ autoCreate: true, serializeAs: null })
   public createdAt: DateTime;
 
