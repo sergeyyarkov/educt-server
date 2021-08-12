@@ -260,7 +260,7 @@ export default class CourseService {
       return {
         success: false,
         status: StatusCodeEnum.BAD_REQUEST,
-        message: `User with id "${teacher.id}" not teacher.`,
+        message: `User with id "${teacher.id}" not a teacher.`,
         data: {},
         error: {
           code: 'E_BAD_REQUEST',

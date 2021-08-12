@@ -15,7 +15,7 @@ export default class CourseSeeder extends BaseSeeder {
       .firstOrFail();
 
     await CourseFactory.with('category')
-      .with('lessons', 2)
+      .with('lessons', 2, lessonFactory => lessonFactory.with('content'))
       .createMany(3, (course: Course) => course.related('teacher').associate(teacher));
   }
 }

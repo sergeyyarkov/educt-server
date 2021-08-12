@@ -1,8 +1,18 @@
 import Factory from '@ioc:Adonis/Lucid/Factory';
+
+/**
+ * Datatypes
+ */
+import CourseStatusEnum from 'App/Datatypes/Enums/CourseStatusEnum';
+
+/**
+ * Models
+ */
 import Category from 'App/Models/Category';
 import Contact from 'App/Models/Contact';
 import Course from 'App/Models/Course';
 import Lesson from 'App/Models/Lesson';
+import LessonContent from 'App/Models/LessonContent';
 import User from 'App/Models/User';
 
 export const ContactFactory = Factory.define(Contact, ({ faker }) => {
@@ -23,12 +33,20 @@ export const UserFactory = Factory.define(User, ({ faker }) => {
   .relation('contacts', () => ContactFactory)
   .build();
 
-export const LessonFactory = Factory.define(Lesson, ({ faker }) => {
+export const LessonContentFactory = Factory.define(LessonContent, ({ faker }) => {
   return {
-    title: faker.lorem.sentence(2),
-    description: faker.lorem.sentence(5),
+    video_url: `https://www.youtube.com/embed/${faker.datatype.string(10)}`,
   };
 }).build();
+
+export const LessonFactory = Factory.define(Lesson, ({ faker }) => {
+  return {
+    title: `Lesson #${faker.datatype.number(200)}`,
+    description: faker.lorem.sentence(5),
+  };
+})
+  .relation('content', () => LessonContentFactory)
+  .build();
 
 export const CategoryFactory = Factory.define(Category, ({ faker }) => {
   const title = faker.lorem.word(6);
@@ -40,8 +58,9 @@ export const CategoryFactory = Factory.define(Category, ({ faker }) => {
 
 export const CourseFactory = Factory.define(Course, ({ faker }) => {
   return {
-    title: faker.lorem.sentence(3),
+    title: `Course #${faker.datatype.number(200)}`,
     description: faker.lorem.sentence(5),
+    status: CourseStatusEnum.PUBLISHED,
   };
 })
   .relation('category', () => CategoryFactory)

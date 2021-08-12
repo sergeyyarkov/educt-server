@@ -16,6 +16,7 @@ import {
 import Category from 'App/Models/Category';
 import Lesson from 'App/Models/Lesson';
 import User from 'App/Models/User';
+import CourseStatusEnum from 'App/Datatypes/Enums/CourseStatusEnum';
 
 export default class Course extends BaseModel {
   @column({ isPrimary: true })
@@ -32,6 +33,9 @@ export default class Course extends BaseModel {
 
   @column()
   public category_id: string;
+
+  @column()
+  public status: CourseStatusEnum;
 
   @belongsTo(() => Category, {
     foreignKey: 'category_id',

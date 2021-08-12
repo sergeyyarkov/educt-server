@@ -10,12 +10,21 @@ export default class Courses extends BaseSchema {
       table.string('description').notNullable();
       table.string('teacher_id', 21).unsigned().references('users.id').onDelete('CASCADE');
       table.string('category_id', 21).unsigned().references('categories.id').onDelete('CASCADE');
+      table
+        .enu('status', ['DRAFT', 'PUBLISHED'], {
+          useNative: true,
+          enumName: 'course_status',
+          existingType: false,
+          schemaName: 'public',
+        })
+        .notNullable();
       table.timestamp('created_at', { useTz: true });
       table.timestamp('updated_at', { useTz: true });
     });
   }
 
   public async down() {
+    await this.schema.raw('DROP TYPE IF EXISTS "course_status" CASCADE');
     this.schema.dropTable(this.tableName);
   }
 }
