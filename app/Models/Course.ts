@@ -34,7 +34,7 @@ export default class Course extends BaseModel {
   @column()
   public category_id: string;
 
-  @column()
+  @column({ serializeAs: null })
   public status: CourseStatusEnum;
 
   @belongsTo(() => Category, {

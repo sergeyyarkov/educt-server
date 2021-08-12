@@ -1,10 +1,11 @@
 import { inject, Ioc } from '@adonisjs/core/build/standalone';
 import { AuthContract } from '@ioc:Adonis/Addons/Auth';
-import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
 
 /**
  * Datatypes
  */
+import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
+import CourseStatusEnum from 'App/Datatypes/Enums/CourseStatusEnum';
 import StatusCodeEnum from 'App/Datatypes/Enums/StatusCodeEnum';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
 import RoleHelper from 'App/Helpers/RoleHelper';
@@ -552,6 +553,30 @@ export default class CourseService {
       success: true,
       status: StatusCodeEnum.OK,
       message: 'Like detached.',
+      data: {},
+    };
+  }
+
+  public async setCourseStatus(id: string | number, status: CourseStatusEnum): Promise<IResponse> {
+    const data = await this.courseRepository.setStatus(id, status);
+    console.log(data);
+
+    if (!data) {
+      return {
+        success: false,
+        status: StatusCodeEnum.BAD_REQUEST,
+        message: `Cannot set status for course with id "${id}"`,
+        data: {},
+        error: {
+          code: 'E_BAD_REQUEST',
+        },
+      };
+    }
+
+    return {
+      success: true,
+      status: StatusCodeEnum.OK,
+      message: 'Status changed.',
       data: {},
     };
   }

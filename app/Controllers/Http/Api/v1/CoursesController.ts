@@ -12,6 +12,7 @@ import CourseService from 'App/Services/CourseService';
 import AddCourseToUserValidator from 'App/Validators/Course/AddCourseToUserValidator';
 import CreateCourseValidator from 'App/Validators/Course/CreateCourseValidator';
 import DelCourseFromUserValidator from 'App/Validators/Course/DelCourseFromUserValidator';
+import SetCourseStatusValidator from 'App/Validators/Course/SetCourseStatusValidator';
 import UpdateCourseValidator from 'App/Validators/Course/UpdateCourseValidator';
 
 import BaseController from '../../BaseController';
@@ -217,6 +218,21 @@ export default class CoursesController extends BaseController {
    */
   public async unsetLike(ctx: HttpContextContract) {
     const result = await this.courseService.detachUserLike(ctx.params.id, ctx.auth);
+
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
+  }
+
+  /**
+   * Set course status
+   * POST /courses/:id/set-status
+   */
+  public async setStatus(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(SetCourseStatusValidator);
+    const result = await this.courseService.setCourseStatus(ctx.params.id, payload.status);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);

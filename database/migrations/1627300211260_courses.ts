@@ -1,5 +1,10 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema';
 
+/**
+ * Datatypes
+ */
+import CourseStatusEnum from 'App/Datatypes/Enums/CourseStatusEnum';
+
 export default class Courses extends BaseSchema {
   protected tableName = 'courses';
 
@@ -11,7 +16,7 @@ export default class Courses extends BaseSchema {
       table.string('teacher_id', 21).unsigned().references('users.id').onDelete('CASCADE');
       table.string('category_id', 21).unsigned().references('categories.id').onDelete('CASCADE');
       table
-        .enu('status', ['DRAFT', 'PUBLISHED'], {
+        .enu('status', Object.values(CourseStatusEnum), {
           useNative: true,
           enumName: 'course_status',
           existingType: false,

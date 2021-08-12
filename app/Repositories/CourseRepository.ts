@@ -1,4 +1,9 @@
 /**
+ * Datatypes
+ */
+import CourseStatusEnum from 'App/Datatypes/Enums/CourseStatusEnum';
+
+/**
  * Models
  */
 import Category from 'App/Models/Category';
@@ -20,12 +25,27 @@ export default class CourseRepository {
   }
 
   /**
+   * Set status on course
+   *
+   * @param id Course id
+   * @returns Data result
+   */
+  public async setStatus(id: string | number, status: CourseStatusEnum): Promise<any> {
+    const data = await this.Course.query().where('id', id).update({ status }).first();
+    return data;
+  }
+
+  /**
    * Get all courses
    *
    * @returns List of courses
    */
   public async getAll(): Promise<Course[]> {
-    const courses = await this.Course.query().preload('teacher').preload('category').preload('lessons');
+    const courses = await this.Course.query()
+      .preload('teacher')
+      .preload('category')
+      .preload('lessons')
+      .where('status', CourseStatusEnum.PUBLISHED);
     return courses;
   }
 
@@ -42,6 +62,7 @@ export default class CourseRepository {
       .preload('lessons')
       .preload('students')
       .where('id', id)
+      .where('status', CourseStatusEnum.PUBLISHED)
       .first();
 
     return course;
@@ -115,7 +136,13 @@ export default class CourseRepository {
    * @returns Created course
    */
   public async create(data: CreateCourseValidator['schema']['props']): Promise<Course> {
-    const createdCourse = await this.Course.create(data);
+    const createdCourse = await this.Course.create({
+      title: data.title,
+      description: data.description,
+      status: CourseStatusEnum.DRAFT, // make course DRAFT before adding lessons
+      teacher_id: data.teacher_id,
+      category_id: data.category_id,
+    });
     return createdCourse;
   }
 

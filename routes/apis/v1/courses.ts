@@ -41,4 +41,8 @@ Route.group(() => {
   Route.delete('/:id/likes', 'Api/v1/CoursesController.unsetLike')
     .middleware('role:admin,teacher,student')
     .as('courses.unset-like');
+
+  Route.post('/:id/set-status', 'Api/v1/CoursesController.setStatus')
+    .middleware('role:admin,teacher')
+    .as('courses.set-status');
 }).prefix('courses');
