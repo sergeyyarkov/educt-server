@@ -1,6 +1,7 @@
 /**
  * Datatypes
  */
+import Database from '@ioc:Adonis/Lucid/Database';
 import CourseStatusEnum from 'App/Datatypes/Enums/CourseStatusEnum';
 
 /**
@@ -18,9 +19,12 @@ import CreateCourseValidator from 'App/Validators/Course/CreateCourseValidator';
 import UpdateCourseValidator from 'App/Validators/Course/UpdateCourseValidator';
 
 export default class CourseRepository {
+  private Database: typeof Database;
+
   private Course: typeof Course;
 
   constructor() {
+    this.Database = Database;
     this.Course = Course;
   }
 
@@ -66,6 +70,17 @@ export default class CourseRepository {
       .first();
 
     return course;
+  }
+
+  /**
+   * Get likes count of course by id
+   *
+   * @param id Course id
+   * @returns Likes count
+   */
+  public async getLikesCount(id: string | number): Promise<any> {
+    const likes = await this.Database.query().from('courses_likes').where('course_id', id).count('* as count');
+    return likes[0].count;
   }
 
   /**

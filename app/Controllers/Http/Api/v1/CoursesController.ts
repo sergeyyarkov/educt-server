@@ -199,6 +199,20 @@ export default class CoursesController extends BaseController {
   }
 
   /**
+   * Get likes count of course
+   * GET /courses/:id/likes
+   */
+  public async showLikes(ctx: HttpContextContract) {
+    const result = await this.courseService.fetchCourseLikesCount(ctx.params.id);
+
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
+  }
+
+  /**
    * Set like on course by authorized user
    * PUT /courses/:id/likes
    */

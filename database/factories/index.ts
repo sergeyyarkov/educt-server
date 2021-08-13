@@ -49,9 +49,8 @@ export const LessonFactory = Factory.define(Lesson, ({ faker }) => {
   .build();
 
 export const CategoryFactory = Factory.define(Category, ({ faker }) => {
-  const title = faker.lorem.word(6);
   return {
-    title: `${title[0].toUpperCase()}${title.slice(1)}`,
+    title: `Category #${faker.datatype.number(200)}`,
     description: faker.lorem.sentence(5),
   };
 }).build();

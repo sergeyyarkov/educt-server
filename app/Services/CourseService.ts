@@ -559,7 +559,6 @@ export default class CourseService {
 
   public async setCourseStatus(id: string | number, status: CourseStatusEnum): Promise<IResponse> {
     const data = await this.courseRepository.setStatus(id, status);
-    console.log(data);
 
     if (!data) {
       return {
@@ -578,6 +577,17 @@ export default class CourseService {
       status: StatusCodeEnum.OK,
       message: 'Status changed.',
       data: {},
+    };
+  }
+
+  public async fetchCourseLikesCount(id: string | number): Promise<IResponse> {
+    const count = await this.courseRepository.getLikesCount(id);
+
+    return {
+      success: true,
+      status: StatusCodeEnum.OK,
+      message: 'Fetched course likes count.',
+      data: { count },
     };
   }
 }

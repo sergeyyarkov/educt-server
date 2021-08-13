@@ -34,6 +34,10 @@ Route.group(() => {
     .middleware('role:admin,teacher')
     .as('courses.detach-student');
 
+  Route.get('/:id/likes', 'Api/v1/CoursesController.showLikes')
+    .middleware('role:admin,teacher,student')
+    .as('courses.show-likes');
+
   Route.put('/:id/likes', 'Api/v1/CoursesController.setLike')
     .middleware('role:admin,teacher,student')
     .as('courses.set-like');
