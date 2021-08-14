@@ -209,25 +209,13 @@ export default class CourseService {
    * @returns Response
    */
   public async fetchStudentsCount(id: string | number): Promise<IResponse> {
-    const data = await this.courseRepository.getStudentsCount(id);
-
-    if (!data) {
-      return {
-        success: false,
-        status: StatusCodeEnum.NOT_FOUND,
-        message: 'Course not found.',
-        data: {},
-        error: {
-          code: 'E_NOT_FOUND',
-        },
-      };
-    }
+    const count = await this.courseRepository.getStudentsCount(id);
 
     return {
       success: true,
       status: StatusCodeEnum.OK,
       message: 'Fetched students count.',
-      data,
+      data: { count },
     };
   }
 

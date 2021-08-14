@@ -78,7 +78,7 @@ export default class CourseRepository {
    * @param id Course id
    * @returns Likes count
    */
-  public async getLikesCount(id: string | number): Promise<any> {
+  public async getLikesCount(id: string | number): Promise<BigInt> {
     const likes = await this.Database.query().from('courses_likes').where('course_id', id).count('* as count');
     return likes[0].count;
   }
@@ -138,10 +138,9 @@ export default class CourseRepository {
    * @param id Course if
    * @returns Students count
    */
-  public async getStudentsCount(id: string | number): Promise<{ count: any } | null> {
-    const course = await this.Course.query().where('id', id).withCount('students').first();
-
-    return course && ({ count: course.$extras.students_count } ?? null);
+  public async getStudentsCount(id: string | number): Promise<BigInt> {
+    const students = await this.Database.query().from('users_courses').where('course_id', id).count('* as count');
+    return students[0].count;
   }
 
   /**
