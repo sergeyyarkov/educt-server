@@ -1,4 +1,3 @@
-import { cuid } from '@ioc:Adonis/Core/Helpers';
 import { inject, Ioc } from '@adonisjs/core/build/standalone';
 import { AuthContract } from '@ioc:Adonis/Addons/Auth';
 
@@ -282,12 +281,6 @@ export default class CourseService {
 
     /* Create course */
     const course = await this.courseRepository.create(data);
-
-    /* Create image if provided */
-    if (data.background_image) {
-      const bgImage = await this.imageRepository.createInCloudinaryCloud(data.background_image, cuid());
-      await course.related('image').associate(bgImage);
-    }
 
     return {
       success: true,

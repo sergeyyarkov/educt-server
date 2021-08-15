@@ -1,6 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import BaseSeeder from '@ioc:Adonis/Lucid/Seeder';
 import Role from 'App/Models/Role';
+import User from 'App/Models/User';
 import { UserFactory } from 'Database/factories';
 
 export default class UserSeeder extends BaseSeeder {
@@ -17,7 +18,13 @@ export default class UserSeeder extends BaseSeeder {
     /**
      * Administrator
      */
-    const userAdmin = await UserFactory.with('contacts').create();
+    const userAdmin = await User.create({
+      first_name: 'John',
+      last_name: 'Doe',
+      login: 'admin',
+      password: '12345',
+      email: 'example.email@mail.com',
+    });
     await userAdmin.related('roles').attach([roles.admin.id]);
 
     /**

@@ -48,6 +48,13 @@ Route.group(() => {
      *
      */
     require('./lessons');
+
+    /**
+     *
+     * Images module
+     *
+     */
+    require('./images');
   }).middleware('auth');
 })
   .prefix('v1')

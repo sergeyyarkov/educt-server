@@ -9,6 +9,16 @@ export default class ImageRepository {
     this.Image = Image;
   }
 
+  public async getById(id: number): Promise<Image | null> {
+    const image = await this.Image.query().where('id', id).first();
+    return image;
+  }
+
+  public async getAll(): Promise<Image[]> {
+    const images = await this.Image.query();
+    return images;
+  }
+
   /**
    * Create image in cloudinary cloud
    *
@@ -28,13 +38,13 @@ export default class ImageRepository {
    * @param id Image id
    * @returns Result or null
    */
-  public async deleteFormCloudinaryCloud(id: number): Promise<any> {
+  public async deleteFormCloudinaryCloud(id: number): Promise<Image | null> {
     const image = await this.Image.query().where('id', id).first();
 
     if (image) {
-      const result = await CloudinaryService.destroy(image.name);
+      await CloudinaryService.destroy(image.name);
       await image.delete();
-      return result;
+      return image;
     }
 
     return null;

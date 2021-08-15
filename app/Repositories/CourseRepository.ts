@@ -49,7 +49,8 @@ export default class CourseRepository {
       .preload('teacher')
       .preload('category')
       .preload('lessons')
-      .where('status', CourseStatusEnum.PUBLISHED);
+      .preload('image');
+    // .where('status', CourseStatusEnum.PUBLISHED);
     return courses;
   }
 
@@ -65,8 +66,9 @@ export default class CourseRepository {
       .preload('category')
       .preload('lessons')
       .preload('students')
+      .preload('image')
       .where('id', id)
-      .where('status', CourseStatusEnum.PUBLISHED)
+      // .where('status', CourseStatusEnum.PUBLISHED)
       .first();
 
     return course;
@@ -154,6 +156,7 @@ export default class CourseRepository {
      * Create new course
      */
     const course = await this.Course.create({
+      bg_image_id: data.bg_image_id,
       title: data.title,
       description: data.description,
       status: CourseStatusEnum.DRAFT, // make course DRAFT before adding lessons
