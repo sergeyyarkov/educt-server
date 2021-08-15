@@ -32,6 +32,7 @@ export default class MeService {
 
     await user.load('roles');
     await user.load('contacts');
+    await user.load('courses');
 
     return {
       success: true,

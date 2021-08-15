@@ -1,4 +1,14 @@
 /**
+ * Services
+ */
+import CloudinaryService from '@ioc:Adonis/Addons/Cloudinary';
+
+/**
+ * Helpers
+ */
+import { cuid } from '@ioc:Adonis/Core/Helpers';
+
+/**
  * Datatypes
  */
 import Database from '@ioc:Adonis/Lucid/Database';
@@ -150,14 +160,24 @@ export default class CourseRepository {
    * @returns Created course
    */
   public async create(data: CreateCourseValidator['schema']['props']): Promise<Course> {
-    const createdCourse = await this.Course.create({
+    /**
+     * Load background image
+     */
+    const imageUploadResponse = await CloudinaryService.upload(data.background_image, cuid());
+
+    /**
+     * Create new course
+     */
+    const course = await this.Course.create({
+      bg_image: imageUploadResponse.secure_url,
       title: data.title,
       description: data.description,
       status: CourseStatusEnum.DRAFT, // make course DRAFT before adding lessons
       teacher_id: data.teacher_id,
       category_id: data.category_id,
     });
-    return createdCourse;
+
+    return course;
   }
 
   /**
@@ -187,7 +207,7 @@ export default class CourseRepository {
    *
    * @param id Course id
    * @param data Data to update
-   * @returns Updated course
+   * @returns Updated course or null
    */
   public async update(id: string | number, data: UpdateCourseValidator['schema']['props']): Promise<Course | null> {
     const course = await this.Course.query()

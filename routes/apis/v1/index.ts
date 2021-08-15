@@ -2,7 +2,9 @@
 import Route from '@ioc:Adonis/Core/Route';
 
 Route.group(() => {
-  Route.get('/', () => `Backend API.`).as('index');
+  Route.get('/', () => {
+    return 'Backend API.';
+  }).as('index');
 
   /**
    *

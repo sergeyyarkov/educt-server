@@ -23,6 +23,13 @@
     "Contracts": "contracts"
   },
   "preloads": ["./routes/index", "./start/kernel"],
-  "providers": ["./providers/AppProvider", "@adonisjs/core", "@adonisjs/lucid", "@adonisjs/auth", "@adonisjs/redis"],
+  "providers": [
+    "./providers/AppProvider",
+    "./providers/CloudinaryProvider",
+    "@adonisjs/core",
+    "@adonisjs/lucid",
+    "@adonisjs/auth",
+    "@adonisjs/redis"
+  ],
   "aceProviders": ["@adonisjs/repl"]
 }

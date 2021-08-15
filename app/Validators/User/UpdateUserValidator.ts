@@ -7,8 +7,8 @@ export default class UpdateUserValidator {
   public schema = schema.create({
     first_name: schema.string(),
     last_name: schema.string(),
-    login: schema.string({}, [rules.unique({ table: 'users', column: 'login' })]),
-    email: schema.string({}, [rules.email(), rules.unique({ table: 'users', column: 'email' })]),
+    login: schema.string.optional({}, [rules.unique({ table: 'users', column: 'login' })]),
+    email: schema.string.optional({}, [rules.email(), rules.unique({ table: 'users', column: 'email' })]),
     password: schema.string(),
   });
 

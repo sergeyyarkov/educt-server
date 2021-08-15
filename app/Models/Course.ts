@@ -23,6 +23,9 @@ export default class Course extends BaseModel {
   public id: string;
 
   @column()
+  public bg_image: string;
+
+  @column()
   public title: string;
 
   @column()

@@ -98,12 +98,12 @@ export default class UserRepository {
    * @returns Created user
    */
   public async create(data: CreateUserValidator['schema']['props']): Promise<User> {
-    const createdUser = await this.User.create(data);
+    const user = await this.User.create(data);
 
-    await createdUser.load('contacts');
-    await createdUser.load('roles');
+    await user.load('contacts');
+    await user.load('roles');
 
-    return createdUser;
+    return user;
   }
 
   /**
@@ -111,7 +111,7 @@ export default class UserRepository {
    *
    * @param id User id
    * @param data Data to update
-   * @returns User or null if user is not found
+   * @returns User or null
    */
   public async update(id: number | string, data: UpdateUserValidator['schema']['props']): Promise<User | null> {
     const user = await this.User.query().preload('contacts').preload('roles').where('id', id).first();
