@@ -49,8 +49,8 @@ export default class CourseRepository {
       .preload('teacher')
       .preload('category')
       .preload('lessons')
-      .preload('image');
-    // .where('status', CourseStatusEnum.PUBLISHED);
+      .preload('image')
+      .where('status', CourseStatusEnum.PUBLISHED);
     return courses;
   }
 
@@ -68,8 +68,27 @@ export default class CourseRepository {
       .preload('students')
       .preload('image')
       .where('id', id)
-      // .where('status', CourseStatusEnum.PUBLISHED)
+      .where('status', CourseStatusEnum.PUBLISHED)
       .first();
+
+    return course;
+  }
+
+  /**
+   * Get course by id without relations
+   *
+   * @param id Course id
+   * @returns Course or null
+   */
+  public async getByIdWithoutRelations(id: string | number, params?: any): Promise<Course | null> {
+    const { status }: any = params || {};
+    const query = this.Course.query().where('id', id);
+
+    if (status) {
+      query.where('status', status);
+    }
+
+    const course = await query.first();
 
     return course;
   }

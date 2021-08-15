@@ -81,7 +81,7 @@ export default class LessonService {
    * @returns Response
    */
   public async createLesson(data: CreateLessonValidator['schema']['props']): Promise<IResponse> {
-    const course = await this.courseRepository.getById(data.course_id);
+    const course = await this.courseRepository.getByIdWithoutRelations(data.course_id);
 
     if (!course) {
       return {
