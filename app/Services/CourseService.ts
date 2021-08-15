@@ -1,3 +1,4 @@
+import { cuid } from '@ioc:Adonis/Core/Helpers';
 import { inject, Ioc } from '@adonisjs/core/build/standalone';
 import { AuthContract } from '@ioc:Adonis/Addons/Auth';
 
@@ -16,6 +17,7 @@ import RoleHelper from 'App/Helpers/RoleHelper';
 import CourseRepository from 'App/Repositories/CourseRepository';
 import UserRepository from 'App/Repositories/UserRepository';
 import CategoryRepository from 'App/Repositories/CategoryRepository';
+import ImageRepository from 'App/Repositories/ImageRepository';
 
 /**
  * Validators
@@ -31,14 +33,18 @@ export default class CourseService {
 
   private categoryRepository: CategoryRepository;
 
+  private imageRepository: ImageRepository;
+
   constructor(
     courseRepository: CourseRepository,
     userRepository: UserRepository,
-    categoryRepository: CategoryRepository
+    categoryRepository: CategoryRepository,
+    imageRepository: ImageRepository
   ) {
     this.courseRepository = courseRepository;
     this.userRepository = userRepository;
     this.categoryRepository = categoryRepository;
+    this.imageRepository = imageRepository;
   }
 
   /**
@@ -274,10 +280,14 @@ export default class CourseService {
       };
     }
 
-    /**
-     * Creating new course
-     */
+    /* Create course */
     const course = await this.courseRepository.create(data);
+
+    /* Create image if provided */
+    if (data.background_image) {
+      const bgImage = await this.imageRepository.createInCloudinaryCloud(data.background_image, cuid());
+      await course.related('image').associate(bgImage);
+    }
 
     return {
       success: true,
@@ -307,6 +317,11 @@ export default class CourseService {
         },
       };
     }
+
+    /**
+     * Delete background image from course
+     */
+    await this.imageRepository.deleteFormCloudinaryCloud(course.bg_image_id);
 
     return {
       success: true,

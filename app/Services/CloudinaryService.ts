@@ -1,5 +1,5 @@
 import * as cloudinary from 'cloudinary';
-import { UploadApiResponse, UploadApiOptions, ResponseCallback } from 'cloudinary';
+import { UploadApiResponse, UploadApiOptions, ResponseCallback, ResourceType, DeliveryType } from 'cloudinary';
 import { MultipartFileContract } from '@ioc:Adonis/Core/BodyParser';
 import { CloudinaryConfig, CloudinaryInterface } from '@ioc:Adonis/Addons/Cloudinary';
 
@@ -36,6 +36,18 @@ export default class CloudinaryService implements CloudinaryInterface {
       callback
     );
 
+    return response;
+  }
+
+  public async destroy(
+    publicId: string,
+    options?: {
+      resource_type?: ResourceType;
+      type?: DeliveryType;
+      invalidate?: boolean;
+    }
+  ): Promise<any> {
+    const response = await this.cloudinary.v2.uploader.destroy(publicId, options);
     return response;
   }
 

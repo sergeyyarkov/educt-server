@@ -7,7 +7,7 @@ export default class CreateCourseValidator {
   public schema = schema.create({
     title: schema.string(),
     description: schema.string(),
-    background_image: schema.file({
+    background_image: schema.file.optional({
       size: '2mb',
       extnames: ['jpg', 'jpeg', 'png'],
     }),

@@ -1,14 +1,4 @@
 /**
- * Services
- */
-import CloudinaryService from '@ioc:Adonis/Addons/Cloudinary';
-
-/**
- * Helpers
- */
-import { cuid } from '@ioc:Adonis/Core/Helpers';
-
-/**
  * Datatypes
  */
 import Database from '@ioc:Adonis/Lucid/Database';
@@ -161,15 +151,9 @@ export default class CourseRepository {
    */
   public async create(data: CreateCourseValidator['schema']['props']): Promise<Course> {
     /**
-     * Load background image
-     */
-    const imageUploadResponse = await CloudinaryService.upload(data.background_image, cuid());
-
-    /**
      * Create new course
      */
     const course = await this.Course.create({
-      bg_image: imageUploadResponse.secure_url,
       title: data.title,
       description: data.description,
       status: CourseStatusEnum.DRAFT, // make course DRAFT before adding lessons

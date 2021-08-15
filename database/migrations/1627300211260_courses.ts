@@ -11,7 +11,7 @@ export default class Courses extends BaseSchema {
   public async up() {
     this.schema.createTable(this.tableName, table => {
       table.string('id', 21).primary();
-      table.string('bg_image');
+      table.string('bg_image_id');
       table.string('title').notNullable();
       table.string('description').notNullable();
       table.string('teacher_id', 21).unsigned().references('users.id').onDelete('CASCADE');

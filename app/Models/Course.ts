@@ -17,13 +17,14 @@ import Category from 'App/Models/Category';
 import Lesson from 'App/Models/Lesson';
 import User from 'App/Models/User';
 import CourseStatusEnum from 'App/Datatypes/Enums/CourseStatusEnum';
+import Image from './Image';
 
 export default class Course extends BaseModel {
   @column({ isPrimary: true })
   public id: string;
 
-  @column()
-  public bg_image: string;
+  @column({ serializeAs: null })
+  public bg_image_id: number;
 
   @column()
   public title: string;
@@ -44,6 +45,11 @@ export default class Course extends BaseModel {
     foreignKey: 'category_id',
   })
   public category: BelongsTo<typeof Category>;
+
+  @belongsTo(() => Image, {
+    foreignKey: 'bg_image_id',
+  })
+  public image: BelongsTo<typeof Image>;
 
   @belongsTo(() => User, {
     foreignKey: 'teacher_id',
