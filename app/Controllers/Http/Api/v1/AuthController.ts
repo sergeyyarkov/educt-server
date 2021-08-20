@@ -28,7 +28,7 @@ export default class AuthController extends BaseController {
 
   public async login(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(AuthValidator);
-    const result = await this.authService.login(payload.login, payload.password, ctx.auth);
+    const result = await this.authService.login(payload.login, payload.password, ctx);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);
@@ -43,7 +43,7 @@ export default class AuthController extends BaseController {
    */
 
   public async logout(ctx: HttpContextContract) {
-    const result = await this.authService.logout(ctx.auth);
+    const result = await this.authService.logout(ctx);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);

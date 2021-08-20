@@ -52,13 +52,21 @@ export default class AuthMiddleware {
     );
   }
 
-  public async handle({ auth }: HttpContextContract, next: () => Promise<void>, customGuards: (keyof GuardsList)[]) {
+  public async handle(ctx: HttpContextContract, next: () => Promise<void>, customGuards: (keyof GuardsList)[]) {
+    /**
+     * Verify token from cookie and set the authorization header
+     */
+    const token = ctx.request.cookie('token');
+    if (token) {
+      ctx.request.headers().authorization = `Bearer ${token}`;
+    }
+
     /**
      * Uses the user defined guards or the default guard mentioned in
      * the config file
      */
-    const guards = customGuards.length ? customGuards : [auth.name];
-    await this.authenticate(auth, guards);
+    const guards = customGuards.length ? customGuards : [ctx.auth.name];
+    await this.authenticate(ctx.auth, guards);
     await next();
   }
 }

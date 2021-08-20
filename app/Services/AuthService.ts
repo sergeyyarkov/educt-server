@@ -1,11 +1,11 @@
 import { inject, Ioc } from '@adonisjs/core/build/standalone';
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import Hash from '@ioc:Adonis/Core/Hash';
 import Logger from '@ioc:Adonis/Core/Logger';
 
 /**
  * Interfaces
  */
-import { AuthContract } from '@ioc:Adonis/Addons/Auth';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
 
 /**
@@ -33,10 +33,10 @@ export default class AuthService {
    *
    * @param login Login
    * @param password Password
-   * @param auth AuthContact
+   * @param ctx Http context
    * @returns Token data
    */
-  public async login(login: string, password: string, auth: AuthContract): Promise<IResponse> {
+  public async login(login: string, password: string, ctx: HttpContextContract): Promise<IResponse> {
     const user = await this.userRepository.getByColumn('login', login);
 
     if (!user) {
@@ -69,10 +69,12 @@ export default class AuthService {
     /**
      * Create new token
      */
-    const token = await auth.use(this.authGuard).generate(user, {
+    const token = await ctx.auth.use(this.authGuard).generate(user, {
       expiresIn: '1d',
       userRoles: user.roles.map(role => role.slug),
     });
+
+    ctx.response.cookie('token', token.token);
 
     Logger.info(`A token for user with id: "${token.user.id}" was successfully generated.`);
 
@@ -87,11 +89,12 @@ export default class AuthService {
   /**
    * Logout user
    *
-   * @param auth AuthContract
+   * @param ctx Http context
    * @returns Logout message
    */
-  public async logout(auth: AuthContract): Promise<IResponse> {
-    await auth.use(this.authGuard).revoke();
+  public async logout(ctx: HttpContextContract): Promise<IResponse> {
+    ctx.response.clearCookie('token');
+    await ctx.auth.use(this.authGuard).revoke();
 
     return {
       success: true,
