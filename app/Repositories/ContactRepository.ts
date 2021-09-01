@@ -64,8 +64,8 @@ export default class ContactRepository {
 
     if (contacts) {
       contacts.phone_number = data.phone_number ?? null;
-      contacts.telegram_id = data.telegram_id ?? null;
-      contacts.twitter_id = data.twitter_id ?? null;
+      contacts.telegram_id = data.telegram_id?.substring(1) ?? null;
+      contacts.twitter_id = data.twitter_id?.substring(1) ?? null;
       contacts.vk_id = data.vk_id ?? null;
 
       await contacts.save();

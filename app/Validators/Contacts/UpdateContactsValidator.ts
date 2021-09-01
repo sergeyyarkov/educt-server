@@ -11,9 +11,9 @@ export default class UpdateContactsValidator {
         strict: true,
       }),
     ]),
-    vk_id: schema.string.optional({}, [rules.regex(/^[a-zA-Z0-9_]+$/)]),
-    twitter_id: schema.string.optional({}, [rules.regex(/^[a-zA-Z0-9_]+$/)]),
-    telegram_id: schema.string.optional({}, [rules.regex(/^[a-zA-Z0-9_]+$/)]),
+    vk_id: schema.string.optional({}, [rules.regex(/^([a-zA-Z0-9_]){1,64}$/)]),
+    twitter_id: schema.string.optional({}, [rules.regex(/(^|[^@\w])@(\w{1,15})\b/)]),
+    telegram_id: schema.string.optional({}, [rules.regex(/(^|[^@\w])@(\w{1,64})\b/)]),
   });
 
   public messages = {};
