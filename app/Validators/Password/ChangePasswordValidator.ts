@@ -5,7 +5,7 @@ export default class ChangePasswordValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public schema = schema.create({
-    oldPassword: schema.string(),
+    oldPassword: schema.string({}, [rules.maxLength(128)]),
     newPassword: schema.string({}, [rules.minLength(6), rules.maxLength(128)]),
   });
 

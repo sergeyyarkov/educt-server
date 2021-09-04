@@ -1,5 +1,4 @@
 import { inject, Ioc } from '@adonisjs/core/build/standalone';
-import { cuid } from '@ioc:Adonis/Core/Helpers';
 import StatusCodeEnum from 'App/Datatypes/Enums/StatusCodeEnum';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
 import ImageRepository from 'App/Repositories/ImageRepository';
@@ -48,7 +47,7 @@ export default class ImageService {
   }
 
   public async createImage(data: CreateImageValidator['schema']['props']): Promise<IResponse> {
-    const image = await this.imageRepository.createInCloudinaryCloud(data.image, cuid());
+    const image = await this.imageRepository.create(data.image);
 
     return {
       success: true,
@@ -59,7 +58,7 @@ export default class ImageService {
   }
 
   public async deleteImage(id: number): Promise<IResponse> {
-    const image = await this.imageRepository.deleteFormCloudinaryCloud(id);
+    const image = await this.imageRepository.delete(id);
 
     if (!image) {
       return {
