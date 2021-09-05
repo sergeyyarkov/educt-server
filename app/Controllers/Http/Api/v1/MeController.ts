@@ -1,5 +1,6 @@
 import { Exception, inject, Ioc } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+import { schema, rules } from '@ioc:Adonis/Core/Validator';
 
 /**
  * Services
@@ -44,6 +45,46 @@ export default class MeController extends BaseController {
   public async changePassword(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(ChangePasswordValidator);
     const result = await this.meService.changeUserPassword(payload.oldPassword, payload.newPassword, ctx.auth);
+
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
+  }
+
+  /**
+   * Send confirmation code to new email
+   * PATCH /me/email
+   */
+  // eslint-disable-next-line class-methods-use-this
+  public async changeEmail(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate({
+      schema: schema.create({
+        email: schema.string({}, [rules.email()]),
+      }),
+    });
+    const result = await MeService.changeUserEmail(payload.email);
+
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
+  }
+
+  /**
+   * Confirm code and update user email
+   * POST /me/email/change/confirm
+   */
+  // eslint-disable-next-line class-methods-use-this
+  public async changeEmailConfirm(ctx: HttpContextContract) {
+    const confirmChangeEmailSchema = schema.create({
+      email: schema.string({}, [rules.email()]),
+      confirmationCode: schema.number(),
+    });
+    const payload = await ctx.request.validate({ schema: confirmChangeEmailSchema });
+    const result = await MeService.changeUserEmailConfirm(ctx, payload.email, payload.confirmationCode);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);

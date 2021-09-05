@@ -1,5 +1,8 @@
 import { inject, Ioc } from '@adonisjs/core/build/standalone';
 import { AuthContract } from '@ioc:Adonis/Addons/Auth';
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+import Redis from '@ioc:Adonis/Addons/Redis';
+import Mail from '@ioc:Adonis/Addons/Mail';
 import Hash from '@ioc:Adonis/Core/Hash';
 import Logger from '@ioc:Adonis/Core/Logger';
 import StatusCodeEnum from 'App/Datatypes/Enums/StatusCodeEnum';
@@ -92,6 +95,98 @@ export default class MeService {
       error: {
         code: 'E_BAD_REQUEST',
       },
+    };
+  }
+
+  public static async changeUserEmail(email: string): Promise<IResponse> {
+    const isConfirmationCodeExist = await Redis.get(`code.change.email:${email}`);
+
+    /**
+     * Confirmation code has not expired
+     */
+    if (isConfirmationCodeExist) {
+      return {
+        success: false,
+        status: StatusCodeEnum.SERVICE_UNAVAILABLE,
+        message: 'Please wait a few seconds before send new confirmation code.',
+        data: {},
+        error: {
+          code: 'E_SERVICE_UNAVAILABLE',
+        },
+      };
+    }
+
+    /**
+     * Create new confirmation code and send to email
+     */
+    const EXPIRE_SECONDS = 60;
+    const confirmationCode = Math.floor(1000 + Math.random() * 9000).toString();
+
+    await Mail.send(message => {
+      message
+        .from('learn-management-system@sandbox7727dde9c8aa4686a308dbb9c0045acb.mailgun.org')
+        .to(email)
+        .subject('Confirmation code.')
+        .htmlView('emails/change_email_confirm', { confirmationCode });
+    });
+    await Redis.set(`code.change.email:${email}`, confirmationCode, 'EX', EXPIRE_SECONDS);
+
+    return {
+      success: true,
+      status: StatusCodeEnum.OK,
+      message: 'The confirmation code has been sent.',
+      data: {
+        expired_seconds: EXPIRE_SECONDS,
+      },
+    };
+  }
+
+  public static async changeUserEmailConfirm(
+    ctx: HttpContextContract,
+    email: string,
+    code: number
+  ): Promise<IResponse> {
+    const user = await ctx.auth.use('api').authenticate();
+    const confirmationCode = await Redis.get(`code.change.email:${email}`);
+
+    /**
+     * Confirmation code not found
+     */
+    if (confirmationCode === null) {
+      return {
+        success: false,
+        status: StatusCodeEnum.NOT_FOUND,
+        message: 'Cannot find the confirmation code for this email.',
+        data: {},
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    if (Number.parseInt(confirmationCode, 10) !== code) {
+      return {
+        success: false,
+        status: StatusCodeEnum.BAD_REQUEST,
+        message: 'Confirmation code is invalid.',
+        data: {},
+        error: {
+          code: 'E_BAD_REQUEST',
+        },
+      };
+    }
+
+    /**
+     * Update user email and delete confirmation code
+     */
+    await user.merge({ email }).save();
+    await Redis.del(`code.change.email:${email}`);
+
+    return {
+      success: true,
+      status: StatusCodeEnum.OK,
+      message: 'User email updated.',
+      data: { email },
     };
   }
 

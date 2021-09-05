@@ -4,7 +4,8 @@
     "./commands",
     "@adonisjs/core/commands",
     "@adonisjs/repl/build/commands",
-    "@adonisjs/lucid/build/commands"
+    "@adonisjs/lucid/build/commands",
+    "@adonisjs/mail/build/commands"
   ],
   "exceptionHandlerNamespace": "App/Exceptions/Handler",
   "namespaces": {
@@ -22,14 +23,27 @@
     "Database": "database",
     "Contracts": "contracts"
   },
-  "preloads": ["./routes/index", "./start/kernel"],
+  "preloads": [
+    "./routes/index",
+    "./start/kernel"
+  ],
   "providers": [
     "./providers/AppProvider",
     "./providers/CloudinaryProvider",
     "@adonisjs/core",
     "@adonisjs/lucid",
     "@adonisjs/auth",
-    "@adonisjs/redis"
+    "@adonisjs/redis",
+    "@adonisjs/mail",
+    "@adonisjs/view"
   ],
-  "aceProviders": ["@adonisjs/repl"]
+  "aceProviders": [
+    "@adonisjs/repl"
+  ],
+  "metaFiles": [
+    {
+      "pattern": "resources/views/**/*.edge",
+      "reloadServer": false
+    }
+  ]
 }
