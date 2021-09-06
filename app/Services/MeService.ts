@@ -98,6 +98,12 @@ export default class MeService {
     };
   }
 
+  /**
+   * Create new confirmation code and send to email
+   *
+   * @param email New email
+   * @returns IResonse
+   */
   public static async changeUserEmail(email: string): Promise<IResponse> {
     const isConfirmationCodeExist = await Redis.get(`code.change.email:${email}`);
 
@@ -119,16 +125,34 @@ export default class MeService {
     /**
      * Create new confirmation code and send to email
      */
-    const EXPIRE_SECONDS = 60;
+    const EXPIRE_SECONDS = 120;
     const confirmationCode = Math.floor(1000 + Math.random() * 9000).toString();
 
-    await Mail.send(message => {
-      message
-        .from('learn-management-system@sandbox7727dde9c8aa4686a308dbb9c0045acb.mailgun.org')
-        .to(email)
-        .subject('Confirmation code.')
-        .htmlView('emails/change_email_confirm', { confirmationCode });
-    });
+    /**
+     * Try send an confirmation code on update email
+     */
+    try {
+      await Mail.send(message => {
+        message.to(email).subject('Confirmation code.').htmlView('emails/change_email_confirm', { confirmationCode });
+      });
+    } catch (error) {
+      Logger.error(`Email send error: ${error}`);
+      return {
+        success: false,
+        status: StatusCodeEnum.SERVICE_UNAVAILABLE,
+        message: 'Unable to send confirmation code to this address.',
+        data: {
+          error,
+        },
+        error: {
+          code: 'E_SERVICE_UNAVAILABLE',
+        },
+      };
+    }
+
+    /**
+     * Create confirmation code value in redis store
+     */
     await Redis.set(`code.change.email:${email}`, confirmationCode, 'EX', EXPIRE_SECONDS);
 
     return {
@@ -141,6 +165,15 @@ export default class MeService {
     };
   }
 
+  /**
+   * Compare confirmation code with payload
+   * and update user email
+   *
+   * @param ctx Http context
+   * @param email New email
+   * @param code Confirmation code
+   * @returns IResponse
+   */
   public static async changeUserEmailConfirm(
     ctx: HttpContextContract,
     email: string,
@@ -164,6 +197,9 @@ export default class MeService {
       };
     }
 
+    /**
+     * Return error if confirmation code is invalid
+     */
     if (Number.parseInt(confirmationCode, 10) !== code) {
       return {
         success: false,

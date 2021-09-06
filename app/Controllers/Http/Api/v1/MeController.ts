@@ -57,7 +57,6 @@ export default class MeController extends BaseController {
    * Send confirmation code to new email
    * PATCH /me/email
    */
-  // eslint-disable-next-line class-methods-use-this
   public async changeEmail(ctx: HttpContextContract) {
     const payload = await ctx.request.validate({
       schema: schema.create({
@@ -77,7 +76,6 @@ export default class MeController extends BaseController {
    * Confirm code and update user email
    * POST /me/email/change/confirm
    */
-  // eslint-disable-next-line class-methods-use-this
   public async changeEmailConfirm(ctx: HttpContextContract) {
     const confirmChangeEmailSchema = schema.create({
       email: schema.string({}, [rules.email()]),
