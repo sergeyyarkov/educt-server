@@ -8,7 +8,7 @@ import IResponse from 'App/Datatypes/Interfaces/IResponse';
 /**
  * Enums
  */
-import StatusCodeEnum from 'App/Datatypes/Enums/StatusCodeEnum';
+import HttpStatusEnum from 'App/Datatypes/Enums/HttpStatusEnum';
 
 /**
  * Models
@@ -50,7 +50,7 @@ export default class UserService {
     if (!user) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'User not found.',
         data: {},
         error: {
@@ -61,7 +61,7 @@ export default class UserService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Fetched user.',
       data: user,
     };
@@ -78,7 +78,7 @@ export default class UserService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Fetched all users.',
       data: users,
     };
@@ -95,7 +95,7 @@ export default class UserService {
 
     return {
       success: true,
-      status: StatusCodeEnum.CREATED,
+      status: HttpStatusEnum.CREATED,
       message: 'User created.',
       data: user,
     };
@@ -114,7 +114,7 @@ export default class UserService {
     if (!user) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'User not found.',
         data: {},
         error: {
@@ -125,7 +125,7 @@ export default class UserService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'User updated.',
       data: user,
     };
@@ -143,7 +143,7 @@ export default class UserService {
     if (!user) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'User not found.',
         data: {},
         error: {
@@ -154,7 +154,7 @@ export default class UserService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'User deleted.',
       data: user,
     };
@@ -173,7 +173,7 @@ export default class UserService {
     if (!user) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'User not found.',
         data: {},
         error: {
@@ -201,7 +201,7 @@ export default class UserService {
     if (attachedRole) {
       return {
         success: false,
-        status: StatusCodeEnum.BAD_REQUEST,
+        status: HttpStatusEnum.BAD_REQUEST,
         message: `Role "${attachedRole.name}" already attached to that user.`,
         data: {},
         error: {
@@ -215,7 +215,7 @@ export default class UserService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Roles attached.',
       data: user.roles,
     };
@@ -234,7 +234,7 @@ export default class UserService {
     if (!user) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'User not found.',
         data: {},
         error: {
@@ -259,7 +259,7 @@ export default class UserService {
     if (notAttachedRole) {
       return {
         success: false,
-        status: StatusCodeEnum.BAD_REQUEST,
+        status: HttpStatusEnum.BAD_REQUEST,
         message: `Role "${notAttachedRole.name}" not attached to that user.`,
         data: {},
         error: {
@@ -273,7 +273,7 @@ export default class UserService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Roles detached.',
       data: user.roles,
     };

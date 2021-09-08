@@ -4,7 +4,7 @@ import { AuthContract } from '@ioc:Adonis/Addons/Auth';
 /**
  * Datatypes
  */
-import StatusCodeEnum from 'App/Datatypes/Enums/StatusCodeEnum';
+import HttpStatusEnum from 'App/Datatypes/Enums/HttpStatusEnum';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
 /**
  * Repositories
@@ -39,7 +39,7 @@ export default class LessonService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Fetched all lessons.',
       data: lessons,
     };
@@ -57,7 +57,7 @@ export default class LessonService {
     if (!lesson) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Lesson not found.',
         data: {},
         error: {
@@ -68,7 +68,7 @@ export default class LessonService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Fetched lesson.',
       data: lesson,
     };
@@ -86,7 +86,7 @@ export default class LessonService {
     if (!course) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Course not found.',
         data: {},
         error: {
@@ -99,7 +99,7 @@ export default class LessonService {
 
     return {
       success: true,
-      status: StatusCodeEnum.CREATED,
+      status: HttpStatusEnum.CREATED,
       message: 'Lesson created.',
       data: lesson,
     };
@@ -117,7 +117,7 @@ export default class LessonService {
     if (!lesson) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Lesson not found.',
         data: {},
         error: {
@@ -128,7 +128,7 @@ export default class LessonService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Lesson deleted.',
       data: lesson,
     };
@@ -147,7 +147,7 @@ export default class LessonService {
     if (!lesson) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Lesson not found.',
         data: {},
         error: {
@@ -158,7 +158,7 @@ export default class LessonService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Lesson updated.',
       data: lesson,
     };
@@ -180,7 +180,7 @@ export default class LessonService {
     if (!lesson) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Lesson not found.',
         data: {},
         error: {
@@ -196,7 +196,7 @@ export default class LessonService {
     if (!userHasCourse) {
       return {
         success: false,
-        status: StatusCodeEnum.FORBIDDEN,
+        status: HttpStatusEnum.FORBIDDEN,
         message: 'The user is not a student of this course.',
         data: {},
         error: {
@@ -209,7 +209,7 @@ export default class LessonService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Fetched lesson content.',
       data: lesson.content,
     };

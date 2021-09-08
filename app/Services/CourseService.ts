@@ -4,10 +4,10 @@ import { AuthContract } from '@ioc:Adonis/Addons/Auth';
 /**
  * Datatypes
  */
+import IResponse from 'App/Datatypes/Interfaces/IResponse';
 import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
 import CourseStatusEnum from 'App/Datatypes/Enums/CourseStatusEnum';
-import StatusCodeEnum from 'App/Datatypes/Enums/StatusCodeEnum';
-import IResponse from 'App/Datatypes/Interfaces/IResponse';
+import HttpStatusEnum from 'App/Datatypes/Enums/HttpStatusEnum';
 import RoleHelper from 'App/Helpers/RoleHelper';
 
 /**
@@ -56,7 +56,7 @@ export default class CourseService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Fetched all courses.',
       data,
     };
@@ -74,7 +74,7 @@ export default class CourseService {
     if (!data) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Course not found.',
         data: {},
         error: {
@@ -85,7 +85,7 @@ export default class CourseService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Fetched course.',
       data,
     };
@@ -103,7 +103,7 @@ export default class CourseService {
     if (!data) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Course not found.',
         data: {},
         error: {
@@ -114,7 +114,7 @@ export default class CourseService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Fetched course teacher.',
       data,
     };
@@ -132,7 +132,7 @@ export default class CourseService {
     if (!data) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Course not found.',
         data: {},
         error: {
@@ -143,7 +143,7 @@ export default class CourseService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Fetched course category.',
       data,
     };
@@ -161,7 +161,7 @@ export default class CourseService {
     if (!data) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Course not found.',
         data: {},
         error: {
@@ -172,7 +172,7 @@ export default class CourseService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Fetched course lessons.',
       data,
     };
@@ -190,7 +190,7 @@ export default class CourseService {
     if (!data) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Course not found.',
         data: {},
         error: {
@@ -201,7 +201,7 @@ export default class CourseService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Fetched course students.',
       data,
     };
@@ -218,7 +218,7 @@ export default class CourseService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Fetched students count.',
       data: { count },
     };
@@ -239,7 +239,7 @@ export default class CourseService {
     if (!teacher) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Teacher not found.',
         data: {},
         error: {
@@ -253,7 +253,7 @@ export default class CourseService {
     if (!isTeacher) {
       return {
         success: false,
-        status: StatusCodeEnum.BAD_REQUEST,
+        status: HttpStatusEnum.BAD_REQUEST,
         message: `User with id "${teacher.id}" not a teacher.`,
         data: {},
         error: {
@@ -270,7 +270,7 @@ export default class CourseService {
     if (!category) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Category not found.',
         data: {},
         error: {
@@ -284,7 +284,7 @@ export default class CourseService {
 
     return {
       success: true,
-      status: StatusCodeEnum.CREATED,
+      status: HttpStatusEnum.CREATED,
       message: 'Course created.',
       data: course,
     };
@@ -302,7 +302,7 @@ export default class CourseService {
     if (!course) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Course not found.',
         data: {},
         error: {
@@ -314,11 +314,11 @@ export default class CourseService {
     /**
      * Delete background image from course
      */
-    await this.imageRepository.deleteFormCloudinaryCloud(course.bg_image_id);
+    await this.imageRepository.delete(course.bg_image_id);
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Course deleted.',
       data: course,
     };
@@ -337,7 +337,7 @@ export default class CourseService {
     if (!course) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Course not found.',
         data: {},
         error: {
@@ -348,7 +348,7 @@ export default class CourseService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Course updated.',
       data: course,
     };
@@ -367,7 +367,7 @@ export default class CourseService {
     if (!course) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Course not found.',
         data: {},
         error: {
@@ -381,7 +381,7 @@ export default class CourseService {
     if (!student) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Student not found.',
         data: {},
         error: {
@@ -395,7 +395,7 @@ export default class CourseService {
     if (!isStudent) {
       return {
         success: false,
-        status: StatusCodeEnum.BAD_REQUEST,
+        status: HttpStatusEnum.BAD_REQUEST,
         message: `User cannot be added to the course without "${RoleEnum.STUDENT}" role.`,
         data: {},
         error: {
@@ -410,7 +410,7 @@ export default class CourseService {
       if (error.code === '23505') {
         return {
           success: false,
-          status: StatusCodeEnum.BAD_REQUEST,
+          status: HttpStatusEnum.BAD_REQUEST,
           message: 'Student already attached to that course.',
           data: {},
           error: {
@@ -423,7 +423,7 @@ export default class CourseService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Student attached.',
       data: {},
     };
@@ -435,7 +435,7 @@ export default class CourseService {
     if (!course) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Course not found.',
         data: {},
         error: {
@@ -449,7 +449,7 @@ export default class CourseService {
     if (!isAttached) {
       return {
         success: false,
-        status: StatusCodeEnum.BAD_REQUEST,
+        status: HttpStatusEnum.BAD_REQUEST,
         message: 'Student not attached to that course.',
         data: {},
         error: {
@@ -463,7 +463,7 @@ export default class CourseService {
     if (!student) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Student not found.',
         data: {},
         error: {
@@ -476,7 +476,7 @@ export default class CourseService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Student detached.',
       data: {},
     };
@@ -489,7 +489,7 @@ export default class CourseService {
     if (!course) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Course not found.',
         data: {},
         error: {
@@ -504,7 +504,7 @@ export default class CourseService {
       if (error.code === '23505') {
         return {
           success: false,
-          status: StatusCodeEnum.BAD_REQUEST,
+          status: HttpStatusEnum.BAD_REQUEST,
           message: 'You are already liked this course.',
           data: {},
           error: {
@@ -517,7 +517,7 @@ export default class CourseService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Like attached.',
       data: {},
     };
@@ -530,7 +530,7 @@ export default class CourseService {
     if (!course) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Course not found.',
         data: {},
         error: {
@@ -547,7 +547,7 @@ export default class CourseService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Like detached.',
       data: {},
     };
@@ -559,7 +559,7 @@ export default class CourseService {
     if (!data) {
       return {
         success: false,
-        status: StatusCodeEnum.BAD_REQUEST,
+        status: HttpStatusEnum.BAD_REQUEST,
         message: `Cannot set status for course with id "${id}"`,
         data: {},
         error: {
@@ -570,7 +570,7 @@ export default class CourseService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Status changed.',
       data: {},
     };
@@ -581,7 +581,7 @@ export default class CourseService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Fetched course likes count.',
       data: { count },
     };

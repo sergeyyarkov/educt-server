@@ -1,5 +1,5 @@
 import { inject, Ioc } from '@adonisjs/core/build/standalone';
-import StatusCodeEnum from 'App/Datatypes/Enums/StatusCodeEnum';
+import HttpStatusEnum from 'App/Datatypes/Enums/HttpStatusEnum';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
 import ImageRepository from 'App/Repositories/ImageRepository';
 import CreateImageValidator from 'App/Validators/Image/CreateImageValidator';
@@ -18,7 +18,7 @@ export default class ImageService {
     return {
       success: true,
       message: 'Fetched all images.',
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       data: images,
     };
   }
@@ -29,7 +29,7 @@ export default class ImageService {
     if (!image) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Image not found.',
         data: {},
         error: {
@@ -41,7 +41,7 @@ export default class ImageService {
     return {
       success: true,
       message: 'Fetched image.',
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       data: image,
     };
   }
@@ -52,7 +52,7 @@ export default class ImageService {
     return {
       success: true,
       message: 'Image created.',
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       data: image,
     };
   }
@@ -63,7 +63,7 @@ export default class ImageService {
     if (!image) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Image not found.',
         data: {},
         error: {
@@ -75,7 +75,7 @@ export default class ImageService {
     return {
       success: true,
       message: 'Image deleted.',
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       data: image,
     };
   }

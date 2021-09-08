@@ -4,14 +4,10 @@ import Hash from '@ioc:Adonis/Core/Hash';
 import Logger from '@ioc:Adonis/Core/Logger';
 
 /**
- * Interfaces
+ * Datatypes
  */
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
-
-/**
- * Enums
- */
-import StatusCodeEnum from 'App/Datatypes/Enums/StatusCodeEnum';
+import HttpStatusEnum from 'App/Datatypes/Enums/HttpStatusEnum';
 
 /**
  * Reposirories
@@ -42,7 +38,7 @@ export default class AuthService {
     if (!user) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'User not found.',
         data: {},
         error: {
@@ -57,7 +53,7 @@ export default class AuthService {
     if (!(await Hash.verify(user.password, password))) {
       return {
         success: false,
-        status: StatusCodeEnum.UNAUTHORIZED,
+        status: HttpStatusEnum.UNAUTHORIZED,
         message: 'Invalid credentials.',
         data: {},
         error: {
@@ -80,7 +76,7 @@ export default class AuthService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Login success.',
       data: token.toJSON(),
     };
@@ -98,7 +94,7 @@ export default class AuthService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Logout success.',
       data: {},
     };

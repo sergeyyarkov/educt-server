@@ -5,11 +5,12 @@ import Redis from '@ioc:Adonis/Addons/Redis';
 import Mail from '@ioc:Adonis/Addons/Mail';
 import Hash from '@ioc:Adonis/Core/Hash';
 import Logger from '@ioc:Adonis/Core/Logger';
-import StatusCodeEnum from 'App/Datatypes/Enums/StatusCodeEnum';
+import HttpStatusEnum from 'App/Datatypes/Enums/HttpStatusEnum';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
 import ContactRepository from 'App/Repositories/ContactRepository';
 import UserRepository from 'App/Repositories/UserRepository';
 import UpdateContactsValidator from 'App/Validators/Contacts/UpdateContactsValidator';
+import CodeErrorEnum from 'App/Datatypes/Enums/CodeErrorEnum';
 
 @inject()
 export default class MeService {
@@ -39,7 +40,7 @@ export default class MeService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'Fetched authorized user data.',
       data: user,
     };
@@ -62,7 +63,7 @@ export default class MeService {
     if (!(await Hash.verify(user.password, oldPassword))) {
       return {
         success: false,
-        status: StatusCodeEnum.UNAUTHORIZED,
+        status: HttpStatusEnum.UNAUTHORIZED,
         message: 'Invalid credentials.',
         data: {},
         error: {
@@ -81,7 +82,7 @@ export default class MeService {
 
       return {
         success: true,
-        status: StatusCodeEnum.OK,
+        status: HttpStatusEnum.OK,
         message: 'Password updated.',
         data: {},
       };
@@ -89,7 +90,7 @@ export default class MeService {
 
     return {
       success: false,
-      status: StatusCodeEnum.BAD_REQUEST,
+      status: HttpStatusEnum.BAD_REQUEST,
       message: 'Unable to change password',
       data: {},
       error: {
@@ -113,11 +114,11 @@ export default class MeService {
     if (isConfirmationCodeExist) {
       return {
         success: false,
-        status: StatusCodeEnum.SERVICE_UNAVAILABLE,
+        status: HttpStatusEnum.SERVICE_UNAVAILABLE,
         message: 'Please wait a few seconds before send new confirmation code.',
         data: {},
         error: {
-          code: 'E_SERVICE_UNAVAILABLE',
+          code: CodeErrorEnum.CONFIRM_CODE_EXIST,
         },
       };
     }
@@ -139,8 +140,8 @@ export default class MeService {
       Logger.error(`Email send error: ${error}`);
       return {
         success: false,
-        status: StatusCodeEnum.SERVICE_UNAVAILABLE,
-        message: 'Unable to send confirmation code to this address.',
+        status: HttpStatusEnum.SERVICE_UNAVAILABLE,
+        message: 'Unable send confirmation code.',
         data: {
           error,
         },
@@ -157,7 +158,7 @@ export default class MeService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'The confirmation code has been sent.',
       data: {
         expired_seconds: EXPIRE_SECONDS,
@@ -188,7 +189,7 @@ export default class MeService {
     if (confirmationCode === null) {
       return {
         success: false,
-        status: StatusCodeEnum.NOT_FOUND,
+        status: HttpStatusEnum.NOT_FOUND,
         message: 'Cannot find the confirmation code for this email.',
         data: {},
         error: {
@@ -203,7 +204,7 @@ export default class MeService {
     if (Number.parseInt(confirmationCode, 10) !== code) {
       return {
         success: false,
-        status: StatusCodeEnum.BAD_REQUEST,
+        status: HttpStatusEnum.BAD_REQUEST,
         message: 'Confirmation code is invalid.',
         data: {},
         error: {
@@ -220,7 +221,7 @@ export default class MeService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'User email updated.',
       data: { email },
     };
@@ -243,7 +244,7 @@ export default class MeService {
     if (contacts) {
       return {
         success: true,
-        status: StatusCodeEnum.OK,
+        status: HttpStatusEnum.OK,
         message: 'User contacts updated.',
         data: contacts,
       };
@@ -256,7 +257,7 @@ export default class MeService {
 
     return {
       success: true,
-      status: StatusCodeEnum.OK,
+      status: HttpStatusEnum.OK,
       message: 'User contacts updated.',
       data: user.contacts,
     };
