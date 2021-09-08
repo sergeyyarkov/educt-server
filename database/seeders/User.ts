@@ -22,7 +22,7 @@ export default class UserSeeder extends BaseSeeder {
       first_name: 'John',
       last_name: 'Doe',
       login: 'admin',
-      password: '12345',
+      password: '123456',
       email: 'example.email@mail.com',
     });
     await userAdmin.related('roles').attach([roles.admin.id]);

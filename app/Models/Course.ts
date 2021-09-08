@@ -32,10 +32,10 @@ export default class Course extends BaseModel {
   @column()
   public description: string;
 
-  @column()
+  @column({ serializeAs: null })
   public teacher_id: string;
 
-  @column()
+  @column({ serializeAs: null })
   public category_id: string;
 
   @column({ serializeAs: null })
