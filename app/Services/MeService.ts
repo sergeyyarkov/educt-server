@@ -34,9 +34,17 @@ export default class MeService {
   public async fetchUserData(auth: AuthContract): Promise<IResponse> {
     const user = await auth.use(this.authGuard).authenticate();
 
-    await user.load('roles');
-    await user.load('contacts');
-    await user.load('courses');
+    await user.load(loader => {
+      loader
+        .load('roles')
+        .load('contacts')
+        .load('courses', q => {
+          q.preload('category');
+          q.withCount('students');
+          q.withCount('likes');
+          q.withCount('lessons');
+        });
+    });
 
     return {
       success: true,

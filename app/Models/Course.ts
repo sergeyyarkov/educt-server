@@ -90,4 +90,15 @@ export default class Course extends BaseModel {
   public static assignCourseId(course: Course) {
     course.id = nanoid();
   }
+
+  /**
+   * Serialize the `$extras` object
+   */
+  public serializeExtras() {
+    return {
+      students_count: this.$extras.students_count,
+      likes_count: this.$extras.likes_count,
+      lessons_count: this.$extras.lessons_count,
+    };
+  }
 }
