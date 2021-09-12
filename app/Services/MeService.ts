@@ -11,6 +11,8 @@ import ContactRepository from 'App/Repositories/ContactRepository';
 import UserRepository from 'App/Repositories/UserRepository';
 import UpdateContactsValidator from 'App/Validators/Contacts/UpdateContactsValidator';
 import CodeErrorEnum from 'App/Datatypes/Enums/CodeErrorEnum';
+import RoleHelper from 'App/Helpers/RoleHelper';
+import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
 
 @inject()
 export default class MeService {
@@ -35,16 +37,20 @@ export default class MeService {
     const user = await auth.use(this.authGuard).authenticate();
 
     await user.load(loader => {
-      loader
-        .load('roles')
-        .load('contacts')
-        .load('courses', q => {
-          q.preload('category');
-          q.withCount('students');
-          q.withCount('likes');
-          q.withCount('lessons');
-        });
+      loader.load('roles').load('contacts');
     });
+
+    /**
+     * Load available courses for STUDENT role
+     */
+    if (RoleHelper.userHasRoles(user.roles, [RoleEnum.STUDENT])) {
+      await user.load('courses', q => {
+        q.preload('category');
+        q.withCount('students');
+        q.withCount('likes');
+        q.withCount('lessons');
+      });
+    }
 
     return {
       success: true,
