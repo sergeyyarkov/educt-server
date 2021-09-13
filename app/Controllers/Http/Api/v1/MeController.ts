@@ -60,8 +60,11 @@ export default class MeController extends BaseController {
   public async changeEmail(ctx: HttpContextContract) {
     const payload = await ctx.request.validate({
       schema: schema.create({
-        email: schema.string({}, [rules.email()]),
+        email: schema.string({}, [rules.email(), rules.unique({ table: 'users', column: 'email' })]),
       }),
+      messages: {
+        'email.unique': 'Email is not available.',
+      },
     });
     const result = await MeService.changeUserEmail(payload.email);
 
@@ -78,7 +81,7 @@ export default class MeController extends BaseController {
    */
   public async changeEmailConfirm(ctx: HttpContextContract) {
     const confirmChangeEmailSchema = schema.create({
-      email: schema.string({}, [rules.email()]),
+      email: schema.string({}, [rules.email(), rules.unique({ table: 'users', column: 'email' })]),
       confirmationCode: schema.number(),
     });
     const payload = await ctx.request.validate({ schema: confirmChangeEmailSchema });
