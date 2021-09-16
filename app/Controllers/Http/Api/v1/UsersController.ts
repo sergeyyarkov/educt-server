@@ -37,7 +37,7 @@ export default class UsersController extends BaseController {
       throw new Exception(result.message, result.status, result.error.code);
     }
 
-    return this.sendResponse(ctx, result.data, result.message, result.status);
+    return this.sendResponse(ctx, result.data, result.message, result.status, result.meta);
   }
 
   /**

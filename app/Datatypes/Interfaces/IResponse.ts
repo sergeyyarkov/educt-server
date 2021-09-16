@@ -3,6 +3,9 @@ export default interface IResponse {
   status: number;
   message: string;
   data: object;
+  meta?: {
+    pagination?: any;
+  };
   error?: {
     code: string;
   };

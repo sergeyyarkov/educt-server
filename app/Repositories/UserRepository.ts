@@ -63,8 +63,9 @@ export default class UserRepository {
    * @param params Params to find
    * @returns Array of users
    */
-  public async getAll(params?: any): Promise<User[]> {
-    const { email, login, first_name, last_name, role }: any = params || {};
+  public async getAll(params?: any) {
+    const { email, login, first_name, last_name, role, page = 1, limit = 10 }: any = params || {};
+
     const query = this.User.query();
 
     if (email) {
@@ -87,8 +88,8 @@ export default class UserRepository {
       query.preload('roles').whereHas('roles', q => q.where('slug', role));
     }
 
-    const data = await query.preload('contacts').preload('roles');
-    return data;
+    const data = await query.preload('contacts').preload('roles').orderBy('created_at', 'desc').paginate(page, limit);
+    return data.toJSON();
   }
 
   /**

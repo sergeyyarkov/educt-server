@@ -80,7 +80,10 @@ export default class UserService {
       success: true,
       status: HttpStatusEnum.OK,
       message: 'Fetched all users.',
-      data: users,
+      data: users.data,
+      meta: {
+        pagination: users.meta,
+      },
     };
   }
 
