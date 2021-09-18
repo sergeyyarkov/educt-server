@@ -64,9 +64,16 @@ export default class UserRepository {
    * @returns Array of users
    */
   public async getAll(params?: any) {
-    const { email, login, first_name, last_name, role, page = 1, limit = 10 }: any = params || {};
+    const { search, email, login, first_name, last_name, role, page = 1, limit = 10 }: any = params || {};
 
     const query = this.User.query();
+
+    if (search) {
+      query
+        .where('first_name', 'ilike', `%${search}%`)
+        .orWhere('last_name', 'ilike', `%${search}%`)
+        .orWhere('email', 'ilike', `%${search}%`);
+    }
 
     if (email) {
       query.preload('contacts').whereHas('contacts', q => q.where('email', 'like', `%${email}%`));
