@@ -1,5 +1,6 @@
 import { schema, rules } from '@ioc:Adonis/Core/Validator';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
 
 export default class CreateUserValidator {
   constructor(protected ctx: HttpContextContract) {}
@@ -29,6 +30,7 @@ export default class CreateUserValidator {
     login: schema.string({}, [rules.maxLength(128), rules.unique({ table: 'users', column: 'login' })]),
     email: schema.string({}, [rules.email(), rules.unique({ table: 'users', column: 'email' })]),
     password: schema.string({}, [rules.minLength(6), rules.maxLength(128)]),
+    role: schema.enum(Object.values(RoleEnum)),
   });
 
   /**

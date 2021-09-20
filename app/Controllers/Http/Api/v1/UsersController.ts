@@ -62,7 +62,7 @@ export default class UsersController extends BaseController {
 
   public async create(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(CreateUserValidator);
-    const result = await this.userService.createUser(payload);
+    const result = await this.userService.createUser(payload, ctx);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);

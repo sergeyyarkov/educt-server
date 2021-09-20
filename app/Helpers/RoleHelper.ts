@@ -21,4 +21,8 @@ export default class RoleHelper {
     }
     return true;
   }
+
+  public static userContainRoles(userRoles: Role[], roles: RoleEnum[]): boolean {
+    return userRoles.map(r => r.slug as RoleEnum).some(r => roles.includes(r));
+  }
 }

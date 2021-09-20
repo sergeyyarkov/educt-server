@@ -68,13 +68,6 @@ export default class UserRepository {
 
     const query = this.User.query();
 
-    if (search) {
-      query
-        .where('first_name', 'ilike', `%${search}%`)
-        .orWhere('last_name', 'ilike', `%${search}%`)
-        .orWhere('email', 'ilike', `%${search}%`);
-    }
-
     if (email) {
       query.preload('contacts').whereHas('contacts', q => q.where('email', 'like', `%${email}%`));
     }
@@ -92,7 +85,16 @@ export default class UserRepository {
     }
 
     if (role) {
-      query.preload('roles').whereHas('roles', q => q.where('slug', role));
+      query.whereHas('roles', q => q.where('slug', role));
+    }
+
+    //  TODO fix search when gets params "serach" and "role"
+    if (search && role) {
+      query
+        .where('first_name', 'like', `%${search}%`)
+        .orWhere('last_name', 'like', `%${search}%`)
+        .orWhere('email', 'like', `%${search}%`)
+        .andWhereHas('roles', q => q.where('slug', role));
     }
 
     const data = await query.preload('contacts').preload('roles').orderBy('created_at', 'desc').paginate(page, limit);
@@ -106,7 +108,13 @@ export default class UserRepository {
    * @returns Created user
    */
   public async create(data: CreateUserValidator['schema']['props']): Promise<User> {
-    const user = await this.User.create(data);
+    const user = await this.User.create({
+      first_name: data.first_name,
+      last_name: data.last_name,
+      login: data.login,
+      email: data.email,
+      password: data.password,
+    });
 
     await user.load('contacts');
     await user.load('roles');
