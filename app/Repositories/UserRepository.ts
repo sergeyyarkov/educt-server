@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import Hash from '@ioc:Adonis/Core/Hash';
 
 /**
@@ -64,6 +62,7 @@ export default class UserRepository {
    * @returns Array of users
    */
   public async getAll(params?: any) {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { search, email, login, first_name, last_name, role, page = 1, limit = 10 }: any = params || {};
 
     const query = this.User.query();
@@ -109,8 +108,8 @@ export default class UserRepository {
    */
   public async create(data: CreateUserValidator['schema']['props']): Promise<User> {
     const user = await this.User.create({
-      first_name: data.first_name,
-      last_name: data.last_name,
+      first_name: data.first_name.charAt(0).toUpperCase() + data.first_name.substr(1),
+      last_name: data.last_name.charAt(0).toUpperCase() + data.last_name.substr(1),
       login: data.login,
       email: data.email,
       password: data.password,

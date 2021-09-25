@@ -44,5 +44,8 @@ export default class CreateUserValidator {
    * }
    *
    */
-  public messages = {};
+  public messages = {
+    'login.unique': '"Login" filed is already in use.',
+    'email.unique': '"Email" field is already in use.',
+  };
 }

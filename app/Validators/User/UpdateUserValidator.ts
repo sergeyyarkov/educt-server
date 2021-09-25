@@ -5,12 +5,14 @@ export default class UpdateUserValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public schema = schema.create({
-    first_name: schema.string(),
-    last_name: schema.string(),
+    first_name: schema.string.optional(),
+    last_name: schema.string.optional(),
     login: schema.string.optional({}, [rules.unique({ table: 'users', column: 'login' })]),
     email: schema.string.optional({}, [rules.email(), rules.unique({ table: 'users', column: 'email' })]),
-    password: schema.string(),
+    password: schema.string.optional(),
   });
 
-  public messages = {};
+  public messages = {
+    'email.unique': 'Email is not available.',
+  };
 }
