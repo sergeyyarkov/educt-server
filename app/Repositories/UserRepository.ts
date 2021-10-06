@@ -68,7 +68,7 @@ export default class UserRepository {
     const query = this.User.query();
 
     if (email) {
-      query.preload('contacts').whereHas('contacts', q => q.where('email', 'like', `%${email}%`));
+      query.where('email', 'like', `%${email}%`);
     }
 
     if (login) {
@@ -83,17 +83,17 @@ export default class UserRepository {
       query.where('last_name', 'like', `%${last_name}%`);
     }
 
-    if (role) {
-      query.whereHas('roles', q => q.where('slug', role));
+    if (search) {
+      query
+        .orWhere('first_name', 'like', `%${search}%`)
+        .orWhere('last_name', 'like', `%${search}%`)
+        .orWhereRaw(`CONCAT(first_name, ' ', last_name) = ?`, [search])
+        .orWhere('email', 'like', `${search}`)
+        .orWhere('id', 'like', `${search}`);
     }
 
-    //  TODO fix search when gets params "serach" and "role"
-    if (search && role) {
-      query
-        .where('first_name', 'like', `%${search}%`)
-        .orWhere('last_name', 'like', `%${search}%`)
-        .orWhere('email', 'like', `%${search}%`)
-        .andWhereHas('roles', q => q.where('slug', role));
+    if (role) {
+      query.whereHas('roles', q => q.where('slug', role));
     }
 
     const data = await query.preload('contacts').preload('roles').orderBy('created_at', 'desc').paginate(page, limit);
