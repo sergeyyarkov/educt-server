@@ -85,9 +85,9 @@ export default class UserRepository {
 
     if (search) {
       query
-        .orWhere('first_name', 'like', `%${search}%`)
-        .orWhere('last_name', 'like', `%${search}%`)
-        .orWhereRaw(`CONCAT(first_name, ' ', last_name) = ?`, [search])
+        .orWhere('first_name', 'ilike', `%${search}%`)
+        .orWhere('last_name', 'ilike', `%${search}%`)
+        .orWhereRaw(`CONCAT(first_name, ' ', last_name) ilike ?`, [search])
         .orWhere('email', 'like', `${search}`)
         .orWhere('id', 'like', `${search}`);
     }
