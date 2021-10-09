@@ -55,6 +55,13 @@ Route.group(() => {
      *
      */
     require('./images');
+
+    /**
+     *
+     * Categories module
+     *
+     */
+    require('./categories');
   }).middleware('auth');
 })
   .prefix('v1')

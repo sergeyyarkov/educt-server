@@ -14,6 +14,7 @@ import CreateCourseValidator from 'App/Validators/Course/CreateCourseValidator';
 import DelCourseFromUserValidator from 'App/Validators/Course/DelCourseFromUserValidator';
 import SetCourseStatusValidator from 'App/Validators/Course/SetCourseStatusValidator';
 import UpdateCourseValidator from 'App/Validators/Course/UpdateCourseValidator';
+import FetchCoursesValidator from 'App/Validators/Course/FetchCoursesValidator';
 
 import BaseController from '../../BaseController';
 
@@ -31,7 +32,8 @@ export default class CoursesController extends BaseController {
    * GET /courses
    */
   public async list(ctx: HttpContextContract) {
-    const result = await this.courseService.fetchCourses();
+    const payload = await ctx.request.validate(FetchCoursesValidator);
+    const result = await this.courseService.fetchCourses(payload);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);

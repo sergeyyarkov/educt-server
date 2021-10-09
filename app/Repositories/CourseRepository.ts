@@ -16,6 +16,7 @@ import User from 'App/Models/User';
  * Validators
  */
 import CreateCourseValidator from 'App/Validators/Course/CreateCourseValidator';
+import FetchCoursesValidator from 'App/Validators/Course/FetchCoursesValidator';
 import UpdateCourseValidator from 'App/Validators/Course/UpdateCourseValidator';
 
 export default class CourseRepository {
@@ -44,14 +45,17 @@ export default class CourseRepository {
    *
    * @returns List of courses
    */
-  public async getAll(): Promise<Course[]> {
+  public async getAll(params?: FetchCoursesValidator['schema']['props']): Promise<Course[]> {
+    const { status = CourseStatusEnum.PUBLISHED } = params || {};
+
     const courses = await this.Course.query()
       .preload('teacher')
       .preload('category')
       .preload('lessons')
       .preload('students')
       .preload('image')
-      .where('status', CourseStatusEnum.PUBLISHED);
+      .where('status', status);
+
     return courses;
   }
 

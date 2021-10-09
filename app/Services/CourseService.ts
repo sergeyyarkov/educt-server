@@ -23,6 +23,7 @@ import ImageRepository from 'App/Repositories/ImageRepository';
  */
 import CreateCourseValidator from 'App/Validators/Course/CreateCourseValidator';
 import UpdateCourseValidator from 'App/Validators/Course/UpdateCourseValidator';
+import FetchCoursesValidator from 'App/Validators/Course/FetchCoursesValidator';
 
 @inject()
 export default class CourseService {
@@ -51,8 +52,8 @@ export default class CourseService {
    *
    * @returns Response
    */
-  public async fetchCourses(): Promise<IResponse> {
-    const data = await this.courseRepository.getAll();
+  public async fetchCourses(params?: FetchCoursesValidator['schema']['props']): Promise<IResponse> {
+    const data = await this.courseRepository.getAll(params);
 
     return {
       success: true,
