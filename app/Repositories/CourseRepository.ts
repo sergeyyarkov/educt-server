@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 /**
  * Datatypes
  */
@@ -46,15 +47,22 @@ export default class CourseRepository {
    * @returns List of courses
    */
   public async getAll(params?: FetchCoursesValidator['schema']['props']): Promise<Course[]> {
-    const { status = CourseStatusEnum.PUBLISHED } = params || {};
+    const { status = CourseStatusEnum.PUBLISHED, category_id } = params || {};
 
-    const courses = await this.Course.query()
-      .preload('teacher')
+    const query = this.Course.query();
+
+    query.where('status', status);
+
+    if (category_id) {
+      query.andWhereHas('category', q => q.where('id', category_id));
+    }
+
+    const courses = await query
       .preload('category')
-      .preload('lessons')
-      .preload('students')
       .preload('image')
-      .where('status', status);
+      .withCount('students')
+      .withCount('likes')
+      .withCount('lessons');
 
     return courses;
   }
@@ -183,7 +191,7 @@ export default class CourseRepository {
       bg_image_id: data.bg_image_id,
       title: data.title,
       description: data.description,
-      status: CourseStatusEnum.DRAFT, // make course DRAFT before adding lessons
+      status: data.status,
       teacher_id: data.teacher_id,
       category_id: data.category_id,
     });
