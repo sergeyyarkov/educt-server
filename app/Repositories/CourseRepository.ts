@@ -47,14 +47,16 @@ export default class CourseRepository {
    * @returns List of courses
    */
   public async getAll(params?: FetchCoursesValidator['schema']['props']): Promise<Course[]> {
-    const { status = CourseStatusEnum.PUBLISHED, category_id } = params || {};
+    const { status, category_id } = params || {};
 
     const query = this.Course.query();
 
-    query.where('status', status);
-
     if (category_id) {
       query.andWhereHas('category', q => q.where('id', category_id));
+    }
+
+    if (status) {
+      query.andWhere('status', status);
     }
 
     const courses = await query
