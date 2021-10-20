@@ -12,4 +12,8 @@ export default class BaseController {
 
     return ctx.response.status(response.status).send(response);
   }
+
+  public sendFile(ctx: HttpContextContract, path: string) {
+    return ctx.response.download(path);
+  }
 }

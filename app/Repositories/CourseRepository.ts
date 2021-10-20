@@ -209,9 +209,11 @@ export default class CourseRepository {
    */
   public async delete(id: string | number): Promise<Course | null> {
     const course = await this.Course.query()
-      .preload('teacher')
       .preload('category')
-      .preload('lessons')
+      .preload('image')
+      .withCount('students')
+      .withCount('likes')
+      .withCount('lessons')
       .where('id', id)
       .first();
 

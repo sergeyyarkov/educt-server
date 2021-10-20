@@ -15,14 +15,26 @@ export default class ImageRepository {
     return image;
   }
 
+  public async getByFileName(name: string): Promise<Image | null> {
+    const image = await this.Image.query().where('name', name).first();
+    return image;
+  }
+
   public async getAll(): Promise<Image[]> {
     const images = await this.Image.query();
     return images;
   }
 
   public async create(file: MultipartFileContract): Promise<Image> {
-    await file.moveToDisk('./images');
-    const image = await this.Image.create({ name: file.clientName, path: file.filePath, ext: file.extname });
+    /**
+     * Save image to disk
+     */
+    await file.moveToDisk('images/courses');
+
+    /**
+     * Save image to database
+     */
+    const image = await this.Image.create({ name: file.fileName, path: file.filePath, ext: file.extname });
     return image;
   }
 
@@ -30,7 +42,14 @@ export default class ImageRepository {
     const image = await this.Image.query().where('id', id).first();
 
     if (image) {
+      /**
+       * Delete from drive
+       */
       await Drive.delete(image.path);
+
+      /**
+       * Delete from database
+       */
       await image.delete();
       return image;
     }

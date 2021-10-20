@@ -5,7 +5,7 @@ export default class Image extends BaseModel {
   @column({ isPrimary: true })
   public id: number;
 
-  @column()
+  @column({ serializeAs: null })
   public path: string;
 
   @column()

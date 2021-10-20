@@ -22,5 +22,8 @@ import Route from '@ioc:Adonis/Core/Route';
 */
 
 Route.group(() => {
+  /**
+   * Api routes
+   */
   require('./api');
 });
