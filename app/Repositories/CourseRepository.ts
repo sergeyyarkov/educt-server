@@ -59,12 +59,7 @@ export default class CourseRepository {
       query.andWhere('status', status);
     }
 
-    const courses = await query
-      .preload('category')
-      .preload('image')
-      .withCount('students')
-      .withCount('likes')
-      .withCount('lessons');
+    const courses = await query.preload('category').withCount('students').withCount('likes').withCount('lessons');
 
     return courses;
   }
@@ -81,7 +76,6 @@ export default class CourseRepository {
       .preload('category')
       .preload('lessons')
       .preload('students')
-      .preload('image')
       .where('id', id)
       .where('status', CourseStatusEnum.PUBLISHED)
       .first();
@@ -190,7 +184,7 @@ export default class CourseRepository {
      * Create new course
      */
     const course = await this.Course.create({
-      bg_image_id: data.bg_image_id,
+      bg_image_path: data.image?.filePath,
       title: data.title,
       description: data.description,
       status: data.status,
@@ -210,7 +204,6 @@ export default class CourseRepository {
   public async delete(id: string | number): Promise<Course | null> {
     const course = await this.Course.query()
       .preload('category')
-      .preload('image')
       .withCount('students')
       .withCount('likes')
       .withCount('lessons')

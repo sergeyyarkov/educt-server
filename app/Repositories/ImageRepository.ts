@@ -25,11 +25,11 @@ export default class ImageRepository {
     return images;
   }
 
-  public async create(file: MultipartFileContract): Promise<Image> {
+  public async create({ file, location }: { file: MultipartFileContract; location: string }): Promise<Image> {
     /**
      * Save image to disk
      */
-    await file.moveToDisk('images/courses');
+    await file.moveToDisk(location);
 
     /**
      * Save image to database

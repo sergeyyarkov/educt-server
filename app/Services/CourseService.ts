@@ -312,11 +312,6 @@ export default class CourseService {
       };
     }
 
-    /**
-     * Delete background image from course
-     */
-    await this.imageRepository.delete(course.bg_image_id);
-
     return {
       success: true,
       status: HttpStatusEnum.OK,

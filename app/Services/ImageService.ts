@@ -47,7 +47,7 @@ export default class ImageService {
   }
 
   public async createImage(data: CreateImageValidator['schema']['props']): Promise<IResponse> {
-    const image = await this.imageRepository.create(data.image);
+    const image = await this.imageRepository.create({ file: data.image, location: 'images' });
 
     return {
       success: true,

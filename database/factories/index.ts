@@ -13,6 +13,7 @@ import Contact from 'App/Models/Contact';
 import Course from 'App/Models/Course';
 import Lesson from 'App/Models/Lesson';
 import LessonContent from 'App/Models/LessonContent';
+import Role from 'App/Models/Role';
 import User from 'App/Models/User';
 
 export const ContactFactory = Factory.define(Contact, ({ faker }) => {
@@ -25,12 +26,31 @@ export const UserFactory = Factory.define(User, ({ faker }) => {
   return {
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),
-    login: `${faker.lorem.word(6)}${faker.datatype.number(10)}`,
+    login: `${faker.lorem.word(12)}${faker.datatype.number(100)}`,
     email: faker.internet.exampleEmail(),
     password: '123456',
   };
 })
   .relation('contacts', () => ContactFactory)
+  .build();
+
+export const TeacherFactory = Factory.define(User, ({ faker }) => {
+  return {
+    first_name: faker.name.firstName(),
+    last_name: faker.name.lastName(),
+    login: `${faker.lorem.word(12)}${faker.datatype.number(100)}`,
+    email: faker.internet.exampleEmail(),
+    password: '123456',
+  };
+})
+  .relation('contacts', () => ContactFactory)
+  .after('create', async (_, user: User) => {
+    /**
+     * Get teacher role to attach after create new user
+     */
+    const role = await Role.findByOrFail('slug', 'teacher');
+    user.related('roles').attach([role.id]);
+  })
   .build();
 
 export const LessonContentFactory = Factory.define(LessonContent, ({ faker }) => {
@@ -64,5 +84,5 @@ export const CourseFactory = Factory.define(Course, ({ faker }) => {
 })
   .relation('category', () => CategoryFactory)
   .relation('lessons', () => LessonFactory)
-  // .relation('teacher', () => UserFactory)
+  .relation('teacher', () => TeacherFactory)
   .build();

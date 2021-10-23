@@ -19,7 +19,7 @@ export default class AssetsController extends BaseController {
 
   /**
    * Send background image of course
-   * GET /media/images/courses/:fileName
+   * GET /assets/images/courses/:fileName
    */
   public async serveCourseImage(ctx: HttpContextContract) {
     const result = await this.assetsService.getCourseImagePath(ctx.params.fileName);

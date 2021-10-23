@@ -8,7 +8,10 @@ export default class CreateCourseValidator {
   public schema = schema.create({
     title: schema.string(),
     description: schema.string(),
-    bg_image_id: schema.number.optional([rules.exists({ table: 'images', column: 'id' })]),
+    image: schema.file.optional({
+      size: '10mb',
+      extnames: ['jpg', 'jpeg', 'png'],
+    }),
     teacher_id: schema.string({}, [rules.exists({ table: 'users', column: 'id' })]),
     category_id: schema.string({}, [rules.exists({ table: 'categories', column: 'id' })]),
     status: schema.enum(Object.values(CourseStatusEnum)),

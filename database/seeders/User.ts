@@ -11,7 +11,6 @@ export default class UserSeeder extends BaseSeeder {
      */
     const roles = {
       admin: await Role.findByOrFail('slug', 'admin'),
-      teacher: await Role.findByOrFail('slug', 'teacher'),
       student: await Role.findByOrFail('slug', 'student'),
     };
 
@@ -26,12 +25,6 @@ export default class UserSeeder extends BaseSeeder {
       email: 'example.email@mail.com',
     });
     await userAdmin.related('roles').attach([roles.admin.id]);
-
-    /**
-     * Teacher
-     */
-    const userTeacher = await UserFactory.with('contacts').create();
-    await userTeacher.related('roles').attach([roles.teacher.id]);
 
     /**
      * Student
