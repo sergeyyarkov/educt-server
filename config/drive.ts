@@ -42,7 +42,7 @@ const driveConfig: DriveConfig = {
      */
     local: {
       driver: 'local',
-      visibility: 'public',
+      visibility: 'private',
 
       /*
        |--------------------------------------------------------------------------
@@ -53,7 +53,7 @@ const driveConfig: DriveConfig = {
        | files.
        |
        */
-      root: Application.tmpPath('uploads'),
+      root: Application.makePath('uploads'),
 
       /*
        |--------------------------------------------------------------------------

@@ -16,33 +16,27 @@ import LessonContent from 'App/Models/LessonContent';
 import Role from 'App/Models/Role';
 import User from 'App/Models/User';
 
+const makeFakeUser = (faker: Faker.FakerStatic) => {
+  return {
+    first_name: faker.name.firstName(),
+    last_name: faker.name.lastName(),
+    login: `${faker.lorem.word(12)}${faker.datatype.number(100)}`,
+    email: faker.internet.exampleEmail(),
+    password: '123456',
+  };
+};
+
 export const ContactFactory = Factory.define(Contact, ({ faker }) => {
   return {
     phone_number: faker.phone.phoneNumber(),
   };
 }).build();
 
-export const UserFactory = Factory.define(User, ({ faker }) => {
-  return {
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
-    login: `${faker.lorem.word(12)}${faker.datatype.number(100)}`,
-    email: faker.internet.exampleEmail(),
-    password: '123456',
-  };
-})
+export const UserFactory = Factory.define(User, ({ faker }) => makeFakeUser(faker))
   .relation('contacts', () => ContactFactory)
   .build();
 
-export const TeacherFactory = Factory.define(User, ({ faker }) => {
-  return {
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
-    login: `${faker.lorem.word(12)}${faker.datatype.number(100)}`,
-    email: faker.internet.exampleEmail(),
-    password: '123456',
-  };
-})
+export const TeacherFactory = Factory.define(User, ({ faker }) => makeFakeUser(faker))
   .relation('contacts', () => ContactFactory)
   .after('create', async (_, user: User) => {
     /**

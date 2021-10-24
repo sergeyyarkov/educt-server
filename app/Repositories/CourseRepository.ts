@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+import Database from '@ioc:Adonis/Lucid/Database';
+import { Attachment } from '@ioc:Adonis/Addons/AttachmentLite';
+
 /**
  * Datatypes
  */
-import Database from '@ioc:Adonis/Lucid/Database';
 import CourseStatusEnum from 'App/Datatypes/Enums/CourseStatusEnum';
 
 /**
@@ -183,14 +185,19 @@ export default class CourseRepository {
     /**
      * Create new course
      */
-    const course = await this.Course.create({
-      bg_image_path: data.image?.filePath,
-      title: data.title,
-      description: data.description,
-      status: data.status,
-      teacher_id: data.teacher_id,
-      category_id: data.category_id,
-    });
+    const course = new this.Course();
+
+    course.title = data.title;
+    course.description = data.description;
+    course.status = data.status;
+    course.teacher_id = data.teacher_id;
+    course.category_id = data.category_id;
+
+    if (data.image) {
+      course.image = Attachment.fromFile(data.image);
+    }
+
+    await course.save();
 
     return course;
   }

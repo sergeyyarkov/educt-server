@@ -26,9 +26,4 @@ Route.group(() => {
    * Api routes
    */
   require('./api');
-
-  /**
-   * Serve assets
-   */
-  require('./assets');
 });
