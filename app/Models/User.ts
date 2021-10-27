@@ -6,6 +6,7 @@ import {
   beforeCreate,
   beforeSave,
   column,
+  computed,
   HasOne,
   hasOne,
   ManyToMany,
@@ -26,6 +27,11 @@ export default class User extends BaseModel {
 
   @column()
   public last_name: string;
+
+  @computed()
+  public get fullname() {
+    return `${this.first_name} ${this.last_name}`;
+  }
 
   @column({ serializeAs: null })
   public login: string;
