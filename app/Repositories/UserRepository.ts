@@ -4,6 +4,7 @@ import Hash from '@ioc:Adonis/Core/Hash';
  * Models
  */
 import User from 'App/Models/User';
+import Role from 'App/Models/Role';
 
 /**
  * Validators
@@ -14,8 +15,11 @@ import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator';
 export default class UserRepository {
   private User: typeof User;
 
+  private Role: typeof Role;
+
   constructor() {
     this.User = User;
+    this.Role = Role;
   }
 
   /**
@@ -130,9 +134,32 @@ export default class UserRepository {
    */
   public async update(id: number | string, data: UpdateUserValidator['schema']['props']): Promise<User | null> {
     const user = await this.User.query().preload('contacts').preload('roles').where('id', id).first();
+    const { role: roleSlug, ...updatedFields } = data;
 
     if (user) {
-      await user.merge(data).save();
+      /**
+       * Update fields
+       */
+      user.merge(updatedFields);
+
+      /**
+       * Attach new single role
+       */
+      if (roleSlug) {
+        const role = await this.Role.query().where('slug', roleSlug).first();
+
+        if (role) {
+          await user.related('roles').detach();
+          await user.related('roles').attach([role.id]);
+          await user.load('roles');
+        }
+      }
+
+      /**
+       * Save updated user in database
+       */
+      await user.save();
+
       return user;
     }
 

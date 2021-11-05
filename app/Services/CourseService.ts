@@ -16,7 +16,6 @@ import RoleHelper from 'App/Helpers/RoleHelper';
 import CourseRepository from 'App/Repositories/CourseRepository';
 import UserRepository from 'App/Repositories/UserRepository';
 import CategoryRepository from 'App/Repositories/CategoryRepository';
-import ImageRepository from 'App/Repositories/ImageRepository';
 
 /**
  * Validators
@@ -33,18 +32,14 @@ export default class CourseService {
 
   private categoryRepository: CategoryRepository;
 
-  private imageRepository: ImageRepository;
-
   constructor(
     courseRepository: CourseRepository,
     userRepository: UserRepository,
-    categoryRepository: CategoryRepository,
-    imageRepository: ImageRepository
+    categoryRepository: CategoryRepository
   ) {
     this.courseRepository = courseRepository;
     this.userRepository = userRepository;
     this.categoryRepository = categoryRepository;
-    this.imageRepository = imageRepository;
   }
 
   /**
