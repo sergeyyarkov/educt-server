@@ -134,36 +134,30 @@ export default class UserRepository {
    */
   public async update(id: number | string, data: UpdateUserValidator['schema']['props']): Promise<User | null> {
     const user = await this.User.query().preload('contacts').preload('roles').where('id', id).first();
-    const { role: roleSlug, ...updatedFields } = data;
+    const { role, ...updatedFields } = data;
 
     if (user) {
-      /**
-       * Update fields
-       */
-      user.merge(updatedFields);
-
-      /**
-       * Attach new single role
-       */
-      if (roleSlug) {
-        const role = await this.Role.query().where('slug', roleSlug).first();
-
-        if (role) {
-          await user.related('roles').detach();
-          await user.related('roles').attach([role.id]);
-          await user.load('roles');
-        }
-      }
-
-      /**
-       * Save updated user in database
-       */
-      await user.save();
-
+      await user.merge(updatedFields).save();
       return user;
     }
 
     return null;
+  }
+
+  /**
+   * Rewrite all user roles
+   *
+   * @param user User
+   * @param roles Updated roles
+   * @returns Updated user roles
+   */
+  // eslint-disable-next-line class-methods-use-this
+  public async updateRoles(user: User, roles: Role[]): Promise<Role[]> {
+    await user.related('roles').detach();
+    await user.related('roles').attach(roles.map(role => role.id));
+    await user.load('roles');
+
+    return user.roles.map(role => role);
   }
 
   /**

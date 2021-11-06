@@ -78,7 +78,7 @@ export default class UsersController extends BaseController {
 
   public async update(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(UpdateUserValidator);
-    const result = await this.userService.updateUser(ctx.params.id, payload);
+    const result = await this.userService.updateUser(ctx.params.id, payload, ctx);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);

@@ -27,8 +27,6 @@ import UserRepository from 'App/Repositories/UserRepository';
  */
 import CreateUserValidator from 'App/Validators/User/CreateUserValidator';
 import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator';
-import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
-import RoleHelper from 'App/Helpers/RoleHelper';
 
 @inject()
 export default class UserService {
@@ -97,19 +95,12 @@ export default class UserService {
    * @returns Response
    */
   public async createUser(data: CreateUserValidator['schema']['props'], ctx: HttpContextContract): Promise<IResponse> {
-    const user = await ctx.auth.use('api').authenticate();
-
-    /**
-     * Load current user roles
-     */
-    await user.load('roles');
-
     const role = await this.roleRepository.getBySlug(data.role);
 
     /**
      * Cannot find role
      */
-    if (role === null) {
+    if (!role) {
       return {
         success: false,
         status: HttpStatusEnum.NOT_FOUND,
@@ -121,16 +112,10 @@ export default class UserService {
       };
     }
 
-    /* TODO need to check the role of the authenticated user before creating a new user, 
-      so we can may be move this into a separate middleware 
-    */
     /**
-     * Check for authenticaded user roles
+     * Check user permissions
      */
-    if (
-      (role.slug === RoleEnum.ADMIN || role.slug === RoleEnum.TEACHER) &&
-      !RoleHelper.userContainRoles(user.roles, [RoleEnum.ADMIN])
-    ) {
+    if (await ctx.bouncer.denies('manageUserRole', role)) {
       return {
         success: false,
         status: HttpStatusEnum.FORBIDDEN,
@@ -145,19 +130,19 @@ export default class UserService {
     /**
      * Create new user
      */
-    const createdUser = await this.userRepository.create(data);
+    const user = await this.userRepository.create(data);
 
     /**
      * Attach role
      */
-    await createdUser.related('roles').attach([role.id]);
-    await createdUser.load('roles');
+    await user.related('roles').attach([role.id]);
+    await user.load('roles');
 
     return {
       success: true,
       status: HttpStatusEnum.CREATED,
       message: 'User created.',
-      data: createdUser,
+      data: user,
     };
   }
 
@@ -168,7 +153,11 @@ export default class UserService {
    * @param data Data to update
    * @returns Response
    */
-  public async updateUser(id: string | number, data: UpdateUserValidator['schema']['props']): Promise<IResponse> {
+  public async updateUser(
+    id: string | number,
+    data: UpdateUserValidator['schema']['props'],
+    ctx: HttpContextContract
+  ): Promise<IResponse> {
     const user = await this.userRepository.update(id, data);
 
     if (!user) {
@@ -181,6 +170,29 @@ export default class UserService {
           code: 'E_NOT_FOUND',
         },
       };
+    }
+
+    /**
+     * Update user role
+     */
+    if (data.role) {
+      const role = await this.roleRepository.getBySlug(data.role);
+
+      if (role) {
+        if (await ctx.bouncer.denies('manageUserRole', role)) {
+          return {
+            success: false,
+            status: HttpStatusEnum.FORBIDDEN,
+            message: 'You dont have permissions to permorm that action',
+            data: {},
+            error: {
+              code: 'E_FORBIDDEN',
+            },
+          };
+        }
+
+        await this.userRepository.updateRoles(user, [role]);
+      }
     }
 
     return {

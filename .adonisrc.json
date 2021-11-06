@@ -5,7 +5,8 @@
     "@adonisjs/core/commands",
     "@adonisjs/repl/build/commands",
     "@adonisjs/lucid/build/commands",
-    "@adonisjs/mail/build/commands"
+    "@adonisjs/mail/build/commands",
+    "@adonisjs/bouncer/build/commands"
   ],
   "exceptionHandlerNamespace": "App/Exceptions/Handler",
   "namespaces": {
@@ -26,7 +27,8 @@
   "preloads": [
     "./routes/index",
     "./start/kernel",
-    "./start/event"
+    "./start/event",
+    "./start/bouncer"
   ],
   "providers": [
     "./providers/AppProvider",
@@ -37,7 +39,8 @@
     "@adonisjs/redis",
     "@adonisjs/mail",
     "@adonisjs/view",
-    "@adonisjs/attachment-lite"
+    "@adonisjs/attachment-lite",
+    "@adonisjs/bouncer"
   ],
   "aceProviders": [
     "@adonisjs/repl"
