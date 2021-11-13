@@ -16,11 +16,11 @@ import LessonContent from 'App/Models/LessonContent';
 import Role from 'App/Models/Role';
 import User from 'App/Models/User';
 
-const makeFakeUser = (faker: Faker.FakerStatic) => {
+const makeFakeUser = (faker: Faker.FakerStatic, loginPrefix?: string) => {
   return {
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),
-    login: `${faker.lorem.word(12)}${faker.datatype.number(100)}`,
+    login: `${loginPrefix || 'user'}${faker.datatype.number(1000)}`,
     email: faker.internet.exampleEmail(),
     password: '123456',
   };
@@ -36,14 +36,19 @@ export const UserFactory = Factory.define(User, ({ faker }) => makeFakeUser(fake
   .relation('contacts', () => ContactFactory)
   .build();
 
-export const TeacherFactory = Factory.define(User, ({ faker }) => makeFakeUser(faker))
+export const TeacherFactory = Factory.define(User, ({ faker }) => makeFakeUser(faker, 'teacher'))
   .relation('contacts', () => ContactFactory)
   .after('create', async (_, user: User) => {
-    /**
-     * Get teacher role to attach after create new user
-     */
     const role = await Role.findByOrFail('slug', 'teacher');
-    user.related('roles').attach([role.id]);
+    await user.related('roles').attach([role.id]);
+  })
+  .build();
+
+export const StudentFactory = Factory.define(User, ({ faker }) => makeFakeUser(faker, 'student'))
+  .relation('contacts', () => ContactFactory)
+  .after('create', async (_, user: User) => {
+    const role = await Role.findByOrFail('slug', 'student');
+    await user.related('roles').attach([role.id]);
   })
   .build();
 

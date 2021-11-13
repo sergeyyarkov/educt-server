@@ -79,7 +79,6 @@ export default class CourseRepository {
       .preload('lessons')
       .preload('students')
       .where('id', id)
-      .where('status', CourseStatusEnum.PUBLISHED)
       .first();
 
     return course;
@@ -241,7 +240,12 @@ export default class CourseRepository {
       .first();
 
     if (course) {
-      await course.merge(data).save();
+      course.merge(data);
+      course.load('category');
+      course.load('teacher');
+
+      await course.save();
+
       return course;
     }
 

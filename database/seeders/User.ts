@@ -2,7 +2,7 @@
 import BaseSeeder from '@ioc:Adonis/Lucid/Seeder';
 import Role from 'App/Models/Role';
 import User from 'App/Models/User';
-import { UserFactory } from 'Database/factories';
+import { StudentFactory } from 'Database/factories';
 
 export default class UserSeeder extends BaseSeeder {
   public async run() {
@@ -22,14 +22,13 @@ export default class UserSeeder extends BaseSeeder {
       last_name: 'Doe',
       login: 'admin',
       password: '123456',
-      email: 'example.email@mail.com',
+      email: 'administrator@example.com',
     });
     await userAdmin.related('roles').attach([roles.admin.id]);
 
     /**
-     * Student
+     * Students
      */
-    const userStudent = await UserFactory.with('contacts').create();
-    await userStudent.related('roles').attach([roles.student.id]);
+    await StudentFactory.with('contacts').createMany(20);
   }
 }
