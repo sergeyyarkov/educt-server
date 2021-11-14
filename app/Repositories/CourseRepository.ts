@@ -240,12 +240,30 @@ export default class CourseRepository {
       .first();
 
     if (course) {
-      course.merge(data);
+      /**
+       * Update fields
+       */
+      course.merge({
+        title: data.title,
+        description: data.description,
+        teacher_id: data.teacher_id,
+        category_id: data.category_id,
+      });
+
+      /**
+       * Update image
+       */
+      if (data.image) {
+        course.image = Attachment.fromFile(data.image);
+      }
+
+      /**
+       * Load other updated data
+       */
       course.load('category');
       course.load('teacher');
 
       await course.save();
-
       return course;
     }
 
