@@ -20,7 +20,7 @@ const makeFakeUser = (faker: Faker.FakerStatic, loginPrefix?: string) => {
   return {
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),
-    login: `${loginPrefix || 'user'}${faker.datatype.number(1000)}`,
+    login: `${loginPrefix || 'user'}${faker.datatype.number(10000)}`,
     email: faker.internet.exampleEmail(),
     password: '123456',
   };
@@ -76,8 +76,8 @@ export const CategoryFactory = Factory.define(Category, ({ faker }) => {
 
 export const CourseFactory = Factory.define(Course, ({ faker }) => {
   return {
-    title: `Course #${faker.datatype.number(200)}`,
-    description: faker.lorem.sentence(5),
+    title: faker.lorem.sentence(8),
+    description: faker.lorem.sentence(20),
     status: CourseStatusEnum.PUBLISHED,
   };
 })

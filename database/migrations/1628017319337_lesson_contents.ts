@@ -5,7 +5,7 @@ export default class LessonContents extends BaseSchema {
 
   public async up() {
     this.schema.createTable(this.tableName, table => {
-      table.increments('id');
+      table.increments('id').primary();
       table.string('lesson_id', 21).unsigned().references('lessons.id').unique().onDelete('CASCADE');
       table.string('video_url').notNullable();
       table.timestamp('created_at', { useTz: true });

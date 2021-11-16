@@ -8,6 +8,7 @@
 import Bouncer from '@ioc:Adonis/Addons/Bouncer';
 import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
 import RoleHelper from 'App/Helpers/RoleHelper';
+import Lesson from 'App/Models/Lesson';
 import Role from 'App/Models/Role';
 import User from 'App/Models/User';
 
@@ -39,6 +40,15 @@ export const { actions } = Bouncer.define('manageUserRole', async (user: User, r
     (role.slug === RoleEnum.ADMIN || role.slug === RoleEnum.TEACHER) &&
     !RoleHelper.userContainRoles(user.roles, [RoleEnum.ADMIN])
   );
+}).define('viewLessonContent', async (user: User, lesson: Lesson) => {
+  await user.load(loader => loader.load('roles').load('courses'));
+  await lesson.load('course');
+
+  if (!RoleHelper.userContainRoles(user.roles, [RoleEnum.ADMIN, RoleEnum.TEACHER])) {
+    return !!user.courses.find(course => course.id === lesson.course.id);
+  }
+
+  return true;
 });
 
 /*

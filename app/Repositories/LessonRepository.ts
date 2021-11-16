@@ -61,9 +61,38 @@ export default class LessonRepository {
       description: data.description,
     });
 
+    /**
+     * Attach lesson to course
+     */
     await lesson.related('course').associate(course);
-    await lesson.related('content').create({ video_url: data.video_url });
-    await lesson.load('content');
+
+    /**
+     * Create content and materials fields in database
+     */
+    const content = await lesson.related('content').create({ video_url: data.video_url });
+
+    if (data.materials) {
+      await Promise.all(
+        data.materials.map(async file => {
+          /**
+           * Move each file to disk and then save in database
+           */
+          await file.moveToDisk('materials');
+          if (file.state === 'moved') {
+            await content.related('materials').create({
+              name: file.clientName,
+              ext: file.extname,
+              url: file.filePath,
+            });
+          }
+        })
+      );
+    }
+
+    /**
+     * Load data
+     */
+    await lesson.load('content', q => q.preload('materials'));
 
     return lesson;
   }

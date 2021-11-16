@@ -28,10 +28,10 @@ export default class Lesson extends BaseModel {
   })
   public content: HasOne<typeof LessonContent>;
 
-  @column.dateTime({ autoCreate: true, serializeAs: null })
+  @column.dateTime({ autoCreate: true })
   public createdAt: DateTime;
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true, serializeAs: null })
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime;
 
   /**

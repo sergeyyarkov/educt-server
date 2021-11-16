@@ -1,11 +1,14 @@
 import { inject, Ioc } from '@adonisjs/core/build/standalone';
-import { AuthContract } from '@ioc:Adonis/Addons/Auth';
+// import { AuthContract } from '@ioc:Adonis/Addons/Auth';
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 
 /**
  * Datatypes
  */
 import HttpStatusEnum from 'App/Datatypes/Enums/HttpStatusEnum';
+// import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
+// import RoleHelper from 'App/Helpers/RoleHelper';
 /**
  * Repositories
  */
@@ -171,10 +174,7 @@ export default class LessonService {
    * @param auth AuthContract
    * @returns Response
    */
-  public async fetchLessonContent(id: string | number, auth: AuthContract): Promise<IResponse> {
-    const user = await auth.use('api').authenticate();
-    await user.load('courses');
-
+  public async fetchLessonContent(id: string | number, ctx: HttpContextContract): Promise<IResponse> {
     const lesson = await this.lessonRepository.getById(id);
 
     if (!lesson) {
@@ -189,11 +189,10 @@ export default class LessonService {
       };
     }
 
-    await lesson.load('course');
-
-    const userHasCourse = user.courses.find(course => course.id === lesson.course.id);
-
-    if (!userHasCourse) {
+    /**
+     * Allow user to view lesson content
+     */
+    if (await ctx.bouncer.denies('viewLessonContent', lesson)) {
       return {
         success: false,
         status: HttpStatusEnum.FORBIDDEN,
@@ -205,7 +204,10 @@ export default class LessonService {
       };
     }
 
-    await lesson.load('content');
+    /**
+     * Load lesson content with materials
+     */
+    await lesson.load('content', q => q.preload('materials'));
 
     return {
       success: true,

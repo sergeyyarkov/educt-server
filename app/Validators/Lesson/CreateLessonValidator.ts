@@ -9,6 +9,12 @@ export default class CreateLessonValidator {
     title: schema.string({}, [rules.maxLength(255)]),
     description: schema.string(),
     video_url: schema.string({}, [rules.url()]),
+    materials: schema.array.optional().members(
+      schema.file({
+        size: '10mb',
+        extnames: ['pdf', 'zip', 'rar', 'doc', 'docx'],
+      })
+    ),
   });
 
   public messages = {};

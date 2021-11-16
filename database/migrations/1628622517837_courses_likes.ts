@@ -5,7 +5,7 @@ export default class CoursesLikes extends BaseSchema {
 
   public async up() {
     this.schema.createTable(this.tableName, table => {
-      table.increments('id');
+      table.increments('id').primary();
       table.string('user_id', 21).unsigned().references('users.id').onDelete('CASCADE');
       table.string('course_id', 21).unsigned().references('courses.id').onDelete('CASCADE');
       table.timestamp('liked_on', { useTz: true });

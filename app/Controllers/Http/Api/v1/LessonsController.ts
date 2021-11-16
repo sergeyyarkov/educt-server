@@ -100,7 +100,7 @@ export default class LessonsController extends BaseController {
    * GET /lessons/:id/content
    */
   public async getContent(ctx: HttpContextContract) {
-    const result = await this.lessonService.fetchLessonContent(ctx.params.id, ctx.auth);
+    const result = await this.lessonService.fetchLessonContent(ctx.params.id, ctx);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);
