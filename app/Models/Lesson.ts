@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import { nanoid } from 'nanoid';
 import { BaseModel, beforeCreate, BelongsTo, belongsTo, column, HasOne, hasOne } from '@ioc:Adonis/Lucid/Orm';
 import Course from './Course';
+// eslint-disable-next-line import/no-cycle
 import LessonContent from './LessonContent';
 
 export default class Lesson extends BaseModel {

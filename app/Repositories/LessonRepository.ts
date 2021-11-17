@@ -1,8 +1,10 @@
 /**
  * Models
  */
+import Drive from '@ioc:Adonis/Core/Drive';
 import Course from 'App/Models/Course';
 import Lesson from 'App/Models/Lesson';
+import LessonMaterial from 'App/Models/LessonMaterial';
 
 /**
  * Validators
@@ -13,8 +15,11 @@ import UpdateLessonValidator from 'App/Validators/Lesson/UpdateLessonValidator';
 export default class LessonRepository {
   private Lesson: typeof Lesson;
 
+  private LessonMaterial: typeof LessonMaterial;
+
   constructor() {
     this.Lesson = Lesson;
+    this.LessonMaterial = LessonMaterial;
   }
 
   /**
@@ -50,6 +55,17 @@ export default class LessonRepository {
   }
 
   /**
+   * Get lesson material
+   *
+   * @param fileName Name of file
+   * @returns Lesson material file or null
+   */
+  public async getMaterialFileByName(fileName: string): Promise<LessonMaterial | null> {
+    const material = await this.LessonMaterial.query().where('name', fileName).first();
+    return material;
+  }
+
+  /**
    * Create lesson
    *
    * @param course Course of lesson
@@ -79,10 +95,12 @@ export default class LessonRepository {
            */
           await file.moveToDisk('materials');
           if (file.state === 'moved') {
+            const url = await Drive.getUrl(`materials/${file.fileName}`);
             await content.related('materials').create({
-              name: file.clientName,
+              name: file.fileName,
+              clientName: file.clientName,
               ext: file.extname,
-              url: file.filePath,
+              url,
             });
           }
         })

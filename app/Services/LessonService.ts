@@ -1,14 +1,13 @@
 import { inject, Ioc } from '@adonisjs/core/build/standalone';
-// import { AuthContract } from '@ioc:Adonis/Addons/Auth';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 
 /**
  * Datatypes
  */
 import HttpStatusEnum from 'App/Datatypes/Enums/HttpStatusEnum';
-// import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
-// import RoleHelper from 'App/Helpers/RoleHelper';
+import LessonMaterial from 'App/Models/LessonMaterial';
+
 /**
  * Repositories
  */
@@ -74,6 +73,55 @@ export default class LessonService {
       status: HttpStatusEnum.OK,
       message: 'Fetched lesson.',
       data: lesson,
+    };
+  }
+
+  /**
+   * Fetch lesson material by file name
+   *
+   * @param fileName Name of file
+   * @returns Response
+   */
+  public async fetchMaterialFile(ctx: HttpContextContract, fileName: string): Promise<IResponse<LessonMaterial>> {
+    const material = await this.lessonRepository.getMaterialFileByName(fileName);
+
+    if (!material) {
+      return {
+        success: false,
+        status: HttpStatusEnum.NOT_FOUND,
+        data: {},
+        message: 'Material not found.',
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    /**
+     * Allow user to view lesson material
+     */
+    await material.load('content', q => q.preload('lesson'));
+
+    const {
+      content: { lesson },
+    } = material;
+    if (await ctx.bouncer.denies('viewLessonContent', lesson)) {
+      return {
+        success: false,
+        status: HttpStatusEnum.FORBIDDEN,
+        message: 'You are not able to view this file.',
+        data: {},
+        error: {
+          code: 'E_FORBIDDEN',
+        },
+      };
+    }
+
+    return {
+      success: true,
+      status: HttpStatusEnum.OK,
+      message: 'Fetched lesson material.',
+      data: material,
     };
   }
 

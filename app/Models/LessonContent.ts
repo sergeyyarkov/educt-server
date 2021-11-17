@@ -1,5 +1,7 @@
-import { BaseModel, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm';
+/* eslint-disable import/no-cycle */
+import { BaseModel, BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm';
 import { DateTime } from 'luxon';
+import Lesson from './Lesson';
 import LessonMaterial from './LessonMaterial';
 
 export default class LessonContent extends BaseModel {
@@ -14,6 +16,9 @@ export default class LessonContent extends BaseModel {
 
   @hasMany(() => LessonMaterial, { foreignKey: 'lesson_content_id' })
   public materials: HasMany<typeof LessonMaterial>;
+
+  @belongsTo(() => Lesson, { foreignKey: 'lesson_id' })
+  public lesson: BelongsTo<typeof Lesson>;
 
   @column.dateTime({ autoCreate: true, serializeAs: null })
   public createdAt: DateTime;

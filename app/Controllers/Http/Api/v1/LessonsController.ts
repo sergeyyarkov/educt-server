@@ -1,3 +1,4 @@
+import Application from '@ioc:Adonis/Core/Application';
 import { Exception, inject, Ioc } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 
@@ -5,6 +6,11 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
  * Services
  */
 import LessonService from 'App/Services/LessonService';
+
+/**
+ * Models
+ */
+import LessonMaterial from 'App/Models/LessonMaterial';
 
 /**
  * Validators
@@ -96,7 +102,7 @@ export default class LessonsController extends BaseController {
   }
 
   /**
-   * Get lesson content by id
+   * Get lesson content by lesson id
    * GET /lessons/:id/content
    */
   public async getContent(ctx: HttpContextContract) {
@@ -107,6 +113,29 @@ export default class LessonsController extends BaseController {
     }
 
     return this.sendResponse(ctx, result.data, result.message, result.status);
+  }
+
+  /**
+   * Get lesson materials by file name
+   * GET /lessons/materials/:file
+   */
+  public async getMaterial(ctx: HttpContextContract) {
+    const { file } = ctx.request.params();
+    const { data, message, status, success, error } = await this.lessonService.fetchMaterialFile(ctx, file);
+
+    if (!success && error) {
+      throw new Exception(message, status, error.code);
+    }
+
+    /**
+     * Send file to user
+     */
+    if (data instanceof LessonMaterial) {
+      const path = Application.makePath(data.url);
+      return this.sendFile(ctx, path, data.clientName);
+    }
+
+    return this.sendResponse(ctx, data, message, status);
   }
 }
 

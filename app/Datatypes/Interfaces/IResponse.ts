@@ -1,8 +1,8 @@
-export default interface IResponse {
+export default interface IResponse<T = {}> {
   success: boolean;
   status: number;
   message: string;
-  data: object;
+  data: T | {};
   meta?: {
     pagination?: any;
   };
