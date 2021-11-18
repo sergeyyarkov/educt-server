@@ -9,6 +9,7 @@ export default class Lessons extends BaseSchema {
       table.string('course_id', 21).unsigned().references('courses.id').onDelete('CASCADE');
       table.string('title').notNullable();
       table.string('description');
+      table.time('duration').notNullable();
       table.timestamp('created_at', { useTz: true });
       table.timestamp('updated_at', { useTz: true });
     });

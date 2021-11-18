@@ -15,6 +15,7 @@ import Lesson from 'App/Models/Lesson';
 import LessonContent from 'App/Models/LessonContent';
 import Role from 'App/Models/Role';
 import User from 'App/Models/User';
+import { DateTime } from 'luxon';
 
 const makeFakeUser = (faker: Faker.FakerStatic, loginPrefix?: string) => {
   return {
@@ -62,6 +63,11 @@ export const LessonFactory = Factory.define(Lesson, ({ faker }) => {
   return {
     title: `Lesson #${faker.datatype.number(200)}`,
     description: faker.lorem.sentence(5),
+    duration: DateTime.fromObject({
+      hour: faker.datatype.number(2),
+      minute: faker.datatype.number({ min: 30, max: 59 }),
+      second: 0,
+    }).toFormat('HH:mm:ss'),
   };
 })
   .relation('content', () => LessonContentFactory)

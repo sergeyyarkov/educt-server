@@ -19,6 +19,9 @@ export default class Lesson extends BaseModel {
   @column()
   public description: string;
 
+  @column()
+  public duration: string;
+
   @belongsTo(() => Course, {
     foreignKey: 'course_id',
   })

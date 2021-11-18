@@ -75,6 +75,7 @@ export default class LessonRepository {
     const lesson = await this.Lesson.create({
       title: data.title,
       description: data.description,
+      duration: data.duration.toFormat('HH:mm:ss'),
     });
 
     /**
