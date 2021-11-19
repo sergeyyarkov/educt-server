@@ -15,11 +15,8 @@ import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator';
 export default class UserRepository {
   private User: typeof User;
 
-  private Role: typeof Role;
-
   constructor() {
     this.User = User;
-    this.Role = Role;
   }
 
   /**

@@ -19,7 +19,7 @@ export default class Courses extends BaseSchema {
       table
         .enu('status', Object.values(CourseStatusEnum), {
           useNative: true,
-          enumName: 'course_status',
+          enumName: 'course_status_enum',
           existingType: false,
           schemaName: 'public',
         })

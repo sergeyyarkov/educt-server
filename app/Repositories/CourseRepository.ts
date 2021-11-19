@@ -76,7 +76,7 @@ export default class CourseRepository {
     const course = await this.Course.query()
       .preload('teacher')
       .preload('category')
-      .preload('lessons')
+      .preload('lessons', q => q.preload('color'))
       .preload('students')
       .where('id', id)
       .first();

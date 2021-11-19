@@ -5,6 +5,7 @@ import { BaseModel, beforeCreate, BelongsTo, belongsTo, column, HasOne, hasOne }
 import Course from './Course';
 // eslint-disable-next-line import/no-cycle
 import LessonContent from './LessonContent';
+import Color from './Color';
 
 export default class Lesson extends BaseModel {
   @column({ isPrimary: true })
@@ -26,6 +27,14 @@ export default class Lesson extends BaseModel {
     foreignKey: 'course_id',
   })
   public course: BelongsTo<typeof Course>;
+
+  @column({ serializeAs: null })
+  public color_id: number;
+
+  @belongsTo(() => Color, {
+    foreignKey: 'color_id',
+  })
+  public color: BelongsTo<typeof Color>;
 
   @hasOne(() => LessonContent, {
     foreignKey: 'lesson_id',
