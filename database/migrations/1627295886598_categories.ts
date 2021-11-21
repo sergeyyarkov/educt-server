@@ -8,6 +8,7 @@ export default class Categories extends BaseSchema {
       table.string('id', 21).primary();
       table.string('title').notNullable();
       table.string('description');
+      table.integer('color_id').unsigned().references('colors.id');
       table.timestamp('created_at', { useTz: true });
       table.timestamp('updated_at', { useTz: true });
     });

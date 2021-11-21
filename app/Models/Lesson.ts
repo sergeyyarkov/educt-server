@@ -29,7 +29,7 @@ export default class Lesson extends BaseModel {
   public course: BelongsTo<typeof Course>;
 
   @column({ serializeAs: null })
-  public color_id: number;
+  public color_id: number | null;
 
   @belongsTo(() => Color, {
     foreignKey: 'color_id',

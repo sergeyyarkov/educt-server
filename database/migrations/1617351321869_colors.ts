@@ -11,7 +11,7 @@ export default class Colors extends BaseSchema {
         .enu('name', Object.keys(ColorEnum), {
           useNative: true,
           enumName: 'color_name_enum',
-          existingType: false,
+          existingType: true,
           schemaName: 'public',
         })
         .notNullable();

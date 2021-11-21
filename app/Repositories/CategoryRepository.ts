@@ -21,7 +21,7 @@ export default class CategoryRepository {
    * @returns Array of categories
    */
   public async getAll(): Promise<Category[]> {
-    const categories = await this.Category.query();
+    const categories = await this.Category.query().preload('color');
     return categories;
   }
 
@@ -32,7 +32,7 @@ export default class CategoryRepository {
    * @returns Category or null
    */
   public async getById(id: string | number): Promise<Category | null> {
-    const category = await this.Category.query().where('id', id).first();
+    const category = await this.Category.query().preload('color').where('id', id).first();
     return category;
   }
 

@@ -16,11 +16,12 @@ export default class Courses extends BaseSchema {
       table.string('description').notNullable();
       table.string('teacher_id', 21).unsigned().references('users.id').notNullable().onDelete('CASCADE');
       table.string('category_id', 21).unsigned().references('categories.id').notNullable().onDelete('CASCADE');
+      table.integer('color_id').unsigned().references('colors.id');
       table
         .enu('status', Object.values(CourseStatusEnum), {
           useNative: true,
           enumName: 'course_status_enum',
-          existingType: false,
+          existingType: true,
           schemaName: 'public',
         })
         .notNullable();

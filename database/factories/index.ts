@@ -1,4 +1,5 @@
 import Factory from '@ioc:Adonis/Lucid/Factory';
+import { string } from '@ioc:Adonis/Core/Helpers';
 
 /**
  * Datatypes
@@ -21,7 +22,7 @@ const makeFakeUser = (faker: Faker.FakerStatic, loginPrefix?: string) => {
   return {
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),
-    login: `${loginPrefix || 'user'}${faker.datatype.number(10000)}`,
+    login: `${loginPrefix || 'user'}-${string.generateRandom(5)}`,
     email: faker.internet.exampleEmail(),
     password: '123456',
   };

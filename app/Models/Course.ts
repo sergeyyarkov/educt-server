@@ -14,10 +14,12 @@ import {
   manyToMany,
 } from '@ioc:Adonis/Lucid/Orm';
 import { attachment, AttachmentContract } from '@ioc:Adonis/Addons/AttachmentLite';
+import ColorHelper from 'App/Helpers/ColorHelper';
 import Category from 'App/Models/Category';
 import Lesson from 'App/Models/Lesson';
 import User from 'App/Models/User';
 import CourseStatusEnum from 'App/Datatypes/Enums/CourseStatusEnum';
+import Color from './Color';
 
 export default class Course extends BaseModel {
   @column({ isPrimary: true })
@@ -37,6 +39,14 @@ export default class Course extends BaseModel {
 
   @column({ serializeAs: null })
   public category_id: string;
+
+  @column({ serializeAs: null })
+  public color_id: number | null;
+
+  @belongsTo(() => Color, {
+    foreignKey: 'color_id',
+  })
+  public color: BelongsTo<typeof Color>;
 
   @column()
   public status: CourseStatusEnum;
@@ -84,6 +94,15 @@ export default class Course extends BaseModel {
   @beforeCreate()
   public static assignCourseId(course: Course) {
     course.id = nanoid();
+  }
+
+  @beforeCreate()
+  public static async assignRandomColor(course: Course) {
+    const color = await ColorHelper.generateRandomColor();
+
+    if (color) {
+      course.color_id = color.id;
+    }
   }
 
   /**

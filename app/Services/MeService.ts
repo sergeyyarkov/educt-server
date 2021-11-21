@@ -45,7 +45,7 @@ export default class MeService {
      */
     if (RoleHelper.userHasRoles(user.roles, [RoleEnum.STUDENT])) {
       await user.load('courses', q => {
-        q.preload('category');
+        q.preload('category', loader => loader.preload('color'));
         q.withCount('students');
         q.withCount('likes');
         q.withCount('lessons');

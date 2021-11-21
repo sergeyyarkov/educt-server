@@ -61,7 +61,12 @@ export default class CourseRepository {
       query.andWhere('status', status);
     }
 
-    const courses = await query.preload('category').withCount('students').withCount('likes').withCount('lessons');
+    const courses = await query
+      .preload('color')
+      .preload('category')
+      .withCount('students')
+      .withCount('likes')
+      .withCount('lessons');
 
     return courses;
   }
@@ -75,6 +80,7 @@ export default class CourseRepository {
   public async getById(id: string | number): Promise<Course | null> {
     const course = await this.Course.query()
       .preload('teacher')
+      .preload('color')
       .preload('category')
       .preload('lessons', q => q.preload('color'))
       .preload('students')
@@ -192,6 +198,9 @@ export default class CourseRepository {
     course.teacher_id = data.teacher_id;
     course.category_id = data.category_id;
 
+    /**
+     * Attach image
+     */
     if (data.image) {
       course.image = Attachment.fromFile(data.image);
     }
