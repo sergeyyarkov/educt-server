@@ -18,6 +18,9 @@ export default class Lesson extends BaseModel {
   public title: string;
 
   @column()
+  public display_order: number;
+
+  @column()
   public description: string;
 
   @column()
