@@ -11,7 +11,7 @@ export default class Colors extends BaseSchema {
         .enu('name', Object.keys(ColorEnum), {
           useNative: true,
           enumName: 'color_name_enum',
-          existingType: true,
+          existingType: false,
           schemaName: 'public',
         })
         .notNullable();
@@ -20,6 +20,7 @@ export default class Colors extends BaseSchema {
   }
 
   public async down() {
+    await this.schema.raw('DROP TYPE IF EXISTS "color_name_enum" CASCADE');
     this.schema.dropTable(this.tableName);
   }
 }

@@ -6,6 +6,7 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
  */
 import HttpStatusEnum from 'App/Datatypes/Enums/HttpStatusEnum';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
+import Lesson from 'App/Models/Lesson';
 import LessonMaterial from 'App/Models/LessonMaterial';
 
 /**
@@ -262,6 +263,28 @@ export default class LessonService {
       status: HttpStatusEnum.OK,
       message: 'Fetched lesson content.',
       data: lesson.content,
+    };
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  public async updateOrder(ids: string[]): Promise<IResponse<{}>> {
+    /**
+     * Update order of lessons
+     */
+    // TODO can be transformed into one query
+    await Promise.all(
+      ids.map(async (id, i) => {
+        await Lesson.query()
+          .where('id', id)
+          .update({ display_order: i + 1 });
+      })
+    );
+
+    return {
+      success: true,
+      status: HttpStatusEnum.OK,
+      message: 'Order updated.',
+      data: {},
     };
   }
 }

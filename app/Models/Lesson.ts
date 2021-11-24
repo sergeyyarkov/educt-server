@@ -17,7 +17,7 @@ export default class Lesson extends BaseModel {
   @column()
   public title: string;
 
-  @column()
+  @column({ serializeAs: null })
   public display_order: number;
 
   @column()
