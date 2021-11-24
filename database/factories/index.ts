@@ -70,7 +70,7 @@ export const LessonFactory = Factory.define(Lesson, ({ faker }) => {
       minute: faker.datatype.number({ min: 30, max: 59 }),
       second: 0,
     }).toFormat('HH:mm:ss'),
-    color_id: faker.datatype.number({ min: 1, max: 25 }),
+    color_id: faker.datatype.number({ min: 1, max: 15 }),
   };
 })
   .relation('content', () => LessonContentFactory)

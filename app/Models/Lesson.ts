@@ -2,6 +2,7 @@
 import { DateTime } from 'luxon';
 import { nanoid } from 'nanoid';
 import { BaseModel, beforeCreate, BelongsTo, belongsTo, column, HasOne, hasOne } from '@ioc:Adonis/Lucid/Orm';
+import ColorHelper from 'App/Helpers/ColorHelper';
 import Course from './Course';
 // eslint-disable-next-line import/no-cycle
 import LessonContent from './LessonContent';
@@ -57,5 +58,14 @@ export default class Lesson extends BaseModel {
   @beforeCreate()
   public static assignLessonId(lesson: Lesson) {
     lesson.id = nanoid();
+  }
+
+  @beforeCreate()
+  public static async assignRandomColor(course: Course) {
+    const color = await ColorHelper.generateRandomColor();
+
+    if (color) {
+      course.color_id = color.id;
+    }
   }
 }
