@@ -1,12 +1,12 @@
 import { inject, Ioc } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+import Database from '@ioc:Adonis/Lucid/Database';
 
 /**
  * Datatypes
  */
 import HttpStatusEnum from 'App/Datatypes/Enums/HttpStatusEnum';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
-import Lesson from 'App/Models/Lesson';
 import LessonMaterial from 'App/Models/LessonMaterial';
 
 /**
@@ -271,14 +271,18 @@ export default class LessonService {
     /**
      * Update order of lessons
      */
-    // TODO can be transformed into one query
-    await Promise.all(
-      ids.map(async (id, i) => {
-        await Lesson.query()
-          .where('id', id)
-          .update({ display_order: i + 1 });
-      })
-    );
+    const params = ids
+      .map((id, i) => ({ id, i: i + 1 }))
+      .reduce((result: Array<number | string>, { id, i }) => result.concat(id, i), []);
+
+    const query = `
+      UPDATE lessons 
+      SET display_order = t.display_order 
+      FROM (VALUES ${ids.map(() => `(?, ??)`).join(',')}) as t(id, display_order) 
+      WHERE t.id = lessons.id
+    `;
+
+    await Database.rawQuery(query, params);
 
     return {
       success: true,
