@@ -1,5 +1,6 @@
 import { inject, Ioc } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+import Database from '@ioc:Adonis/Lucid/Database';
 
 /**
  * Datatypes
@@ -262,6 +263,32 @@ export default class LessonService {
       status: HttpStatusEnum.OK,
       message: 'Fetched lesson content.',
       data: lesson.content,
+    };
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  public async updateOrder(ids: string[]): Promise<IResponse<{}>> {
+    /**
+     * Update order of lessons
+     */
+    const params = ids
+      .map((id, i) => ({ id, i: i + 1 }))
+      .reduce((result: Array<number | string>, { id, i }) => result.concat(id, i), []);
+
+    const query = `
+      UPDATE lessons 
+      SET display_order = t.display_order 
+      FROM (VALUES ${ids.map(() => `(?, ??)`).join(',')}) as t(id, display_order) 
+      WHERE t.id = lessons.id
+    `;
+
+    await Database.rawQuery(query, params);
+
+    return {
+      success: true,
+      status: HttpStatusEnum.OK,
+      message: 'Order updated.',
+      data: {},
     };
   }
 }

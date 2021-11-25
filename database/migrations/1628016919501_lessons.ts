@@ -8,6 +8,7 @@ export default class Lessons extends BaseSchema {
       table.string('id', 21).primary();
       table.string('course_id', 21).unsigned().references('courses.id').onDelete('CASCADE');
       table.string('title').notNullable();
+      table.integer('display_order').notNullable();
       table.integer('color_id').unsigned().references('colors.id');
       table.string('description');
       table.time('duration').notNullable();

@@ -21,7 +21,7 @@ export default class Courses extends BaseSchema {
         .enu('status', Object.values(CourseStatusEnum), {
           useNative: true,
           enumName: 'course_status_enum',
-          existingType: true,
+          existingType: false,
           schemaName: 'public',
         })
         .notNullable();
@@ -31,7 +31,7 @@ export default class Courses extends BaseSchema {
   }
 
   public async down() {
-    await this.schema.raw('DROP TYPE IF EXISTS "course_status" CASCADE');
+    await this.schema.raw('DROP TYPE IF EXISTS "course_status_enum" CASCADE');
     this.schema.dropTable(this.tableName);
   }
 }
