@@ -7,7 +7,7 @@ export default class CourseSeeder extends BaseSeeder {
   public async run() {
     this.CourseFactory = CourseFactory;
 
-    await this.CourseFactory.with('lessons', 2, lessonFactory => lessonFactory.with('content'))
+    await this.CourseFactory.with('lessons', 10, lessonFactory => lessonFactory.with('content'))
       .with('category')
       .with('teacher')
       .createMany(3);

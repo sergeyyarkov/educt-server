@@ -72,10 +72,13 @@ export default class LessonRepository {
    * @returns Lesson
    */
   public async create(course: Course, data: CreateLessonValidator['schema']['props']): Promise<Lesson> {
+    await course.loadCount('lessons');
+
     const lesson = await this.Lesson.create({
       title: data.title,
       description: data.description,
       duration: data.duration.toFormat('HH:mm:ss'),
+      display_order: Number.parseInt(course.$extras.lessons_count, 10) + 1,
     });
 
     /**

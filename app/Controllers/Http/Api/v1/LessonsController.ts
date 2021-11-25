@@ -1,6 +1,7 @@
 import Application from '@ioc:Adonis/Core/Application';
 import { Exception, inject, Ioc } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+import { schema } from '@ioc:Adonis/Core/Validator';
 
 /**
  * Services
@@ -133,6 +134,25 @@ export default class LessonsController extends BaseController {
     if (data instanceof LessonMaterial) {
       const path = Application.makePath(data.url);
       return this.sendFile(ctx, path, data.clientName);
+    }
+
+    return this.sendResponse(ctx, data, message, status);
+  }
+
+  /**
+   * Save order of lessons
+   * POST /lessons/save-order
+   */
+  // eslint-disable-next-line class-methods-use-this
+  public async saveOrder(ctx: HttpContextContract) {
+    const saveOrderSchema = schema.create({
+      ids: schema.array().members(schema.string()),
+    });
+    const payload = await ctx.request.validate({ schema: saveOrderSchema });
+    const { data, message, status, success, error } = await this.lessonService.updateOrder(payload.ids);
+
+    if (!success && error) {
+      throw new Exception(message, status, error.code);
     }
 
     return this.sendResponse(ctx, data, message, status);

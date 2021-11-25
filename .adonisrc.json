@@ -27,7 +27,6 @@
   "preloads": ["./routes/index", "./start/kernel", "./start/event", "./start/bouncer"],
   "providers": [
     "./providers/AppProvider",
-    "./providers/CloudinaryProvider",
     "@adonisjs/core",
     "@adonisjs/lucid",
     "@adonisjs/auth",

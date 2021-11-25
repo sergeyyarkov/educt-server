@@ -64,12 +64,13 @@ export const LessonFactory = Factory.define(Lesson, ({ faker }) => {
   return {
     title: faker.lorem.sentence(6),
     description: faker.lorem.sentence(7),
+    display_order: 1,
     duration: DateTime.fromObject({
       hour: faker.datatype.number(2),
       minute: faker.datatype.number({ min: 30, max: 59 }),
       second: 0,
     }).toFormat('HH:mm:ss'),
-    color_id: faker.datatype.number({ min: 1, max: 25 }),
+    color_id: faker.datatype.number({ min: 1, max: 15 }),
   };
 })
   .relation('content', () => LessonContentFactory)
