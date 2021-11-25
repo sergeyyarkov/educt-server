@@ -53,8 +53,9 @@ Route.group(() => {
      *
      * Images module
      *
+     * This module is not necessary yet
      */
-    require('./images');
+    // require('./images');
 
     /**
      *
