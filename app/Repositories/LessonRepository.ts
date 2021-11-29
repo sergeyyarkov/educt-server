@@ -149,7 +149,7 @@ export default class LessonRepository {
    * @returns Deleted lesson or null
    */
   public async delete(id: string | number): Promise<Lesson | null> {
-    const lesson = await this.Lesson.query().where('id', id).first();
+    const lesson = await this.Lesson.query().where('id', id).preload('color').first();
 
     if (lesson) {
       await lesson.delete();
