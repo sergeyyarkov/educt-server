@@ -1,10 +1,21 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable no-param-reassign */
 import { DateTime } from 'luxon';
 import { nanoid } from 'nanoid';
-import { BaseModel, beforeCreate, BelongsTo, belongsTo, column, HasOne, hasOne } from '@ioc:Adonis/Lucid/Orm';
+import {
+  BaseModel,
+  beforeCreate,
+  BelongsTo,
+  belongsTo,
+  column,
+  hasMany,
+  HasMany,
+  HasOne,
+  hasOne,
+} from '@ioc:Adonis/Lucid/Orm';
 import ColorHelper from 'App/Helpers/ColorHelper';
 import Course from './Course';
-// eslint-disable-next-line import/no-cycle
+import LessonMaterial from './LessonMaterial';
 import LessonContent from './LessonContent';
 import Color from './Color';
 
@@ -45,6 +56,9 @@ export default class Lesson extends BaseModel {
   })
   public content: HasOne<typeof LessonContent>;
 
+  @hasMany(() => LessonMaterial, { foreignKey: 'lesson_id' })
+  public materials: HasMany<typeof LessonMaterial>;
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime;
 
@@ -67,5 +81,14 @@ export default class Lesson extends BaseModel {
     if (color) {
       course.color_id = color.id;
     }
+  }
+
+  /**
+   * Serialize the `$extras` object
+   */
+  public serializeExtras() {
+    return {
+      materials_count: this.$extras.materials_count,
+    };
   }
 }

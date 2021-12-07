@@ -62,10 +62,10 @@ export default class User extends BaseModel {
   })
   public likes: ManyToMany<typeof Course>;
 
-  @column.dateTime({ autoCreate: true, serializeAs: null })
+  @column.dateTime({ autoCreate: true })
   public createdAt: DateTime;
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true, serializeAs: null })
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime;
 
   /**

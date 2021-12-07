@@ -1,7 +1,7 @@
+/* eslint-disable import/no-cycle */
 import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm';
 import { DateTime } from 'luxon';
-// eslint-disable-next-line import/no-cycle
-import LessonContent from './LessonContent';
+import Lesson from './Lesson';
 
 export default class LessonMaterial extends BaseModel {
   @column({ isPrimary: true })
@@ -20,12 +20,12 @@ export default class LessonMaterial extends BaseModel {
   public ext: string;
 
   @column()
-  public lesson_content_id: number;
+  public lesson_id: string;
 
-  @belongsTo(() => LessonContent, {
-    foreignKey: 'lesson_content_id',
+  @belongsTo(() => Lesson, {
+    foreignKey: 'lesson_id',
   })
-  public content: BelongsTo<typeof LessonContent>;
+  public lesson: BelongsTo<typeof Lesson>;
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime;

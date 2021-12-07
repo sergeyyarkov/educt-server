@@ -89,7 +89,7 @@ export default class LessonRepository {
     /**
      * Create content and materials fields in database
      */
-    const content = await lesson.related('content').create({ video_url: data.video_url });
+    await lesson.related('content').create({ video_url: data.video_url });
 
     if (data.materials) {
       await Promise.all(
@@ -100,7 +100,7 @@ export default class LessonRepository {
           await file.moveToDisk('materials');
           if (file.state === 'moved') {
             const url = await Drive.getUrl(`materials/${file.fileName}`);
-            await content.related('materials').create({
+            await lesson.related('materials').create({
               name: file.fileName,
               clientName: file.clientName,
               ext: file.extname,
@@ -114,7 +114,7 @@ export default class LessonRepository {
     /**
      * Load data
      */
-    await lesson.load('content', q => q.preload('materials'));
+    await lesson.load(loader => loader.load('content').load('materials'));
 
     return lesson;
   }
