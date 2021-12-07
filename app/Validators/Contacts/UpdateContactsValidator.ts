@@ -10,7 +10,6 @@ export default class UpdateContactsValidator {
         locales: ['ru-RU', 'en-US'],
         strict: true,
       }),
-      // TODO validate correctly
       rules.unique({ table: 'contacts', column: 'phone_number' }),
     ]),
     vk_id: schema.string.optional({}, [rules.regex(/^([a-zA-Z0-9_]){1,64}$/)]),

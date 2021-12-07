@@ -11,7 +11,7 @@ Route.group(() => {
   Route.patch('/password', 'Api/v1/MeController.changePassword')
     .middleware('role:admin,teacher,student')
     .as('me.change-password');
-  Route.put('/contacts', 'Api/v1/MeController.updateContacts')
+  Route.patch('/contacts', 'Api/v1/MeController.updateContacts')
     .middleware('role:admin,teacher,student')
     .as('me.update-contacts');
 }).prefix('me');

@@ -1,7 +1,9 @@
+import Drive from '@ioc:Adonis/Core/Drive';
+import { MultipartFileContract } from '@ioc:Adonis/Core/BodyParser';
+
 /**
  * Models
  */
-import Drive from '@ioc:Adonis/Core/Drive';
 import Course from 'App/Models/Course';
 import Lesson from 'App/Models/Lesson';
 import LessonMaterial from 'App/Models/LessonMaterial';
@@ -17,9 +19,12 @@ export default class LessonRepository {
 
   private LessonMaterial: typeof LessonMaterial;
 
+  private Drive: typeof Drive;
+
   constructor() {
     this.Lesson = Lesson;
     this.LessonMaterial = LessonMaterial;
+    this.Drive = Drive;
   }
 
   /**
@@ -91,26 +96,13 @@ export default class LessonRepository {
      */
     await lesson.related('content').create({ video_url: data.video_url });
 
+    /**
+     * Move each file to disk and then save in database
+     */
     if (data.materials) {
-      await Promise.all(
-        data.materials.map(async file => {
-          /**
-           * Move each file to disk and then save in database
-           */
-          await file.moveToDisk('materials');
-          if (file.state === 'moved') {
-            const url = await Drive.getUrl(`materials/${file.fileName}`);
-            await lesson.related('materials').create({
-              name: file.fileName,
-              clientName: file.clientName,
-              ext: file.extname,
-              url,
-            });
-          }
-        })
-      );
+      const tasks = data.materials.map(file => this.saveMaterials(file, lesson));
+      await Promise.all(tasks);
     }
-
     /**
      * Load data
      */
@@ -157,5 +149,18 @@ export default class LessonRepository {
     }
 
     return null;
+  }
+
+  public async saveMaterials(file: MultipartFileContract, lesson: Lesson): Promise<void> {
+    await file.moveToDisk('materials');
+    if (file.state === 'moved') {
+      const url = await this.Drive.getUrl(`materials/${file.fileName}`);
+      await lesson.related('materials').create({
+        name: file.fileName,
+        clientName: file.clientName,
+        ext: file.extname,
+        url,
+      });
+    }
   }
 }
