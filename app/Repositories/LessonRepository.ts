@@ -1,5 +1,4 @@
 import Drive from '@ioc:Adonis/Core/Drive';
-import { MultipartFileContract } from '@ioc:Adonis/Core/BodyParser';
 
 /**
  * Models
@@ -96,12 +95,42 @@ export default class LessonRepository {
      */
     await lesson.related('content').create({ video_url: data.video_url });
 
-    /**
-     * Move each file to disk and then save in database
-     */
     if (data.materials) {
-      const tasks = data.materials.map(file => this.saveMaterials(file, lesson));
-      await Promise.all(tasks);
+      /**
+       * Move each file to disk
+       */
+      const files = await Promise.all(
+        data.materials.map(async file => {
+          await file.moveToDisk('materials');
+          return file;
+        })
+      );
+
+      /**
+       * Create lesson material
+       */
+      const materials = await Promise.all(
+        files.map(async file => {
+          if (file.state === 'moved' && file.fileName && file.extname) {
+            const url = await this.Drive.getUrl(`materials/${file.fileName}`);
+            const material = new LessonMaterial();
+
+            material.name = file.fileName;
+            material.clientName = file.clientName;
+            material.ext = file.extname;
+            material.url = url;
+
+            return material;
+          }
+
+          return null;
+        })
+      );
+
+      /**
+       * Save lesson materials to database
+       */
+      await lesson.related('materials').createMany(materials.filter((l): l is LessonMaterial => l !== null));
     }
     /**
      * Load data
@@ -141,26 +170,25 @@ export default class LessonRepository {
    * @returns Deleted lesson or null
    */
   public async delete(id: string | number): Promise<Lesson | null> {
-    const lesson = await this.Lesson.query().where('id', id).preload('color').first();
+    const lesson = await this.Lesson.query().where('id', id).preload('materials').preload('color').first();
 
     if (lesson) {
+      /**
+       * Delete files from disk
+       */
+      await Promise.all(
+        lesson.materials.map(async file => {
+          await this.Drive.delete(`materials/${file.name}`);
+        })
+      );
+
+      /**
+       * Delete lesson from database
+       */
       await lesson.delete();
       return lesson;
     }
 
     return null;
-  }
-
-  public async saveMaterials(file: MultipartFileContract, lesson: Lesson): Promise<void> {
-    await file.moveToDisk('materials');
-    if (file.state === 'moved') {
-      const url = await this.Drive.getUrl(`materials/${file.fileName}`);
-      await lesson.related('materials').create({
-        name: file.fileName,
-        clientName: file.clientName,
-        ext: file.extname,
-        url,
-      });
-    }
   }
 }

@@ -63,15 +63,7 @@ export default class ContactRepository {
     const contacts = await this.Contact.query().where('user_id', user.id).first();
 
     if (contacts) {
-      await contacts
-        .merge({
-          phone_number: data.phone_number,
-          telegram_id: data.telegram_id?.substring(1),
-          twitter_id: data.twitter_id?.substring(1),
-          vk_id: data.vk_id,
-        })
-        .save();
-
+      await contacts.merge(data).save();
       await user.load('contacts');
 
       return contacts;
