@@ -4,6 +4,17 @@
 
 - API deployment with Docker and Nginx web server.
 
+## [1.0.1] - 2021-11-25
+
+### Fix
+
+- Creating materials for lesson
+- Contacts updating
+
+### Added
+
+- Materials count for each lessons
+
 ## [1.0.0] - 2021-11-25
 
 ### Added
