@@ -91,10 +91,13 @@ export default class LessonRepository {
     await lesson.related('course').associate(course);
 
     /**
-     * Create content and materials fields in database
+     * Create content
      */
     await lesson.related('content').create({ video_url: data.video_url });
 
+    /**
+     * Create materials
+     */
     if (data.materials) {
       /**
        * Move each file to disk
