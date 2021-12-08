@@ -96,7 +96,7 @@ export default class MeController extends BaseController {
 
   /**
    * Update contacts of authenticated user
-   * PUT /me/contacts
+   * PATCH /me/contacts
    */
   public async updateContacts(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(UpdateContactsValidator);

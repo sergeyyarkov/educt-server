@@ -10,7 +10,7 @@ export default class LessonMaterials extends BaseSchema {
       table.string('name').notNullable();
       table.string('client_name').notNullable();
       table.string('ext').notNullable();
-      table.integer('lesson_content_id').unsigned().references('lesson_contents.id').onDelete('CASCADE');
+      table.string('lesson_id', 21).unsigned().references('lessons.id').onDelete('CASCADE');
       table.timestamp('created_at', { useTz: true });
       table.timestamp('updated_at', { useTz: true });
     });

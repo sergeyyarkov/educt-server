@@ -82,7 +82,7 @@ export default class CourseRepository {
       .preload('teacher')
       .preload('color')
       .preload('category')
-      .preload('lessons', q => q.preload('color').orderBy('display_order', 'asc'))
+      .preload('lessons', q => q.preload('color').orderBy('display_order', 'asc').withCount('materials'))
       .preload('students')
       .where('id', id)
       .first();

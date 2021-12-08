@@ -101,12 +101,9 @@ export default class LessonService {
     /**
      * Allow user to view lesson material
      */
-    await material.load('content', q => q.preload('lesson'));
+    await material.load('lesson');
 
-    const {
-      content: { lesson },
-    } = material;
-    if (await ctx.bouncer.denies('viewLessonContent', lesson)) {
+    if (await ctx.bouncer.denies('viewLessonContent', material.lesson)) {
       return {
         success: false,
         status: HttpStatusEnum.FORBIDDEN,
@@ -254,9 +251,9 @@ export default class LessonService {
     }
 
     /**
-     * Load lesson content with materials
+     * Load lesson with materials
      */
-    await lesson.load('content', q => q.preload('materials'));
+    await lesson.load(loader => loader.load('content').load('materials'));
 
     return {
       success: true,

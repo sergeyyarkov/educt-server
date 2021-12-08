@@ -1,7 +1,8 @@
+import Drive from '@ioc:Adonis/Core/Drive';
+
 /**
  * Models
  */
-import Drive from '@ioc:Adonis/Core/Drive';
 import Course from 'App/Models/Course';
 import Lesson from 'App/Models/Lesson';
 import LessonMaterial from 'App/Models/LessonMaterial';
@@ -17,9 +18,12 @@ export default class LessonRepository {
 
   private LessonMaterial: typeof LessonMaterial;
 
+  private Drive: typeof Drive;
+
   constructor() {
     this.Lesson = Lesson;
     this.LessonMaterial = LessonMaterial;
+    this.Drive = Drive;
   }
 
   /**
@@ -87,34 +91,54 @@ export default class LessonRepository {
     await lesson.related('course').associate(course);
 
     /**
-     * Create content and materials fields in database
+     * Create content
      */
-    const content = await lesson.related('content').create({ video_url: data.video_url });
+    await lesson.related('content').create({ video_url: data.video_url });
 
+    /**
+     * Create materials
+     */
     if (data.materials) {
-      await Promise.all(
+      /**
+       * Move each file to disk
+       */
+      const files = await Promise.all(
         data.materials.map(async file => {
-          /**
-           * Move each file to disk and then save in database
-           */
           await file.moveToDisk('materials');
-          if (file.state === 'moved') {
-            const url = await Drive.getUrl(`materials/${file.fileName}`);
-            await content.related('materials').create({
-              name: file.fileName,
-              clientName: file.clientName,
-              ext: file.extname,
-              url,
-            });
-          }
+          return file;
         })
       );
-    }
 
+      /**
+       * Create lesson material
+       */
+      const materials = await Promise.all(
+        files.map(async file => {
+          if (file.state === 'moved' && file.fileName && file.extname) {
+            const url = await this.Drive.getUrl(`materials/${file.fileName}`);
+            const material = new LessonMaterial();
+
+            material.name = file.fileName;
+            material.clientName = file.clientName;
+            material.ext = file.extname;
+            material.url = url;
+
+            return material;
+          }
+
+          return null;
+        })
+      );
+
+      /**
+       * Save lesson materials to database
+       */
+      await lesson.related('materials').createMany(materials.filter((l): l is LessonMaterial => l !== null));
+    }
     /**
      * Load data
      */
-    await lesson.load('content', q => q.preload('materials'));
+    await lesson.load(loader => loader.load('content').load('materials'));
 
     return lesson;
   }
@@ -149,9 +173,21 @@ export default class LessonRepository {
    * @returns Deleted lesson or null
    */
   public async delete(id: string | number): Promise<Lesson | null> {
-    const lesson = await this.Lesson.query().where('id', id).first();
+    const lesson = await this.Lesson.query().where('id', id).preload('materials').preload('color').first();
 
     if (lesson) {
+      /**
+       * Delete files from disk
+       */
+      await Promise.all(
+        lesson.materials.map(async file => {
+          await this.Drive.delete(`materials/${file.name}`);
+        })
+      );
+
+      /**
+       * Delete lesson from database
+       */
       await lesson.delete();
       return lesson;
     }
