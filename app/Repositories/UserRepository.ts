@@ -64,7 +64,7 @@ export default class UserRepository {
    */
   public async getAll(params?: any) {
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { search, email, login, first_name, last_name, role, page = 1, limit = 10 }: any = params || {};
+    const { search, email, login, first_name, last_name, role, page, limit }: any = params || {};
 
     const query = this.User.query();
 
@@ -97,8 +97,21 @@ export default class UserRepository {
       query.whereHas('roles', q => q.where('slug', role));
     }
 
-    const data = await query.preload('contacts').preload('roles').orderBy('created_at', 'desc').paginate(page, limit);
-    return data.toJSON();
+    query.preload('contacts').preload('roles').orderBy('created_at', 'desc');
+
+    /**
+     * Return paginated users if provided params
+     */
+    if (limit && page) {
+      const data = await query.paginate(page, limit);
+      return data.toJSON();
+    }
+
+    /**
+     * Return all users
+     */
+    const data = await query;
+    return data;
   }
 
   /**
