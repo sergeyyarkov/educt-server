@@ -420,6 +420,93 @@ export default class CourseService {
     };
   }
 
+  /**
+   * Attach list of students from course
+   *
+   * @param id Course id
+   * @param ids Student ids
+   * @returns Response
+   */
+  public async attachStudentList(id: string | number, ids: Array<string>): Promise<IResponse> {
+    const course = await this.courseRepository.getById(id);
+
+    if (!course) {
+      return {
+        success: false,
+        status: HttpStatusEnum.NOT_FOUND,
+        message: 'Course not found.',
+        data: {},
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    const students = await this.userRepository.getByIds(ids);
+
+    try {
+      await course.related('students').attach(students.map(s => s.id));
+    } catch (error) {
+      if (error.code === '23505') {
+        return {
+          success: false,
+          status: HttpStatusEnum.BAD_REQUEST,
+          message: 'Some student already attached to that course.',
+          data: {},
+          error: {
+            code: 'E_BAD_REQUEST',
+          },
+        };
+      }
+      throw new Error(error);
+    }
+
+    return {
+      success: true,
+      status: HttpStatusEnum.OK,
+      message: 'Student list successfully attached.',
+      data: {},
+    };
+  }
+
+  /**
+   * Detach list of students from course
+   *
+   * @param id Course id
+   * @param ids Student ids
+   * @returns Response
+   */
+  public async detachStudentList(id: string | number, ids: Array<string>): Promise<IResponse> {
+    const course = await this.courseRepository.getById(id);
+
+    if (!course) {
+      return {
+        success: false,
+        status: HttpStatusEnum.NOT_FOUND,
+        message: 'Course not found.',
+        data: {},
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    const students = await this.userRepository.getByIds(ids);
+
+    try {
+      await course.related('students').detach(students.map(s => s.id));
+    } catch (error) {
+      throw new Error(error);
+    }
+
+    return {
+      success: true,
+      status: HttpStatusEnum.OK,
+      message: 'Student list successfully detached from course.',
+      data: {},
+    };
+  }
+
   public async detachUserCourse(id: string | number, studentId: string | number): Promise<IResponse> {
     const course = await this.courseRepository.getById(id);
 

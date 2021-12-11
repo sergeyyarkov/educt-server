@@ -30,6 +30,11 @@ export default class UserRepository {
     return data;
   }
 
+  public async getByIds(ids: Array<string>): Promise<Array<User>> {
+    const data = await this.User.query().preload('contacts').preload('roles').whereIn('id', ids);
+    return data;
+  }
+
   /**
    * Get user by column
    *
