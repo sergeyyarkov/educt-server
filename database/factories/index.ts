@@ -87,6 +87,7 @@ export const CourseFactory = Factory.define(Course, ({ faker }) => {
   return {
     title: faker.lorem.sentence(8),
     description: faker.lorem.sentence(20),
+    education_description: faker.lorem.sentence(15),
     status: CourseStatusEnum.PUBLISHED,
   };
 })

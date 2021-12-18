@@ -37,7 +37,10 @@ export default class MeService {
     const user = await auth.use(this.authGuard).authenticate();
 
     await user.load(loader => {
-      loader.load('roles').load('contacts');
+      loader
+        .load('roles')
+        .load('contacts')
+        .load('likes', q => q.select('id'));
     });
 
     /**

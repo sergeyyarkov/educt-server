@@ -81,9 +81,12 @@ export default class CourseRepository {
     const course = await this.Course.query()
       .preload('teacher')
       .preload('color')
-      .preload('category')
+      .preload('category', q => q.preload('color'))
       .preload('lessons', q => q.preload('color').orderBy('display_order', 'asc').withCount('materials'))
       .preload('students', q => q.preload('roles').preload('contacts'))
+      .withCount('likes')
+      .withCount('lessons')
+      .withCount('students')
       .where('id', id)
       .first();
 
@@ -194,6 +197,7 @@ export default class CourseRepository {
 
     course.title = data.title;
     course.description = data.description;
+    course.education_description = data.education_description;
     course.status = data.status;
     course.teacher_id = data.teacher_id;
     course.category_id = data.category_id;
@@ -255,6 +259,7 @@ export default class CourseRepository {
       course.merge({
         title: data.title,
         description: data.description,
+        education_description: data.education_description,
         teacher_id: data.teacher_id,
         category_id: data.category_id,
       });

@@ -34,6 +34,9 @@ export default class Course extends BaseModel {
   @column()
   public description: string;
 
+  @column()
+  public education_description: string | null;
+
   @column({ serializeAs: null })
   public teacher_id: string;
 

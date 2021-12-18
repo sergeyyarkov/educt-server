@@ -14,6 +14,7 @@ export default class Courses extends BaseSchema {
       table.json('image');
       table.string('title').notNullable();
       table.string('description').notNullable();
+      table.string('education_description', 250);
       table.string('teacher_id', 21).unsigned().references('users.id').notNullable().onDelete('CASCADE');
       table.string('category_id', 21).unsigned().references('categories.id').notNullable().onDelete('CASCADE');
       table.integer('color_id').unsigned().references('colors.id');

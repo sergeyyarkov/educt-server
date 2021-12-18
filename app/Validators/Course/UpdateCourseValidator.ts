@@ -7,6 +7,7 @@ export default class UpdateCourseValidator {
   public schema = schema.create({
     title: schema.string.optional(),
     description: schema.string.optional(),
+    education_description: schema.string.nullable(),
     image: schema.file.optional({
       size: '10mb',
       extnames: ['jpg', 'jpeg', 'png'],
