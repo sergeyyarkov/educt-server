@@ -157,7 +157,11 @@ export default class CourseRepository {
    * @returns List of lessons or null
    */
   public async getLessons(id: string | number): Promise<Lesson[] | null> {
-    const course = await this.Course.query().select('id').preload('lessons').where('id', id).first();
+    const course = await this.Course.query()
+      .select('id')
+      .preload('lessons', q => q.preload('color').orderBy('display_order', 'asc'))
+      .where('id', id)
+      .first();
     return course && course.lessons;
   }
 

@@ -49,7 +49,7 @@ export default class LessonsController extends BaseController {
    * GET /lessons/:id
    */
   public async show(ctx: HttpContextContract) {
-    const result = await this.lessonService.fetchLesson(ctx.params.id);
+    const result = await this.lessonService.fetchLesson(ctx.params.id, ctx);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);

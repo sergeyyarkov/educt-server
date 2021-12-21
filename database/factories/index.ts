@@ -56,7 +56,7 @@ export const StudentFactory = Factory.define(User, ({ faker }) => makeFakeUser(f
 
 export const LessonContentFactory = Factory.define(LessonContent, ({ faker }) => {
   return {
-    video_url: `https://www.youtube.com/embed/${faker.datatype.string(10)}`,
+    video_url: `/uploads/videos/${faker.datatype.string(10)}`,
   };
 }).build();
 

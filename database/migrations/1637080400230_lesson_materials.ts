@@ -8,6 +8,7 @@ export default class LessonMaterials extends BaseSchema {
       table.increments('id').primary();
       table.string('url').notNullable();
       table.string('name').notNullable();
+      table.integer('size').notNullable();
       table.string('client_name').notNullable();
       table.string('ext').notNullable();
       table.string('lesson_id', 21).unsigned().references('lessons.id').onDelete('CASCADE');

@@ -14,6 +14,9 @@ export default class LessonMaterial extends BaseModel {
   public name: string;
 
   @column()
+  public size: number;
+
+  @column()
   public clientName: string;
 
   @column()

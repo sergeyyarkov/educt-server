@@ -54,7 +54,7 @@ export default class LessonService {
    * @param id Lesson id
    * @returns Response
    */
-  public async fetchLesson(id: string | number): Promise<IResponse> {
+  public async fetchLesson(id: string | number, ctx: HttpContextContract): Promise<IResponse> {
     const lesson = await this.lessonRepository.getById(id);
 
     if (!lesson) {
@@ -68,6 +68,26 @@ export default class LessonService {
         },
       };
     }
+
+    /**
+     * Allow user to view lesson content
+     */
+    if (await ctx.bouncer.denies('viewLessonContent', lesson)) {
+      return {
+        success: false,
+        status: HttpStatusEnum.FORBIDDEN,
+        message: 'The user is not a student of this course.',
+        data: {},
+        error: {
+          code: 'E_FORBIDDEN',
+        },
+      };
+    }
+
+    /**
+     * Load lesson with materials
+     */
+    await lesson.load(loader => loader.load('content').load('materials'));
 
     return {
       success: true,

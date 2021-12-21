@@ -43,7 +43,7 @@ export default class LessonRepository {
    * @returns Lesson or null
    */
   public async getById(id: string | number): Promise<Lesson | null> {
-    const lesson = await this.Lesson.query().where('id', id).first();
+    const lesson = await this.Lesson.query().where('id', id).preload('color').withCount('materials').first();
     return lesson;
   }
 
@@ -119,6 +119,7 @@ export default class LessonRepository {
             const material = new LessonMaterial();
 
             material.name = file.fileName;
+            material.size = file.size;
             material.clientName = file.clientName;
             material.ext = file.extname;
             material.url = url;
