@@ -157,6 +157,20 @@ export default class LessonsController extends BaseController {
 
     return this.sendResponse(ctx, data, message, status);
   }
+
+  /**
+   * Get information about progress of video
+   * GET /lessons/:id/progress
+   */
+  public async getVideoProgress(ctx: HttpContextContract) {
+    const { data, message, status, success, error } = await this.lessonService.fetchLessonProgress(ctx.params.id, ctx);
+
+    if (!success && error) {
+      throw new Exception(message, status, error.code);
+    }
+
+    return this.sendResponse(ctx, data, message, status);
+  }
 }
 
 new Ioc().make(LessonsController);

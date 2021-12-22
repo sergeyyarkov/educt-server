@@ -18,6 +18,7 @@ import Course from './Course';
 import LessonMaterial from './LessonMaterial';
 import LessonContent from './LessonContent';
 import Color from './Color';
+import LessonProgress from './LessonProgress';
 
 export default class Lesson extends BaseModel {
   @column({ isPrimary: true })
@@ -58,6 +59,11 @@ export default class Lesson extends BaseModel {
 
   @hasMany(() => LessonMaterial, { foreignKey: 'lesson_id' })
   public materials: HasMany<typeof LessonMaterial>;
+
+  @hasOne(() => LessonProgress, {
+    foreignKey: 'lesson_id',
+  })
+  public progress: HasOne<typeof LessonProgress>;
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime;

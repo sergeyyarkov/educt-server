@@ -156,10 +156,15 @@ export default class CourseRepository {
    * @param id Course id
    * @returns List of lessons or null
    */
-  public async getLessons(id: string | number): Promise<Lesson[] | null> {
+  public async getLessons(id: string | number, userId: string): Promise<Lesson[] | null> {
     const course = await this.Course.query()
       .select('id')
-      .preload('lessons', q => q.preload('color').orderBy('display_order', 'asc'))
+      .preload('lessons', q =>
+        q
+          .preload('progress', p => p.where('user_id', userId))
+          .preload('color')
+          .orderBy('display_order', 'asc')
+      )
       .where('id', id)
       .first();
     return course && course.lessons;

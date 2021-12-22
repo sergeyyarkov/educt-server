@@ -13,6 +13,7 @@ import LessonMaterial from 'App/Models/LessonMaterial';
  * Repositories
  */
 import CourseRepository from 'App/Repositories/CourseRepository';
+import LessonProgressRepository from 'App/Repositories/LessonProgressRepository';
 import LessonRepository from 'App/Repositories/LessonRepository';
 
 /**
@@ -27,9 +28,16 @@ export default class LessonService {
 
   private lessonRepository: LessonRepository;
 
-  constructor(courseRepository: CourseRepository, lessonRepository: LessonRepository) {
+  private lessonProgressRepository: LessonProgressRepository;
+
+  constructor(
+    courseRepository: CourseRepository,
+    lessonRepository: LessonRepository,
+    lessonProgressRepository: LessonProgressRepository
+  ) {
     this.courseRepository = courseRepository;
     this.lessonRepository = lessonRepository;
+    this.lessonProgressRepository = lessonProgressRepository;
   }
 
   /**
@@ -54,7 +62,7 @@ export default class LessonService {
    * @param id Lesson id
    * @returns Response
    */
-  public async fetchLesson(id: string | number, ctx: HttpContextContract): Promise<IResponse> {
+  public async fetchLesson(id: string | number, ctx: HttpContextContract) {
     const lesson = await this.lessonRepository.getById(id);
 
     if (!lesson) {
@@ -140,6 +148,56 @@ export default class LessonService {
       status: HttpStatusEnum.OK,
       message: 'Fetched lesson material.',
       data: material,
+    };
+  }
+
+  /**
+   * Fetch progress of lesson by lesson id
+   *
+   * @param id Lesson id
+   * @param ctx Http context
+   */
+  public async fetchLessonProgress(id: string, ctx: HttpContextContract): Promise<IResponse> {
+    const user = await ctx.auth.use('api').authenticate();
+    const lesson = await this.lessonRepository.getById(id);
+
+    if (!lesson) {
+      return {
+        success: false,
+        status: HttpStatusEnum.NOT_FOUND,
+        message: 'Lesson not found.',
+        data: {},
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    if (await ctx.bouncer.denies('viewLessonContent', lesson)) {
+      return {
+        success: false,
+        status: HttpStatusEnum.FORBIDDEN,
+        message: 'The user is not a student of this course.',
+        data: {},
+        error: {
+          code: 'E_FORBIDDEN',
+        },
+      };
+    }
+
+    const progress = await this.lessonProgressRepository.get(user.id, lesson.id);
+
+    if (progress === null) {
+      await this.lessonProgressRepository.create({ user_id: user.id, lesson_id: lesson.id, is_watched: true });
+    }
+
+    return {
+      success: true,
+      status: HttpStatusEnum.OK,
+      message: 'Fetched lesson progress',
+      data: {
+        progress,
+      },
     };
   }
 

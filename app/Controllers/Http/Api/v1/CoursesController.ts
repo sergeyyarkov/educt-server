@@ -73,7 +73,7 @@ export default class CoursesController extends BaseController {
   }
 
   /**
-   * Show Category of Course with "id"
+   * Show Category by course id
    * GET /courses/:id/category
    */
   public async showCategory(ctx: HttpContextContract) {
@@ -87,11 +87,11 @@ export default class CoursesController extends BaseController {
   }
 
   /**
-   * Show Lessons of ourse with "id"
+   * Show Lessons by course id
    * GET /courses/:id/lessons
    */
   public async showLessons(ctx: HttpContextContract) {
-    const result = await this.courseService.fetchCourseLessons(ctx.params.id);
+    const result = await this.courseService.fetchCourseLessons(ctx.params.id, ctx);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);
