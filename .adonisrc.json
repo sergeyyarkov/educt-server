@@ -24,7 +24,12 @@
     "Database": "database",
     "Contracts": "contracts"
   },
-  "preloads": ["./routes/index", "./start/kernel", "./start/event", "./start/bouncer"],
+  "preloads": [
+    "./routes/index",
+    "./start/kernel",
+    "./start/event",
+    "./start/bouncer"
+  ],
   "providers": [
     "./providers/AppProvider",
     "@adonisjs/core",
@@ -34,9 +39,12 @@
     "@adonisjs/mail",
     "@adonisjs/view",
     "@adonisjs/attachment-lite",
-    "@adonisjs/bouncer"
+    "@adonisjs/bouncer",
+    "@adonisjs/drive-s3"
   ],
-  "aceProviders": ["@adonisjs/repl"],
+  "aceProviders": [
+    "@adonisjs/repl"
+  ],
   "metaFiles": [
     {
       "pattern": "resources/views/**/*.edge",

@@ -8,9 +8,6 @@ export default class LessonMaterial extends BaseModel {
   public id: number;
 
   @column()
-  public url: string;
-
-  @column()
   public name: string;
 
   @column()

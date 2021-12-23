@@ -14,6 +14,10 @@ export default class BaseController {
     return ctx.response.status(response.status).send(response);
   }
 
+  public sendStream(ctx: HttpContextContract, ...args: Parameters<ResponseContract['stream']>) {
+    return ctx.response.stream(...args);
+  }
+
   public sendFile(ctx: HttpContextContract, ...args: Parameters<ResponseContract['attachment']>) {
     return ctx.response.attachment(...args);
   }

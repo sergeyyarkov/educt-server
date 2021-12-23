@@ -12,7 +12,7 @@ Route.group(() => {
   Route.get('/:id/content', 'Api/v1/LessonsController.getContent')
     .middleware('role:admin,teacher,student')
     .as('lessons.get-content');
-  Route.get('/materials/:file', 'Api/v1/LessonsController.getMaterial')
+  Route.get('/materials/:fileName', 'Api/v1/LessonsController.getMaterial')
     .middleware('role:admin,teacher,student')
     .as('lessons.get-material');
   Route.get('/:id/progress', 'Api/v1/LessonsController.getVideoProgress')

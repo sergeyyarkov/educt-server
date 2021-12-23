@@ -111,8 +111,8 @@ export default class LessonService {
    * @param fileName Name of file
    * @returns Response
    */
-  public async fetchMaterialFile(ctx: HttpContextContract, fileName: string): Promise<IResponse<LessonMaterial>> {
-    const material = await this.lessonRepository.getMaterialFileByName(fileName);
+  public async fetchMaterialFile(ctx: HttpContextContract, name: string): Promise<IResponse<LessonMaterial>> {
+    const material = await this.lessonRepository.getMaterialFileByName(name);
 
     if (!material) {
       return {
@@ -187,7 +187,7 @@ export default class LessonService {
 
     const progress = await this.lessonProgressRepository.get(user.id, lesson.id);
 
-    if (progress === null) {
+    if (!progress) {
       await this.lessonProgressRepository.create({ user_id: user.id, lesson_id: lesson.id, is_watched: true });
     }
 

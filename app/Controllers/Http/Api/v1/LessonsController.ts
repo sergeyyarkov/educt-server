@@ -1,7 +1,7 @@
-import Application from '@ioc:Adonis/Core/Application';
 import { Exception, inject, Ioc } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import { schema } from '@ioc:Adonis/Core/Validator';
+import { extname } from 'path';
 
 /**
  * Services
@@ -19,6 +19,7 @@ import LessonMaterial from 'App/Models/LessonMaterial';
 import CreateLessonValidator from 'App/Validators/Lesson/CreateLessonValidator';
 import UpdateLessonValidator from 'App/Validators/Lesson/UpdateLessonValidator';
 
+import Drive from '@ioc:Adonis/Core/Drive';
 import BaseController from '../../BaseController';
 
 @inject()
@@ -118,11 +119,11 @@ export default class LessonsController extends BaseController {
 
   /**
    * Get lesson materials by file name
-   * GET /lessons/materials/:file
+   * GET /lessons/materials/:fileName
    */
   public async getMaterial(ctx: HttpContextContract) {
-    const { file } = ctx.request.params();
-    const { data, message, status, success, error } = await this.lessonService.fetchMaterialFile(ctx, file);
+    const { fileName } = ctx.request.params();
+    const { data, message, status, success, error } = await this.lessonService.fetchMaterialFile(ctx, fileName);
 
     if (!success && error) {
       throw new Exception(message, status, error.code);
@@ -132,8 +133,21 @@ export default class LessonsController extends BaseController {
      * Send file to user
      */
     if (data instanceof LessonMaterial) {
-      const path = Application.makePath(data.url);
-      return this.sendFile(ctx, path, data.clientName);
+      const path = `materials/${data.name}`;
+
+      /**
+       * Material file not found
+       */
+      if (!(await Drive.exists(path))) return ctx.response.notFound();
+
+      const { size } = await Drive.getStats(path);
+
+      ctx.response.type(extname(data.name));
+      ctx.response.header('content-length', size);
+
+      const stream = await Drive.getStream(path);
+
+      return this.sendStream(ctx, stream);
     }
 
     return this.sendResponse(ctx, data, message, status);

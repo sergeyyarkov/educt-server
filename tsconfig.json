@@ -35,7 +35,8 @@
       "@adonisjs/mail",
       "@adonisjs/view",
       "@adonisjs/attachment-lite",
-      "@adonisjs/bouncer"
+      "@adonisjs/bouncer",
+      "@adonisjs/drive-s3"
     ]
   }
 }

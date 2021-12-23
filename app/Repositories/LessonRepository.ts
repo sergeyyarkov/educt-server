@@ -1,4 +1,5 @@
 import Drive from '@ioc:Adonis/Core/Drive';
+import { cuid } from '@ioc:Adonis/Core/Helpers';
 
 /**
  * Models
@@ -59,13 +60,24 @@ export default class LessonRepository {
   }
 
   /**
-   * Get lesson material
+   * Get lesson material by name
    *
    * @param fileName Name of file
-   * @returns Lesson material file or null
+   * @returns Lesson material or null
    */
   public async getMaterialFileByName(fileName: string): Promise<LessonMaterial | null> {
     const material = await this.LessonMaterial.query().where('name', fileName).first();
+    return material;
+  }
+
+  /**
+   * Get lesson material by id
+   *
+   * @param id Material id
+   * @returns Lesson material or null
+   */
+  public async getMaterialFileById(id: number): Promise<LessonMaterial | null> {
+    const material = await this.LessonMaterial.query().where('id', id).first();
     return material;
   }
 
@@ -104,8 +116,9 @@ export default class LessonRepository {
        */
       const files = await Promise.all(
         data.materials.map(async file => {
-          await file.moveToDisk('materials');
-          return file;
+          const name = `${cuid()}.${file.extname}`;
+          await file.moveToDisk('materials', { name });
+          return { file, name };
         })
       );
 
@@ -113,16 +126,14 @@ export default class LessonRepository {
        * Create lesson material
        */
       const materials = await Promise.all(
-        files.map(async file => {
+        files.map(async ({ file, name }) => {
           if (file.state === 'moved' && file.fileName && file.extname) {
-            const url = await this.Drive.getUrl(`materials/${file.fileName}`);
             const material = new LessonMaterial();
 
-            material.name = file.fileName;
+            material.name = name;
             material.size = file.size;
             material.clientName = file.clientName;
             material.ext = file.extname;
-            material.url = url;
 
             return material;
           }
