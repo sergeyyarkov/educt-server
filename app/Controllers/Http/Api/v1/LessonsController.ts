@@ -1,7 +1,6 @@
 import { Exception, inject, Ioc } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import { schema } from '@ioc:Adonis/Core/Validator';
-import { extname } from 'path';
 
 /**
  * Services
@@ -12,6 +11,7 @@ import LessonService from 'App/Services/LessonService';
  * Models
  */
 import LessonMaterial from 'App/Models/LessonMaterial';
+import LessonVideo from 'App/Models/LessonVideo';
 
 /**
  * Validators
@@ -19,7 +19,6 @@ import LessonMaterial from 'App/Models/LessonMaterial';
 import CreateLessonValidator from 'App/Validators/Lesson/CreateLessonValidator';
 import UpdateLessonValidator from 'App/Validators/Lesson/UpdateLessonValidator';
 
-import Drive from '@ioc:Adonis/Core/Drive';
 import BaseController from '../../BaseController';
 
 @inject()
@@ -133,21 +132,7 @@ export default class LessonsController extends BaseController {
      * Send file to user
      */
     if (data instanceof LessonMaterial) {
-      const path = `materials/${data.name}`;
-
-      /**
-       * Material file not found
-       */
-      if (!(await Drive.exists(path))) return ctx.response.notFound();
-
-      const { size } = await Drive.getStats(path);
-
-      ctx.response.type(extname(data.name));
-      ctx.response.header('content-length', size);
-
-      const stream = await Drive.getStream(path);
-
-      return this.sendStream(ctx, stream);
+      this.sendFileFromDrive(`materials/${data.name}`, ctx);
     }
 
     return this.sendResponse(ctx, data, message, status);
@@ -181,6 +166,28 @@ export default class LessonsController extends BaseController {
 
     if (!success && error) {
       throw new Exception(message, status, error.code);
+    }
+
+    return this.sendResponse(ctx, data, message, status);
+  }
+
+  /**
+   * Get video file of lesson by file name
+   * GET /lessons/video/:fileName
+   */
+  public async getVideo(ctx: HttpContextContract) {
+    const { fileName } = ctx.request.params();
+    const { data, message, status, success, error } = await this.lessonService.fetchVideoFile(ctx, fileName);
+
+    if (!success && error) {
+      throw new Exception(message, status, error.code);
+    }
+
+    /**
+     * Send file to user
+     */
+    if (data instanceof LessonVideo) {
+      return this.sendFileFromDrive(`videos/${data.name}`, ctx);
     }
 
     return this.sendResponse(ctx, data, message, status);

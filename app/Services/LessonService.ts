@@ -8,6 +8,7 @@ import Database from '@ioc:Adonis/Lucid/Database';
 import HttpStatusEnum from 'App/Datatypes/Enums/HttpStatusEnum';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
 import LessonMaterial from 'App/Models/LessonMaterial';
+import LessonVideo from 'App/Models/LessonVideo';
 
 /**
  * Repositories
@@ -151,6 +152,43 @@ export default class LessonService {
     };
   }
 
+  public async fetchVideoFile(ctx: HttpContextContract, name: string): Promise<IResponse<LessonVideo>> {
+    const video = await this.lessonRepository.getVideoFileByName(name);
+
+    if (!video) {
+      return {
+        success: false,
+        status: HttpStatusEnum.NOT_FOUND,
+        data: {},
+        message: 'Video not found.',
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    await video.load('lesson');
+
+    if (await ctx.bouncer.denies('viewLessonContent', video.lesson)) {
+      return {
+        success: false,
+        status: HttpStatusEnum.FORBIDDEN,
+        message: 'You are not able to view this file.',
+        data: {},
+        error: {
+          code: 'E_FORBIDDEN',
+        },
+      };
+    }
+
+    return {
+      success: true,
+      status: HttpStatusEnum.OK,
+      message: 'Fetched lesson video.',
+      data: video,
+    };
+  }
+
   /**
    * Fetch progress of lesson by lesson id
    *
@@ -222,6 +260,9 @@ export default class LessonService {
       };
     }
 
+    /**
+     * Create new lesson
+     */
     const lesson = await this.lessonRepository.create(course, data);
 
     return {

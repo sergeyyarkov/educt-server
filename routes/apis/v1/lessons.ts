@@ -15,6 +15,9 @@ Route.group(() => {
   Route.get('/materials/:fileName', 'Api/v1/LessonsController.getMaterial')
     .middleware('role:admin,teacher,student')
     .as('lessons.get-material');
+  Route.get('/video/:fileName', 'Api/v1/LessonsController.getVideo')
+    .middleware('role:admin,teacher,student')
+    .as('lessons.get-video');
   Route.get('/:id/progress', 'Api/v1/LessonsController.getVideoProgress')
     .middleware('role:admin,teacher,student')
     .as('lessons.get-video-progress');

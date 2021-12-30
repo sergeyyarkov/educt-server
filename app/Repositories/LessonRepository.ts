@@ -7,6 +7,7 @@ import { cuid } from '@ioc:Adonis/Core/Helpers';
 import Course from 'App/Models/Course';
 import Lesson from 'App/Models/Lesson';
 import LessonMaterial from 'App/Models/LessonMaterial';
+import LessonVideo from 'App/Models/LessonVideo';
 
 /**
  * Validators
@@ -19,11 +20,14 @@ export default class LessonRepository {
 
   private LessonMaterial: typeof LessonMaterial;
 
+  private LessonVideo: typeof LessonVideo;
+
   private Drive: typeof Drive;
 
   constructor() {
     this.Lesson = Lesson;
     this.LessonMaterial = LessonMaterial;
+    this.LessonVideo = LessonVideo;
     this.Drive = Drive;
   }
 
@@ -81,6 +85,11 @@ export default class LessonRepository {
     return material;
   }
 
+  public async getVideoFileByName(fileName: string): Promise<LessonVideo | null> {
+    const video = await this.LessonVideo.query().where('name', fileName).first();
+    return video;
+  }
+
   /**
    * Create lesson
    *
@@ -95,17 +104,28 @@ export default class LessonRepository {
       description: data.description,
       duration: data.duration.toFormat('HH:mm:ss'),
       display_order: Number.parseInt(course.$extras.lessons_count, 10) + 1,
+      course_id: course.id,
     });
-
-    /**
-     * Attach lesson to course
-     */
-    await lesson.related('course').associate(course);
 
     /**
      * Create content
      */
     await lesson.related('content').create({ video_url: data.video_url });
+
+    /**
+     * Move video file to disk and save to database
+     */
+    const videoName = `${cuid()}.${data.video.extname}`;
+    await data.video.moveToDisk('videos', { name: videoName });
+    if (data.video.state === 'moved') {
+      await lesson.related('video').create({
+        name: videoName,
+        clientName: data.video.clientName,
+        ext: data.video.extname,
+        size: data.video.size,
+        url: `lessons/video/${videoName}`,
+      });
+    }
 
     /**
      * Create materials
@@ -150,7 +170,7 @@ export default class LessonRepository {
     /**
      * Load data
      */
-    await lesson.load(loader => loader.load('content').load('materials'));
+    await lesson.load(loader => loader.load('content').load('materials').load('video'));
 
     return lesson;
   }
@@ -185,15 +205,21 @@ export default class LessonRepository {
    * @returns Deleted lesson or null
    */
   public async delete(id: string | number): Promise<Lesson | null> {
-    const lesson = await this.Lesson.query().where('id', id).preload('materials').preload('color').first();
+    const lesson = await this.Lesson.query()
+      .where('id', id)
+      .preload('video')
+      .preload('materials')
+      .preload('color')
+      .first();
 
     if (lesson) {
       /**
        * Delete files from disk
        */
+      await this.Drive.delete(`videos/${lesson.video.name}`);
       await Promise.all(
-        lesson.materials.map(async file => {
-          await this.Drive.delete(`materials/${file.name}`);
+        lesson.materials.map(async material => {
+          await this.Drive.delete(`materials/${material.name}`);
         })
       );
 

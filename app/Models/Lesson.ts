@@ -17,8 +17,9 @@ import ColorHelper from 'App/Helpers/ColorHelper';
 import Course from './Course';
 import LessonMaterial from './LessonMaterial';
 import LessonContent from './LessonContent';
-import Color from './Color';
 import LessonProgress from './LessonProgress';
+import LessonVideo from './LessonVideo';
+import Color from './Color';
 
 export default class Lesson extends BaseModel {
   @column({ isPrimary: true })
@@ -56,6 +57,11 @@ export default class Lesson extends BaseModel {
     foreignKey: 'lesson_id',
   })
   public content: HasOne<typeof LessonContent>;
+
+  @hasOne(() => LessonVideo, {
+    foreignKey: 'lesson_id',
+  })
+  public video: HasOne<typeof LessonVideo>;
 
   @hasMany(() => LessonMaterial, { foreignKey: 'lesson_id' })
   public materials: HasMany<typeof LessonMaterial>;
