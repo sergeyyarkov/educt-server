@@ -127,11 +127,8 @@ export default class LessonsController extends BaseController {
       throw new Exception(message, status, error.code);
     }
 
-    /**
-     * Send file to user
-     */
     if (data instanceof LessonMaterial) {
-      this.sendFileFromDrive(`materials/${data.name}`, ctx);
+      return this.sendFileFromDrive(`materials/${data.name}`, ctx);
     }
 
     return this.sendResponse(ctx, data, message, status);
