@@ -96,7 +96,7 @@ export default class LessonService {
     /**
      * Load lesson with materials
      */
-    await lesson.load(loader => loader.load('content').load('materials'));
+    await lesson.load(loader => loader.load('content').load('materials').load('video'));
 
     return {
       success: true,

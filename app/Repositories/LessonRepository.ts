@@ -123,7 +123,7 @@ export default class LessonRepository {
         clientName: data.video.clientName,
         ext: data.video.extname,
         size: data.video.size,
-        url: `lessons/video/${videoName}`,
+        url: `/video/${videoName}`,
       });
     }
 

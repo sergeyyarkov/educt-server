@@ -11,7 +11,6 @@ import LessonService from 'App/Services/LessonService';
  * Models
  */
 import LessonMaterial from 'App/Models/LessonMaterial';
-import LessonVideo from 'App/Models/LessonVideo';
 
 /**
  * Validators
@@ -166,28 +165,6 @@ export default class LessonsController extends BaseController {
 
     if (!success && error) {
       throw new Exception(message, status, error.code);
-    }
-
-    return this.sendResponse(ctx, data, message, status);
-  }
-
-  /**
-   * Get video file of lesson by file name
-   * GET /lessons/video/:fileName
-   */
-  public async getVideo(ctx: HttpContextContract) {
-    const { fileName } = ctx.request.params();
-    const { data, message, status, success, error } = await this.lessonService.fetchVideoFile(ctx, fileName);
-
-    if (!success && error) {
-      throw new Exception(message, status, error.code);
-    }
-
-    /**
-     * Send file to user
-     */
-    if (data instanceof LessonVideo) {
-      return this.sendFileFromDrive(`videos/${data.name}`, ctx);
     }
 
     return this.sendResponse(ctx, data, message, status);
