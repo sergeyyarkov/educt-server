@@ -16,7 +16,7 @@ export default class CreateLessonValidator {
     }),
     materials: schema.array.optional().members(
       schema.file({
-        size: '10mb',
+        size: '100mb',
         extnames: ['pdf', 'zip', 'rar', 'doc', 'docx'],
       })
     ),
