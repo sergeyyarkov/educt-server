@@ -11,7 +11,7 @@ export default class LessonContent extends BaseModel {
   public lesson_id: string;
 
   @column()
-  public video_url: string;
+  public body: string;
 
   @belongsTo(() => Lesson, { foreignKey: 'lesson_id' })
   public lesson: BelongsTo<typeof Lesson>;

@@ -110,7 +110,7 @@ export default class LessonRepository {
     /**
      * Create content
      */
-    await lesson.related('content').create({ video_url: data.video_url });
+    await lesson.related('content').create({ body: '' });
 
     /**
      * Move video file to disk and save to database
@@ -170,7 +170,7 @@ export default class LessonRepository {
     /**
      * Load data
      */
-    await lesson.load(loader => loader.load('content').load('materials').load('video'));
+    await lesson.load(loader => loader.load('content').load('materials').load('video').load('progress'));
 
     return lesson;
   }

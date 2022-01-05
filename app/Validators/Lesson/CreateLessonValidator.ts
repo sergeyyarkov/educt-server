@@ -9,7 +9,6 @@ export default class CreateLessonValidator {
     title: schema.string({}, [rules.maxLength(255)]),
     description: schema.string(),
     duration: schema.date({ format: 'HH:mm:ss' }),
-    video_url: schema.string({}, [rules.url()]),
     video: schema.file({
       size: '5000mb',
       extnames: ['mp4', 'mov', 'avi', 'wmv', 'webm', 'flv'],
