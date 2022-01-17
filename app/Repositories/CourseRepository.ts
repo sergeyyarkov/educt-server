@@ -283,10 +283,11 @@ export default class CourseRepository {
       /**
        * Load other updated data
        */
-      course.load('category');
-      course.load('teacher');
+      await course.load('category');
+      await course.load('teacher');
 
       await course.save();
+
       return course;
     }
 

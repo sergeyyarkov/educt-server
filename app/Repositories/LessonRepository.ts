@@ -1,4 +1,5 @@
 import Drive from '@ioc:Adonis/Core/Drive';
+import { MultipartFileContract } from '@ioc:Adonis/Core/BodyParser';
 import { cuid } from '@ioc:Adonis/Core/Helpers';
 
 /**
@@ -115,58 +116,15 @@ export default class LessonRepository {
     /**
      * Move video file to disk and save to database
      */
-    const videoName = `${cuid()}.${data.video.extname}`;
-    await data.video.moveToDisk('videos', { name: videoName });
-    if (data.video.state === 'moved') {
-      await lesson.related('video').create({
-        name: videoName,
-        clientName: data.video.clientName,
-        ext: data.video.extname,
-        size: data.video.size,
-        url: `/video/${videoName}`,
-      });
-    }
+    await this.createVideo(lesson, data.video);
 
     /**
      * Create materials
      */
     if (data.materials) {
-      /**
-       * Move each file to disk
-       */
-      const files = await Promise.all(
-        data.materials.map(async file => {
-          const name = `${cuid()}.${file.extname}`;
-          await file.moveToDisk('materials', { name });
-          return { file, name };
-        })
-      );
-
-      /**
-       * Create lesson material
-       */
-      const materials = await Promise.all(
-        files.map(async ({ file, name }) => {
-          if (file.state === 'moved' && file.fileName && file.extname) {
-            const material = new LessonMaterial();
-
-            material.name = name;
-            material.size = file.size;
-            material.clientName = file.clientName;
-            material.ext = file.extname;
-
-            return material;
-          }
-
-          return null;
-        })
-      );
-
-      /**
-       * Save lesson materials to database
-       */
-      await lesson.related('materials').createMany(materials.filter((l): l is LessonMaterial => l !== null));
+      await this.createMaterials(lesson, data.materials);
     }
+
     /**
      * Load data
      */
@@ -182,19 +140,48 @@ export default class LessonRepository {
    * @returns Updated lesson
    */
   public async update(id: string | number, data: UpdateLessonValidator['schema']['props']): Promise<Lesson | null> {
-    const lesson = await this.Lesson.query().where('id', id).first();
+    const lesson = await this.Lesson.query().preload('video').preload('color').where('id', id).first();
 
     if (lesson) {
-      await lesson
-        .merge({
-          course_id: data.course_id,
-          title: data.title,
-          description: data.description,
-        })
-        .save();
+      /**
+       * Update files
+       */
+      lesson.merge({
+        title: data.title,
+        description: data.description,
+        course_id: data.course_id,
+      });
+
+      /**
+       * Update video
+       */
+      if (data.video) {
+        /**
+         * Delete video from drive and database
+         */
+        await this.Drive.delete(`videos/${lesson.video.name}`);
+        await lesson.related('video').query().delete();
+
+        /**
+         * Upload new video to drive and save to database
+         */
+        await this.createVideo(lesson, data.video);
+      }
+
+      /**
+       * Update materials
+       */
+      if (data.materials && data.materials !== null) {
+        await this.deleteMaterials(lesson);
+        await this.createMaterials(lesson, data.materials);
+      } else if (data.materials === null) await this.deleteMaterials(lesson);
+
+      await lesson.load(loader => loader.load('video').load('materials'));
+      await lesson.save();
 
       return lesson;
     }
+
     return null;
   }
 
@@ -205,23 +192,14 @@ export default class LessonRepository {
    * @returns Deleted lesson or null
    */
   public async delete(id: string | number): Promise<Lesson | null> {
-    const lesson = await this.Lesson.query()
-      .where('id', id)
-      .preload('video')
-      .preload('materials')
-      .preload('color')
-      .first();
+    const lesson = await this.Lesson.query().where('id', id).preload('video').preload('color').first();
 
     if (lesson) {
       /**
        * Delete files from disk
        */
       await this.Drive.delete(`videos/${lesson.video.name}`);
-      await Promise.all(
-        lesson.materials.map(async material => {
-          await this.Drive.delete(`materials/${material.name}`);
-        })
-      );
+      await this.deleteMaterials(lesson);
 
       /**
        * Delete lesson from database
@@ -231,5 +209,69 @@ export default class LessonRepository {
     }
 
     return null;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  public async createVideo(lesson: Lesson, video: MultipartFileContract): Promise<void> {
+    const videoName = `${cuid()}.${video.extname}`;
+    await video.moveToDisk('videos', { name: videoName });
+    if (video.state === 'moved') {
+      await lesson.related('video').create({
+        name: videoName,
+        clientName: video.clientName,
+        ext: video.extname,
+        size: video.size,
+        url: `/video/${videoName}`,
+      });
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  public async createMaterials(lesson: Lesson, materials: MultipartFileContract[]): Promise<void> {
+    /**
+     * Move each file to disk
+     */
+    const files = await Promise.all(
+      materials.map(async file => {
+        const name = `${cuid()}.${file.extname}`;
+        await file.moveToDisk('materials', { name });
+        return { file, name };
+      })
+    );
+
+    /**
+     * Create lesson material
+     */
+    const promises = await Promise.all(
+      files.map(async ({ file, name }) => {
+        if (file.state === 'moved' && file.fileName && file.extname) {
+          const material = new LessonMaterial();
+
+          material.name = name;
+          material.size = file.size;
+          material.clientName = file.clientName;
+          material.ext = file.extname;
+
+          return material;
+        }
+
+        return null;
+      })
+    );
+
+    /**
+     * Save lesson materials to database
+     */
+    await lesson.related('materials').createMany(promises.filter((l): l is LessonMaterial => l !== null));
+  }
+
+  public async deleteMaterials(lesson: Lesson) {
+    await lesson.load('materials');
+    await Promise.all(
+      lesson.materials.map(async material => {
+        await this.Drive.delete(`materials/${material.name}`);
+        await material.delete();
+      })
+    );
   }
 }

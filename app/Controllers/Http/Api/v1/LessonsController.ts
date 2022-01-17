@@ -88,7 +88,7 @@ export default class LessonsController extends BaseController {
 
   /**
    * Update lesson by id.
-   * PUT /lessons/:id
+   * PATCH /lessons/:id
    */
   public async update(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(UpdateLessonValidator);
