@@ -159,7 +159,10 @@ export default class LessonRepository {
         /**
          * Delete video from drive and database
          */
-        await this.Drive.delete(`videos/${lesson.video.name}`);
+        if (lesson.video) {
+          await this.Drive.delete(`videos/${lesson.video.name}`);
+        }
+
         await lesson.related('video').query().delete();
 
         /**
