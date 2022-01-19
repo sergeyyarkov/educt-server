@@ -7,6 +7,7 @@ import Category from 'App/Models/Category';
  * Validators
  */
 import CreateCategoryValidator from 'App/Validators/Category/CreateCategoryValidator';
+import UpdateCategoryValidator from 'App/Validators/Category/UpdateCategoryValidator';
 
 export default class CategoryRepository {
   private Category: typeof Category;
@@ -62,6 +63,29 @@ export default class CategoryRepository {
 
     if (category) {
       await category.delete();
+      return category;
+    }
+
+    return null;
+  }
+
+  /**
+   *
+   * @param id Category id
+   * @param data
+   * @returns
+   */
+  public async update(id: string | number, data: UpdateCategoryValidator['schema']['props']): Promise<Category | null> {
+    const category = await this.Category.query().where('id', id).first();
+
+    if (category) {
+      await category
+        .merge({
+          title: data.title,
+          description: data.description,
+        })
+        .save();
+
       return category;
     }
 

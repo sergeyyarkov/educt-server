@@ -7,9 +7,10 @@ import { Exception, inject, Ioc } from '@adonisjs/core/build/standalone';
 import CategoryService from 'App/Services/CategoryService';
 
 /**
- * Validatoes
+ * Validators
  */
 import CreateCategoryValidator from 'App/Validators/Category/CreateCategoryValidator';
+import UpdateCategoryValidator from 'App/Validators/Category/UpdateCategoryValidator';
 
 import BaseController from '../../BaseController';
 
@@ -71,6 +72,21 @@ export default class CategoriesController extends BaseController {
    */
   public async delete(ctx: HttpContextContract) {
     const result = await this.categoryService.deleteCategory(ctx.params.id);
+
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
+  }
+
+  /**
+   * Update category by id
+   * PATCH /categories/:id
+   */
+  public async update(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(UpdateCategoryValidator);
+    const result = await this.categoryService.updateCategory(ctx.params.id, payload);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);

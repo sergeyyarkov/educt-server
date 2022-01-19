@@ -15,6 +15,7 @@ import CategoryRepository from 'App/Repositories/CategoryRepository';
  * Validators
  */
 import CreateCategoryValidator from 'App/Validators/Category/CreateCategoryValidator';
+import UpdateCategoryValidator from 'App/Validators/Category/UpdateCategoryValidator';
 
 @inject()
 export default class CategoryService {
@@ -111,6 +112,38 @@ export default class CategoryService {
       success: true,
       status: HttpStatusEnum.OK,
       message: 'Category deleted.',
+      data,
+    };
+  }
+
+  /**
+   * Update category
+   *
+   * @param id Category id
+   * @returns Updated category
+   */
+  public async updateCategory(
+    id: string | number,
+    data: UpdateCategoryValidator['schema']['props']
+  ): Promise<IResponse> {
+    const category = await this.categoryRepository.update(id, data);
+
+    if (!category) {
+      return {
+        success: false,
+        status: HttpStatusEnum.NOT_FOUND,
+        message: 'Category not found.',
+        data: {},
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    return {
+      success: true,
+      status: HttpStatusEnum.OK,
+      message: 'Category updated.',
       data,
     };
   }
