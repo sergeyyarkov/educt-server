@@ -70,6 +70,7 @@ export default class CategoryRepository {
   }
 
   /**
+   * Update category by id
    *
    * @param id Category id
    * @param data
@@ -79,13 +80,7 @@ export default class CategoryRepository {
     const category = await this.Category.query().where('id', id).first();
 
     if (category) {
-      await category
-        .merge({
-          title: data.title,
-          description: data.description,
-        })
-        .save();
-
+      await category.merge(data).save();
       return category;
     }
 

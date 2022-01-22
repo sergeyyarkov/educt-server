@@ -6,7 +6,7 @@ export default class UpdateCategoryValidator {
 
   public schema = schema.create({
     title: schema.string.optional(),
-    description: schema.string.optional(),
+    description: schema.string.nullableAndOptional(),
   });
 
   public messages = {};

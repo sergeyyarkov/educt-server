@@ -14,7 +14,7 @@ export default class Category extends BaseModel {
   public title: string;
 
   @column()
-  public description: string;
+  public description: string | null;
 
   @column({ serializeAs: null })
   public color_id: number | null;

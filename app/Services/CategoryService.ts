@@ -144,7 +144,7 @@ export default class CategoryService {
       success: true,
       status: HttpStatusEnum.OK,
       message: 'Category updated.',
-      data,
+      data: category,
     };
   }
 }
