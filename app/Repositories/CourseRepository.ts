@@ -49,7 +49,7 @@ export default class CourseRepository {
    * @returns List of courses
    */
   public async getAll(params?: FetchCoursesValidator['schema']['props']): Promise<Course[]> {
-    const { status, category_id } = params || {};
+    const { status, category_id, limit } = params || {};
 
     const query = this.Course.query();
 
@@ -61,12 +61,17 @@ export default class CourseRepository {
       query.andWhere('status', status);
     }
 
+    if (limit) {
+      query.limit(limit);
+    }
+
     const courses = await query
       .preload('color')
       .preload('category')
       .withCount('students')
       .withCount('likes')
-      .withCount('lessons');
+      .withCount('lessons')
+      .orderBy('created_at', 'desc');
 
     return courses;
   }
