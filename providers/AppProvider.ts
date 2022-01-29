@@ -7,7 +7,11 @@ export default class AppProvider {
 
   public async boot() {}
 
-  public async ready() {}
+  public async ready() {
+    if (this.app.environment === 'web') {
+      await import('../start/socket');
+    }
+  }
 
   public async shutdown() {}
 }

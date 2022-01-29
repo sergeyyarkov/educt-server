@@ -2,6 +2,7 @@ import { inject, Ioc } from '@adonisjs/core/build/standalone';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
 import HttpStatusEnum from 'App/Datatypes/Enums/HttpStatusEnum';
 import Database from '@ioc:Adonis/Lucid/Database';
+import Ws from './WsService';
 
 @inject()
 export default class StatService {
@@ -19,12 +20,15 @@ export default class StatService {
       `
     );
 
+    const online = await Ws.sessionStore.getOnlineSessionsCount();
+
     return {
       success: true,
       status: HttpStatusEnum.OK,
       message: 'Fetched stat.',
       data: {
         ...count.rows[0],
+        online,
       },
     };
   }
