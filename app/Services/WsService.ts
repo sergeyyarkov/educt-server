@@ -18,7 +18,7 @@ export interface ServerToClientEvents {
    * User
    */
   'user:session': (data: { sessionId: string | undefined; userId: string | undefined }) => void;
-  'user:connected': (data: { userId: string; socketId: string }) => void;
+  'user:connected': (data: { userId: string; userName: string }) => void;
   'user:online': (data: number) => void;
 }
 
@@ -27,6 +27,7 @@ export interface ClientToServerEvents {
    * User
    */
   'user:logout': () => void;
+  'user:status': () => void;
 }
 
 export interface InterServerEvents {}
@@ -65,22 +66,10 @@ class WsService {
   private listen() {
     this.io.on('connection', socket => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const onlineController = new OnlineController(socket);
+      const onlineController = new OnlineController(socket, this.io, this.sessionStore);
+
       const { sessionId, userId, userName } = socket.data;
       const isExistSocketData = !!(sessionId && userId && userName);
-
-      /**
-       * Set user session and send online count
-       */
-      if (isExistSocketData) {
-        this.sessionStore
-          .saveSession(sessionId, { userId, userName, connected: true })
-          .then(() => this.sessionStore.getOnlineSessionsCount())
-          .then(online => {
-            socket.emit('user:online', online);
-            socket.broadcast.emit('user:online', online);
-          });
-      }
 
       /**
        * Send session to client
@@ -93,29 +82,6 @@ class WsService {
       socket.on('user:logout', async () => {
         if (isExistSocketData) {
           await this.sessionStore.destroySession(sessionId);
-        }
-      });
-
-      /**
-       * Broadcast to all clients about new connection
-       */
-      socket.broadcast.emit('user:connected', {
-        userId: socket.handshake.auth.userId,
-        socketId: socket.id,
-      });
-
-      socket.on('disconnect', async () => {
-        if (isExistSocketData) {
-          const matchingSockets = await this.io.in(userId).allSockets();
-          const isDisconnected = matchingSockets.size === 0;
-
-          if (isDisconnected) {
-            /**
-             * Update connection flag of socket to flase and send online count
-             */
-            this.sessionStore.saveSession(sessionId, { userId, userName, connected: false });
-            this.sessionStore.getOnlineSessionsCount().then(online => socket.broadcast.emit('user:online', online));
-          }
         }
       });
     });
