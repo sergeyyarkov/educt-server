@@ -26,7 +26,7 @@ export interface ClientToServerEvents {
   /**
    * User
    */
-  'user:logout': (data: { sessionId: string }) => void;
+  'user:logout': () => void;
 }
 
 export interface InterServerEvents {}
@@ -69,10 +69,13 @@ class WsService {
       const { sessionId, userId, userName } = socket.data;
       const isExistSocketData = !!(sessionId && userId && userName);
 
+      console.log('New socket connected');
+
       /**
        * Set user session and send online count
        */
       if (isExistSocketData) {
+        console.log('Saving session');
         this.sessionStore
           .saveSession(sessionId, { userId, userName, connected: true })
           .then(() => this.sessionStore.getOnlineSessionsCount())
@@ -86,6 +89,13 @@ class WsService {
        * Send session to client
        */
       socket.emit('user:session', { sessionId: socket.data.sessionId, userId: socket.data.userId });
+
+      /**
+       * Destroy session on user logout request
+       */
+      socket.on('user:logout', () => {
+        console.log('Destroy session', sessionId);
+      });
 
       /**
        * Broadcast to all clients about new connection

@@ -49,8 +49,13 @@ class RedisSessionStore {
       nextIndex = parseInt(nextIndexAsStr, 10);
       result.forEach(s => keys.add(s));
     } while (nextIndex !== 0);
+    const commands = Array.from(keys).map(key => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const [prefix, ...id] = key.split('-');
+      return ['hmget', id.join('-'), 'userId', 'userName', 'connected'];
+    });
 
-    const commands = Array.from(keys).map(key => ['hmget', key.split('-')[1], 'userId', 'userName', 'connected']);
+    console.log(commands);
 
     return this.redisClient
       .multi(commands)
@@ -63,8 +68,8 @@ class RedisSessionStore {
    */
   public async getOnlineSessionsCount() {
     const sessions = await this.getSessions();
-
     const online = new Set(sessions.filter(s => s?.connected === true).map(s => s?.userId));
+
     return online.size;
   }
 
@@ -75,7 +80,7 @@ class RedisSessionStore {
    * @param data Session data
    */
   public async saveSession(id: string, data: SessionDataType): Promise<void> {
-    this.redisClient
+    await this.redisClient
       .multi()
       .hmset(id, {
         userId: data.userId,
