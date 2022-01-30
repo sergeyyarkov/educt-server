@@ -1,6 +1,6 @@
+import { Server } from 'socket.io';
 import Redis from '@ioc:Adonis/Addons/Redis';
 import AdonisServer from '@ioc:Adonis/Core/Server';
-import { Server } from 'socket.io';
 
 /**
  * Controllers
@@ -32,9 +32,9 @@ export interface ClientToServerEvents {
 export interface InterServerEvents {}
 
 export interface SocketData {
-  sessionId?: string | undefined;
-  userId?: string | undefined;
-  userName?: string | undefined;
+  sessionId: string;
+  userId: string;
+  userName: string;
 }
 
 class WsService {
@@ -64,23 +64,23 @@ class WsService {
 
   private listen() {
     this.io.on('connection', socket => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const onlineController = new OnlineController(socket);
+      const { sessionId, userId, userName } = socket.data;
+      const isExistSocketData = !!(sessionId && userId && userName);
 
       /**
        * Set user session and send online count
        */
-      this.sessionStore
-        .saveSession(socket.data.sessionId, {
-          sessionId: socket.data.sessionId,
-          userId: socket.data.userId,
-          userName: socket.data.userName,
-          connected: true,
-        })
-        .then(async () => {
-          const online = await this.sessionStore.getOnlineSessionsCount();
-          socket.emit('user:online', online);
-          socket.broadcast.emit('user:online', online);
-        });
+      if (isExistSocketData) {
+        this.sessionStore
+          .saveSession(sessionId, { userId, userName, connected: true })
+          .then(() => this.sessionStore.getOnlineSessionsCount())
+          .then(online => {
+            socket.emit('user:online', online);
+            socket.broadcast.emit('user:online', online);
+          });
+      }
 
       /**
        * Send session to client
@@ -96,21 +96,17 @@ class WsService {
       });
 
       socket.on('disconnect', async () => {
-        const matchingSockets = await this.io.in(socket.data.userId).allSockets();
-        const isDisconnected = matchingSockets.size === 0;
+        if (isExistSocketData) {
+          const matchingSockets = await this.io.in(userId).allSockets();
+          const isDisconnected = matchingSockets.size === 0;
 
-        if (isDisconnected) {
-          /**
-           * Update connection flag of socket to flase
-           */
-          this.sessionStore.saveSession(socket.data.sessionId, {
-            sessionId: socket.data.sessionId,
-            userId: socket.data.userId,
-            userName: socket.data.userName,
-            connected: false,
-          });
-
-          this.sessionStore.getOnlineSessionsCount().then(online => socket.broadcast.emit('user:online', online));
+          if (isDisconnected) {
+            /**
+             * Update connection flag of socket to flase and send online count
+             */
+            this.sessionStore.saveSession(sessionId, { userId, userName, connected: false });
+            this.sessionStore.getOnlineSessionsCount().then(online => socket.broadcast.emit('user:online', online));
+          }
         }
       });
     });

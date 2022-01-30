@@ -6,7 +6,6 @@ import OpaqueTokenHelper from 'App/Helpers/OpaqueTokenHelper';
 import Ws, { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from 'App/Services/WsService';
 import { Socket } from 'socket.io';
 import { ExtendedError } from 'socket.io/dist/namespace';
-import Logger from '@ioc:Adonis/Core/Logger';
 
 export default class AuthMiddleware {
   /**
@@ -53,8 +52,6 @@ export default class AuthMiddleware {
       const session = await Ws.sessionStore.findSession(sessionId);
 
       if (session) {
-        Logger.info(`[Ws]: Attacing session from redis session store.`);
-
         socket.data.sessionId = sessionId;
         socket.data.userId = session.userId;
         socket.data.userName = session.userName;
@@ -66,7 +63,6 @@ export default class AuthMiddleware {
     /**
      * Parse data from redis string and create new session
      */
-    Logger.info(`[Ws]: Attaching token data from cookie.`);
     const parsedData = JSON.parse(data);
 
     /**
