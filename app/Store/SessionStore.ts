@@ -55,8 +55,6 @@ class RedisSessionStore {
       return ['hmget', id.join('-'), 'userId', 'userName', 'connected'];
     });
 
-    console.log(commands);
-
     return this.redisClient
       .multi(commands)
       .exec()
@@ -89,6 +87,21 @@ class RedisSessionStore {
       })
       .expire(id, SESSION_TTL)
       .exec();
+  }
+
+  /**
+   * Remove session from redis store
+   *
+   * @param id Session id
+   */
+  public async destroySession(id: string): Promise<number> {
+    const session = await this.findSession(id);
+
+    if (session) {
+      return this.redisClient.del(id);
+    }
+
+    return 0;
   }
 }
 

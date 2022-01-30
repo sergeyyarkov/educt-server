@@ -69,13 +69,10 @@ class WsService {
       const { sessionId, userId, userName } = socket.data;
       const isExistSocketData = !!(sessionId && userId && userName);
 
-      console.log('New socket connected');
-
       /**
        * Set user session and send online count
        */
       if (isExistSocketData) {
-        console.log('Saving session');
         this.sessionStore
           .saveSession(sessionId, { userId, userName, connected: true })
           .then(() => this.sessionStore.getOnlineSessionsCount())
@@ -93,8 +90,10 @@ class WsService {
       /**
        * Destroy session on user logout request
        */
-      socket.on('user:logout', () => {
-        console.log('Destroy session', sessionId);
+      socket.on('user:logout', async () => {
+        if (isExistSocketData) {
+          await this.sessionStore.destroySession(sessionId);
+        }
       });
 
       /**
