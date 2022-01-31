@@ -8,11 +8,14 @@ Route.group(() => {
     .as('lessons.update-order');
   Route.get('/:id', 'Api/v1/LessonsController.show').middleware('role:admin,teacher,student').as('lessons.show');
   Route.delete('/:id', 'Api/v1/LessonsController.delete').middleware('role:admin,teacher').as('lessons.delete');
-  Route.put('/:id', 'Api/v1/LessonsController.update').middleware('role:admin,teacher').as('lessons.update');
+  Route.patch('/:id', 'Api/v1/LessonsController.update').middleware('role:admin,teacher').as('lessons.update');
   Route.get('/:id/content', 'Api/v1/LessonsController.getContent')
     .middleware('role:admin,teacher,student')
     .as('lessons.get-content');
-  Route.get('/materials/:file', 'Api/v1/LessonsController.getMaterial')
+  Route.get('/materials/:fileName', 'Api/v1/LessonsController.getMaterial')
     .middleware('role:admin,teacher,student')
     .as('lessons.get-material');
+  Route.get('/:id/progress', 'Api/v1/LessonsController.getVideoProgress')
+    .middleware('role:admin,teacher,student')
+    .as('lessons.get-video-progress');
 }).prefix('lessons');

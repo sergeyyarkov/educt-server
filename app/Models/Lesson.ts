@@ -17,6 +17,8 @@ import ColorHelper from 'App/Helpers/ColorHelper';
 import Course from './Course';
 import LessonMaterial from './LessonMaterial';
 import LessonContent from './LessonContent';
+import LessonProgress from './LessonProgress';
+import LessonVideo from './LessonVideo';
 import Color from './Color';
 
 export default class Lesson extends BaseModel {
@@ -56,8 +58,18 @@ export default class Lesson extends BaseModel {
   })
   public content: HasOne<typeof LessonContent>;
 
+  @hasOne(() => LessonVideo, {
+    foreignKey: 'lesson_id',
+  })
+  public video: HasOne<typeof LessonVideo>;
+
   @hasMany(() => LessonMaterial, { foreignKey: 'lesson_id' })
   public materials: HasMany<typeof LessonMaterial>;
+
+  @hasOne(() => LessonProgress, {
+    foreignKey: 'lesson_id',
+  })
+  public progress: HasOne<typeof LessonProgress>;
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime;

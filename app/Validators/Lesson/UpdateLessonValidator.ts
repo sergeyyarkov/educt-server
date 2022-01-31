@@ -5,9 +5,20 @@ export default class UpdateLessonValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public schema = schema.create({
-    course_id: schema.string({}, [rules.exists({ table: 'courses', column: 'id' })]),
-    title: schema.string({}, [rules.maxLength(255)]),
-    description: schema.string(),
+    course_id: schema.string.optional({}, [rules.exists({ table: 'courses', column: 'id' })]),
+    title: schema.string.optional({}, [rules.maxLength(255)]),
+    description: schema.string.optional(),
+    duration: schema.date.optional({ format: 'HH:mm:ss' }),
+    video: schema.file.optional({
+      size: '5000mb',
+      extnames: ['mp4', 'mov', 'avi', 'wmv', 'webm', 'flv'],
+    }),
+    materials: schema.array.nullableAndOptional().members(
+      schema.file({
+        size: '100mb',
+        extnames: ['pdf', 'zip', 'rar', 'doc', 'docx'],
+      })
+    ),
   });
 
   public messages = {};

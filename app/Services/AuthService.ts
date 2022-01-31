@@ -1,7 +1,6 @@
 import { inject, Ioc } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import Hash from '@ioc:Adonis/Core/Hash';
-import Logger from '@ioc:Adonis/Core/Logger';
 
 /**
  * Datatypes
@@ -68,17 +67,19 @@ export default class AuthService {
     const token = await ctx.auth.use(this.authGuard).generate(user, {
       expiresIn: '1d',
       userRoles: user.roles.map(role => role.slug),
+      userName: user.fullname,
     });
 
     ctx.response.cookie('token', token.token);
-
-    Logger.info(`A token for user with id: "${token.user.id}" was successfully generated.`);
 
     return {
       success: true,
       status: HttpStatusEnum.OK,
       message: 'Login success.',
-      data: token.toJSON(),
+      data: {
+        userId: user.id,
+        ...token.toJSON(),
+      },
     };
   }
 

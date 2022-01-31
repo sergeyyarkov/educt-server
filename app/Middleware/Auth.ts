@@ -31,8 +31,7 @@ export default class AuthMiddleware {
      * driver
      */
     let guardLastAttempted: string | undefined;
-    const authPromises: Promise<boolean>[] = guards.map(guard => auth.use(guard).check());
-    const authResults: boolean[] = await Promise.all(authPromises);
+    const authResults: boolean[] = await Promise.all(guards.map(guard => auth.use(guard).check()));
 
     for (let i = 0; i < authResults.length; i += 1) {
       /**
@@ -54,7 +53,7 @@ export default class AuthMiddleware {
 
   public async handle(ctx: HttpContextContract, next: () => Promise<void>, customGuards: (keyof GuardsList)[]) {
     /**
-     * Verify token from cookie and set the authorization header
+     * Set the authorization header for token
      */
     const token = ctx.request.cookie('token');
     if (token) {

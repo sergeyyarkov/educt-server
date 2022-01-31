@@ -1,5 +1,6 @@
 import { inject, Ioc } from '@adonisjs/core/build/standalone';
 import { AuthContract } from '@ioc:Adonis/Addons/Auth';
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 
 /**
  * Datatypes
@@ -23,6 +24,7 @@ import CategoryRepository from 'App/Repositories/CategoryRepository';
 import CreateCourseValidator from 'App/Validators/Course/CreateCourseValidator';
 import UpdateCourseValidator from 'App/Validators/Course/UpdateCourseValidator';
 import FetchCoursesValidator from 'App/Validators/Course/FetchCoursesValidator';
+import Course from 'App/Models/Course';
 
 @inject()
 export default class CourseService {
@@ -64,7 +66,7 @@ export default class CourseService {
    * @param id Course id
    * @returns Response
    */
-  public async fetchCourse(id: string | number): Promise<IResponse> {
+  public async fetchCourse(id: string | number): Promise<IResponse<Course | {}>> {
     const data = await this.courseRepository.getById(id);
 
     if (!data) {
@@ -151,8 +153,9 @@ export default class CourseService {
    * @param id Course id
    * @returns Response
    */
-  public async fetchCourseLessons(id: string | number): Promise<IResponse> {
-    const data = await this.courseRepository.getLessons(id);
+  public async fetchCourseLessons(id: string | number, ctx: HttpContextContract): Promise<IResponse> {
+    const user = await ctx.auth.use('api').authenticate();
+    const data = await this.courseRepository.getLessons(id, user.id);
 
     if (!data) {
       return {
@@ -416,6 +419,93 @@ export default class CourseService {
       success: true,
       status: HttpStatusEnum.OK,
       message: 'Student attached.',
+      data: {},
+    };
+  }
+
+  /**
+   * Attach list of students from course
+   *
+   * @param id Course id
+   * @param ids Student ids
+   * @returns Response
+   */
+  public async attachStudentList(id: string | number, ids: Array<string>): Promise<IResponse> {
+    const course = await this.courseRepository.getById(id);
+
+    if (!course) {
+      return {
+        success: false,
+        status: HttpStatusEnum.NOT_FOUND,
+        message: 'Course not found.',
+        data: {},
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    const students = await this.userRepository.getByIds(ids);
+
+    try {
+      await course.related('students').attach(students.map(s => s.id));
+    } catch (error) {
+      if (error.code === '23505') {
+        return {
+          success: false,
+          status: HttpStatusEnum.BAD_REQUEST,
+          message: 'Some student already attached to that course.',
+          data: {},
+          error: {
+            code: 'E_BAD_REQUEST',
+          },
+        };
+      }
+      throw new Error(error);
+    }
+
+    return {
+      success: true,
+      status: HttpStatusEnum.OK,
+      message: 'Student list successfully attached.',
+      data: {},
+    };
+  }
+
+  /**
+   * Detach list of students from course
+   *
+   * @param id Course id
+   * @param ids Student ids
+   * @returns Response
+   */
+  public async detachStudentList(id: string | number, ids: Array<string>): Promise<IResponse> {
+    const course = await this.courseRepository.getById(id);
+
+    if (!course) {
+      return {
+        success: false,
+        status: HttpStatusEnum.NOT_FOUND,
+        message: 'Course not found.',
+        data: {},
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    const students = await this.userRepository.getByIds(ids);
+
+    try {
+      await course.related('students').detach(students.map(s => s.id));
+    } catch (error) {
+      throw new Error(error);
+    }
+
+    return {
+      success: true,
+      status: HttpStatusEnum.OK,
+      message: 'Student list successfully detached from course.',
       data: {},
     };
   }

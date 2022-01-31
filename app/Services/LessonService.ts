@@ -8,11 +8,13 @@ import Database from '@ioc:Adonis/Lucid/Database';
 import HttpStatusEnum from 'App/Datatypes/Enums/HttpStatusEnum';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
 import LessonMaterial from 'App/Models/LessonMaterial';
+import LessonVideo from 'App/Models/LessonVideo';
 
 /**
  * Repositories
  */
 import CourseRepository from 'App/Repositories/CourseRepository';
+import LessonProgressRepository from 'App/Repositories/LessonProgressRepository';
 import LessonRepository from 'App/Repositories/LessonRepository';
 
 /**
@@ -27,9 +29,16 @@ export default class LessonService {
 
   private lessonRepository: LessonRepository;
 
-  constructor(courseRepository: CourseRepository, lessonRepository: LessonRepository) {
+  private lessonProgressRepository: LessonProgressRepository;
+
+  constructor(
+    courseRepository: CourseRepository,
+    lessonRepository: LessonRepository,
+    lessonProgressRepository: LessonProgressRepository
+  ) {
     this.courseRepository = courseRepository;
     this.lessonRepository = lessonRepository;
+    this.lessonProgressRepository = lessonProgressRepository;
   }
 
   /**
@@ -54,7 +63,7 @@ export default class LessonService {
    * @param id Lesson id
    * @returns Response
    */
-  public async fetchLesson(id: string | number): Promise<IResponse> {
+  public async fetchLesson(id: string | number, ctx: HttpContextContract) {
     const lesson = await this.lessonRepository.getById(id);
 
     if (!lesson) {
@@ -68,6 +77,26 @@ export default class LessonService {
         },
       };
     }
+
+    /**
+     * Allow user to view lesson content
+     */
+    if (await ctx.bouncer.denies('viewLessonContent', lesson)) {
+      return {
+        success: false,
+        status: HttpStatusEnum.FORBIDDEN,
+        message: 'The user is not a student of this course.',
+        data: {},
+        error: {
+          code: 'E_FORBIDDEN',
+        },
+      };
+    }
+
+    /**
+     * Load lesson with materials
+     */
+    await lesson.load(loader => loader.load('content').load('materials').load('video'));
 
     return {
       success: true,
@@ -83,8 +112,8 @@ export default class LessonService {
    * @param fileName Name of file
    * @returns Response
    */
-  public async fetchMaterialFile(ctx: HttpContextContract, fileName: string): Promise<IResponse<LessonMaterial>> {
-    const material = await this.lessonRepository.getMaterialFileByName(fileName);
+  public async fetchMaterialFile(ctx: HttpContextContract, name: string): Promise<IResponse<LessonMaterial>> {
+    const material = await this.lessonRepository.getMaterialFileByName(name);
 
     if (!material) {
       return {
@@ -123,6 +152,93 @@ export default class LessonService {
     };
   }
 
+  public async fetchVideoFile(ctx: HttpContextContract, name: string): Promise<IResponse<LessonVideo>> {
+    const video = await this.lessonRepository.getVideoFileByName(name);
+
+    if (!video) {
+      return {
+        success: false,
+        status: HttpStatusEnum.NOT_FOUND,
+        data: {},
+        message: 'Video not found.',
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    await video.load('lesson');
+
+    if (await ctx.bouncer.denies('viewLessonContent', video.lesson)) {
+      return {
+        success: false,
+        status: HttpStatusEnum.FORBIDDEN,
+        message: 'You are not able to view this file.',
+        data: {},
+        error: {
+          code: 'E_FORBIDDEN',
+        },
+      };
+    }
+
+    return {
+      success: true,
+      status: HttpStatusEnum.OK,
+      message: 'Fetched lesson video.',
+      data: video,
+    };
+  }
+
+  /**
+   * Fetch progress of lesson by lesson id
+   *
+   * @param id Lesson id
+   * @param ctx Http context
+   */
+  public async fetchLessonProgress(id: string, ctx: HttpContextContract): Promise<IResponse> {
+    const user = await ctx.auth.use('api').authenticate();
+    const lesson = await this.lessonRepository.getById(id);
+
+    if (!lesson) {
+      return {
+        success: false,
+        status: HttpStatusEnum.NOT_FOUND,
+        message: 'Lesson not found.',
+        data: {},
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    if (await ctx.bouncer.denies('viewLessonContent', lesson)) {
+      return {
+        success: false,
+        status: HttpStatusEnum.FORBIDDEN,
+        message: 'The user is not a student of this course.',
+        data: {},
+        error: {
+          code: 'E_FORBIDDEN',
+        },
+      };
+    }
+
+    const progress = await this.lessonProgressRepository.get(user.id, lesson.id);
+
+    if (!progress) {
+      await this.lessonProgressRepository.create({ user_id: user.id, lesson_id: lesson.id, is_watched: true });
+    }
+
+    return {
+      success: true,
+      status: HttpStatusEnum.OK,
+      message: 'Fetched lesson progress',
+      data: {
+        progress,
+      },
+    };
+  }
+
   /**
    * Create lesson
    *
@@ -144,6 +260,9 @@ export default class LessonService {
       };
     }
 
+    /**
+     * Create new lesson
+     */
     const lesson = await this.lessonRepository.create(course, data);
 
     return {

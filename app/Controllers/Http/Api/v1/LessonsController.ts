@@ -1,4 +1,3 @@
-import Application from '@ioc:Adonis/Core/Application';
 import { Exception, inject, Ioc } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import { schema } from '@ioc:Adonis/Core/Validator';
@@ -49,7 +48,7 @@ export default class LessonsController extends BaseController {
    * GET /lessons/:id
    */
   public async show(ctx: HttpContextContract) {
-    const result = await this.lessonService.fetchLesson(ctx.params.id);
+    const result = await this.lessonService.fetchLesson(ctx.params.id, ctx);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);
@@ -89,7 +88,7 @@ export default class LessonsController extends BaseController {
 
   /**
    * Update lesson by id.
-   * PUT /lessons/:id
+   * PATCH /lessons/:id
    */
   public async update(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(UpdateLessonValidator);
@@ -118,22 +117,18 @@ export default class LessonsController extends BaseController {
 
   /**
    * Get lesson materials by file name
-   * GET /lessons/materials/:file
+   * GET /lessons/materials/:fileName
    */
   public async getMaterial(ctx: HttpContextContract) {
-    const { file } = ctx.request.params();
-    const { data, message, status, success, error } = await this.lessonService.fetchMaterialFile(ctx, file);
+    const { fileName } = ctx.request.params();
+    const { data, message, status, success, error } = await this.lessonService.fetchMaterialFile(ctx, fileName);
 
     if (!success && error) {
       throw new Exception(message, status, error.code);
     }
 
-    /**
-     * Send file to user
-     */
     if (data instanceof LessonMaterial) {
-      const path = Application.makePath(data.url);
-      return this.sendFile(ctx, path, data.clientName);
+      return this.sendFileFromDrive(`materials/${data.name}`, ctx);
     }
 
     return this.sendResponse(ctx, data, message, status);
@@ -150,6 +145,20 @@ export default class LessonsController extends BaseController {
     });
     const payload = await ctx.request.validate({ schema: saveOrderSchema });
     const { data, message, status, success, error } = await this.lessonService.updateOrder(payload.ids);
+
+    if (!success && error) {
+      throw new Exception(message, status, error.code);
+    }
+
+    return this.sendResponse(ctx, data, message, status);
+  }
+
+  /**
+   * Get information about progress of video
+   * GET /lessons/:id/progress
+   */
+  public async getVideoProgress(ctx: HttpContextContract) {
+    const { data, message, status, success, error } = await this.lessonService.fetchLessonProgress(ctx.params.id, ctx);
 
     if (!success && error) {
       throw new Exception(message, status, error.code);

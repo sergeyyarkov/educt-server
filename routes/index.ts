@@ -26,4 +26,9 @@ Route.group(() => {
    * Api routes
    */
   require('./api');
+
+  /**
+   * Other routes
+   */
+  require('./videos');
 });

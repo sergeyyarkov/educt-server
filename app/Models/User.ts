@@ -7,6 +7,8 @@ import {
   beforeSave,
   column,
   computed,
+  HasMany,
+  hasMany,
   HasOne,
   hasOne,
   ManyToMany,
@@ -17,6 +19,7 @@ import { nanoid } from 'nanoid';
 import Role from 'App/Models/Role';
 import Contact from 'App/Models/Contact';
 import Course from 'App/Models/Course';
+import LessonProgress from './LessonProgress';
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -61,6 +64,11 @@ export default class User extends BaseModel {
     pivotTable: 'courses_likes',
   })
   public likes: ManyToMany<typeof Course>;
+
+  @hasMany(() => LessonProgress, {
+    foreignKey: 'user_id',
+  })
+  public lessons_progress: HasMany<typeof LessonProgress>;
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime;

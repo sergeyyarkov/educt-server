@@ -30,6 +30,14 @@ Route.group(() => {
     .middleware('role:admin,teacher')
     .as('courses.attach-student');
 
+  Route.post('/:id/attach-student-list', 'Api/v1/CoursesController.attachStudentList')
+    .middleware('role:admin,teacher')
+    .as('courses.attach-student-list');
+
+  Route.patch('/:id/detach-student-list', 'Api/v1/CoursesController.detachStudentList')
+    .middleware('role:admin,teacher')
+    .as('courses.detach-student-list');
+
   Route.delete('/:id/detach-student', 'Api/v1/CoursesController.detachStudent')
     .middleware('role:admin,teacher')
     .as('courses.detach-student');
@@ -49,4 +57,8 @@ Route.group(() => {
   Route.post('/:id/set-status', 'Api/v1/CoursesController.setStatus')
     .middleware('role:admin,teacher')
     .as('courses.set-status');
+
+  Route.get('/:id/lessons-progress', 'Api/v1/CoursesController.getLessonsProgress')
+    .middleware('role:admin,teacher,student')
+    .as('courses.get-lessons-progress');
 }).prefix('courses');

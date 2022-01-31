@@ -8,10 +8,10 @@ export default class LessonMaterial extends BaseModel {
   public id: number;
 
   @column()
-  public url: string;
+  public name: string;
 
   @column()
-  public name: string;
+  public size: number;
 
   @column()
   public clientName: string;

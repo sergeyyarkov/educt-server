@@ -10,6 +10,8 @@ import CourseService from 'App/Services/CourseService';
  * Validators
  */
 import AddCourseToUserValidator from 'App/Validators/Course/AddCourseToUserValidator';
+import AttachStudentsValitator from 'App/Validators/Course/AttachStudentsValitator';
+import DetachStudentstValitator from 'App/Validators/Course/DetachStudentstValitator';
 import CreateCourseValidator from 'App/Validators/Course/CreateCourseValidator';
 import DelCourseFromUserValidator from 'App/Validators/Course/DelCourseFromUserValidator';
 import SetCourseStatusValidator from 'App/Validators/Course/SetCourseStatusValidator';
@@ -71,7 +73,7 @@ export default class CoursesController extends BaseController {
   }
 
   /**
-   * Show Category of Course with "id"
+   * Show Category by course id
    * GET /courses/:id/category
    */
   public async showCategory(ctx: HttpContextContract) {
@@ -85,11 +87,11 @@ export default class CoursesController extends BaseController {
   }
 
   /**
-   * Show Lessons of ourse with "id"
+   * Show Lessons by course id
    * GET /courses/:id/lessons
    */
   public async showLessons(ctx: HttpContextContract) {
-    const result = await this.courseService.fetchCourseLessons(ctx.params.id);
+    const result = await this.courseService.fetchCourseLessons(ctx.params.id, ctx);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);
@@ -172,12 +174,42 @@ export default class CoursesController extends BaseController {
   }
 
   /**
+   * Attach list of students to course
+   * POST /courses/:id/attach-student-list
+   */
+  public async attachStudentList(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(AttachStudentsValitator);
+    const result = await this.courseService.attachStudentList(ctx.params.id, payload.students);
+
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
+  }
+
+  /**
    * Detach student from course
    * DELETE /courses/:id/detach-student
    */
   public async detachStudent(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(DelCourseFromUserValidator);
     const result = await this.courseService.detachUserCourse(ctx.params.id, payload.student_id);
+
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
+  }
+
+  /**
+   * Detach list of students to course
+   * POST /courses/:id/detach-student-list
+   */
+  public async detachStudentList(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(DetachStudentstValitator);
+    const result = await this.courseService.detachStudentList(ctx.params.id, payload.students);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);

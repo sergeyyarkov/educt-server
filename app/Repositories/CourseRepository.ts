@@ -49,7 +49,7 @@ export default class CourseRepository {
    * @returns List of courses
    */
   public async getAll(params?: FetchCoursesValidator['schema']['props']): Promise<Course[]> {
-    const { status, category_id } = params || {};
+    const { status, category_id, limit } = params || {};
 
     const query = this.Course.query();
 
@@ -61,12 +61,17 @@ export default class CourseRepository {
       query.andWhere('status', status);
     }
 
+    if (limit) {
+      query.limit(limit);
+    }
+
     const courses = await query
       .preload('color')
       .preload('category')
       .withCount('students')
       .withCount('likes')
-      .withCount('lessons');
+      .withCount('lessons')
+      .orderBy('created_at', 'desc');
 
     return courses;
   }
@@ -81,9 +86,12 @@ export default class CourseRepository {
     const course = await this.Course.query()
       .preload('teacher')
       .preload('color')
-      .preload('category')
+      .preload('category', q => q.preload('color'))
       .preload('lessons', q => q.preload('color').orderBy('display_order', 'asc').withCount('materials'))
-      .preload('students')
+      .preload('students', q => q.preload('roles').preload('contacts'))
+      .withCount('likes')
+      .withCount('lessons')
+      .withCount('students')
       .where('id', id)
       .first();
 
@@ -153,8 +161,17 @@ export default class CourseRepository {
    * @param id Course id
    * @returns List of lessons or null
    */
-  public async getLessons(id: string | number): Promise<Lesson[] | null> {
-    const course = await this.Course.query().select('id').preload('lessons').where('id', id).first();
+  public async getLessons(id: string | number, userId: string): Promise<Lesson[] | null> {
+    const course = await this.Course.query()
+      .select('id')
+      .preload('lessons', q =>
+        q
+          .preload('progress', p => p.where('user_id', userId))
+          .preload('color')
+          .orderBy('display_order', 'asc')
+      )
+      .where('id', id)
+      .first();
     return course && course.lessons;
   }
 
@@ -194,6 +211,7 @@ export default class CourseRepository {
 
     course.title = data.title;
     course.description = data.description;
+    course.education_description = data.education_description;
     course.status = data.status;
     course.teacher_id = data.teacher_id;
     course.category_id = data.category_id;
@@ -255,6 +273,7 @@ export default class CourseRepository {
       course.merge({
         title: data.title,
         description: data.description,
+        education_description: data.education_description,
         teacher_id: data.teacher_id,
         category_id: data.category_id,
       });
@@ -269,10 +288,11 @@ export default class CourseRepository {
       /**
        * Load other updated data
        */
-      course.load('category');
-      course.load('teacher');
+      await course.load('category');
+      await course.load('teacher');
 
       await course.save();
+
       return course;
     }
 

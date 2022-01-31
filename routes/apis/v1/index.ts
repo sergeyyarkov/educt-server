@@ -63,6 +63,11 @@ Route.group(() => {
      *
      */
     require('./categories');
+
+    /**
+     * Stat module
+     */
+    require('./stat');
   }).middleware('auth');
 })
   .prefix('v1')

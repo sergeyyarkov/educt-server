@@ -8,6 +8,7 @@ export default class FetchCoursesValidator {
   public schema = schema.create({
     status: schema.enum.optional(Object.values(CourseStatusEnum)),
     category_id: schema.string.optional({}, [rules.exists({ table: 'categories', column: 'id' })]),
+    limit: schema.number.optional(),
   });
 
   public messages = {};

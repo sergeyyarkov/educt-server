@@ -56,7 +56,7 @@ export const StudentFactory = Factory.define(User, ({ faker }) => makeFakeUser(f
 
 export const LessonContentFactory = Factory.define(LessonContent, ({ faker }) => {
   return {
-    video_url: `https://www.youtube.com/embed/${faker.datatype.string(10)}`,
+    body: `${faker.lorem.sentences(40)}`,
   };
 }).build();
 
@@ -87,6 +87,7 @@ export const CourseFactory = Factory.define(Course, ({ faker }) => {
   return {
     title: faker.lorem.sentence(8),
     description: faker.lorem.sentence(20),
+    education_description: faker.lorem.sentence(15),
     status: CourseStatusEnum.PUBLISHED,
   };
 })

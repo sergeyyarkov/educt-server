@@ -76,16 +76,24 @@ export default class UserService {
    */
   public async fetchUsers(params?: any): Promise<IResponse> {
     const users = await this.userRepository.getAll(params);
-
-    return {
+    const result: IResponse = {
       success: true,
       status: HttpStatusEnum.OK,
       message: 'Fetched all users.',
-      data: users.data,
-      meta: {
-        pagination: users.meta,
-      },
+      data: {},
     };
+
+    if (users instanceof Array) {
+      result.data = users;
+      return result;
+    }
+
+    result.data = users.data;
+    result.meta = {
+      pagination: users.meta,
+    };
+
+    return result;
   }
 
   /**
