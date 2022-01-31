@@ -4,16 +4,23 @@
 
 - API deployment with Docker and Nginx web server.
 
-## [1.0.1] - 2021-11-25
+## [1.1.0] - 2022-01-31
+
+### Added
+
+- Cloud storate support (AWS S3)
+- Websocket server with redis session storage (online counter)
+- Videos controller in api (video viewing rights)
+- Categories updating operations
+- Statistics controller in api (online count, lessonc count, courses count)
+- Materials count for each lessons
+- Users pagination
+- Batch actions with students (detaching from course)
 
 ### Fix
 
 - Creating materials for lesson
 - Contacts updating
-
-### Added
-
-- Materials count for each lessons
 
 ## [1.0.0] - 2021-11-25
 
