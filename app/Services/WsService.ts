@@ -59,8 +59,20 @@ class WsService {
     });
     this.sessionStore = new RedisSessionStore(Redis.connection('session'));
 
-    this.setupMiddlewares();
-    this.listen();
+    /**
+     * Clean up sessions before start
+     */
+    this.sessionStore.destroyAllSessions().then(() => {
+      /**
+       * Middlewares
+       */
+      this.setupMiddlewares();
+
+      /**
+       * On connection socket
+       */
+      this.listen();
+    });
   }
 
   private listen() {

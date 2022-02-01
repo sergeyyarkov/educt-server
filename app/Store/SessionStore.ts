@@ -25,6 +25,20 @@ class RedisSessionStore {
     };
   }
 
+  private async scanSessionKeys(): Promise<Set<string>> {
+    const keys = new Set<string>();
+    let nextIndex = 0;
+
+    do {
+      // eslint-disable-next-line no-await-in-loop
+      const [nextIndexAsStr, result] = await this.redisClient.scan(nextIndex, 'MATCH', '*', 'COUNT', 100);
+      nextIndex = parseInt(nextIndexAsStr, 10);
+      result.forEach(s => keys.add(s));
+    } while (nextIndex !== 0);
+
+    return keys;
+  }
+
   /**
    * Return session data by session id
    *
@@ -40,15 +54,7 @@ class RedisSessionStore {
    * Returns the all sessions from store
    */
   public async getSessions(): Promise<Array<SessionDataType | undefined>> {
-    const keys = new Set<string>();
-    let nextIndex = 0;
-
-    do {
-      // eslint-disable-next-line no-await-in-loop
-      const [nextIndexAsStr, result] = await this.redisClient.scan(nextIndex, 'MATCH', '*', 'COUNT', 100);
-      nextIndex = parseInt(nextIndexAsStr, 10);
-      result.forEach(s => keys.add(s));
-    } while (nextIndex !== 0);
+    const keys = await this.scanSessionKeys();
     const commands = Array.from(keys).map(key => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [prefix, ...id] = key.split('-');
@@ -99,6 +105,27 @@ class RedisSessionStore {
 
     if (session) {
       return this.redisClient.del(id);
+    }
+
+    return 0;
+  }
+
+  /**
+   * Remove all sessions from redis store
+   *
+   * @returns Count of deleted sessions
+   */
+  public async destroyAllSessions() {
+    const keys = await this.scanSessionKeys().then(values =>
+      Array.from(values).map(v => {
+        const [, ...key] = v.split('-');
+        return key.join('-');
+      })
+    );
+
+    if (keys.length > 0) {
+      const deleted = await this.redisClient.del(keys);
+      return deleted;
     }
 
     return 0;

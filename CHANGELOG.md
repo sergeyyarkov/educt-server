@@ -4,6 +4,12 @@
 
 - API deployment with Docker and Nginx web server.
 
+## [1.1.1] -
+
+### Fix
+
+- Cleaning up session store before starting websocket server
+
 ## [1.1.0] - 2022-01-31
 
 ### Added
