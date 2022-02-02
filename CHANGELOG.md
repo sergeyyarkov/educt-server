@@ -6,6 +6,10 @@
 
 ## [1.1.1] -
 
+## Added
+
+- About description for user and `last_login` column date
+
 ### Fix
 
 - Cleaning up session store before starting websocket server
