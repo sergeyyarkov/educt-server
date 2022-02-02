@@ -70,7 +70,15 @@ export default class AuthService {
       userName: user.fullname,
     });
 
+    /**
+     * Set cookie toke to response
+     */
     ctx.response.cookie('token', token.token);
+
+    /**
+     * Save last login date
+     */
+    await this.userRepository.updateLastLogin(user.id);
 
     return {
       success: true,

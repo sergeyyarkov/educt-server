@@ -2,6 +2,7 @@ import Route from '@ioc:Adonis/Core/Route';
 
 Route.group(() => {
   Route.get('/', 'Api/v1/MeController.show').middleware('role:admin,teacher,student').as('me.show');
+  Route.patch('/info', 'Api/v1/MeController.updateInfo').middleware('role:admin,teacher,student').as('me.update-info');
   Route.patch('/email', 'Api/v1/MeController.changeEmail')
     .middleware('role:admin,teacher,student')
     .as('me.change-email');

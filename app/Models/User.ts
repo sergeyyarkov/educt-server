@@ -70,6 +70,12 @@ export default class User extends BaseModel {
   })
   public lessons_progress: HasMany<typeof LessonProgress>;
 
+  @column()
+  public about: string | null;
+
+  @column.dateTime()
+  public last_login: DateTime | null;
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime;
 

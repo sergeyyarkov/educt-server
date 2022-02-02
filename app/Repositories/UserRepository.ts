@@ -1,4 +1,5 @@
 import Hash from '@ioc:Adonis/Core/Hash';
+import { DateTime } from 'luxon';
 
 /**
  * Models
@@ -11,6 +12,7 @@ import Role from 'App/Models/Role';
  */
 import CreateUserValidator from 'App/Validators/User/CreateUserValidator';
 import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator';
+import UpdateUserInfoValidator from 'App/Validators/User/UpdateUserInfoValidator';
 
 export default class UserRepository {
   private User: typeof User;
@@ -154,6 +156,31 @@ export default class UserRepository {
     if (user) {
       await user.merge(updatedFields).save();
       return user;
+    }
+
+    return null;
+  }
+
+  /**
+   * Updates the time of last login column in database for user
+   *
+   * @param id User id
+   */
+  public async updateLastLogin(id: number | string) {
+    await this.User.query().where('id', id).update({ last_login: DateTime.now() }).first();
+  }
+
+  /**
+   * Update personal info of user
+   *
+   * @param data New fields
+   */
+  public async updateInfo(id: string | number, data: UpdateUserInfoValidator['schema']['props']) {
+    const user = await this.User.query().preload('contacts').preload('roles').where('id', id).first();
+
+    if (user) {
+      await user.merge(data).save();
+      return { about: user.about };
     }
 
     return null;

@@ -8,9 +8,11 @@ export default class Users extends BaseSchema {
       table.string('id', 21).primary();
       table.string('first_name', 24).notNullable();
       table.string('last_name', 24).notNullable();
+      table.text('about');
       table.string('login', 128).notNullable().unique();
       table.string('email').notNullable().unique();
       table.string('password').notNullable();
+      table.timestamp('last_login', { useTz: true });
       table.timestamp('created_at', { useTz: true });
       table.timestamp('updated_at', { useTz: true });
     });

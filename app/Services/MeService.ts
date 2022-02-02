@@ -13,6 +13,7 @@ import UpdateContactsValidator from 'App/Validators/Contacts/UpdateContactsValid
 import CodeErrorEnum from 'App/Datatypes/Enums/CodeErrorEnum';
 import RoleHelper from 'App/Helpers/RoleHelper';
 import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
+import UpdateUserInfoValidator from 'App/Validators/User/UpdateUserInfoValidator';
 
 @inject()
 export default class MeService {
@@ -277,6 +278,37 @@ export default class MeService {
       status: HttpStatusEnum.OK,
       message: 'User contacts updated.',
       data: user.contacts,
+    };
+  }
+
+  public async updateUserInfo(
+    data: UpdateUserInfoValidator['schema']['props'],
+    auth: AuthContract
+  ): Promise<IResponse> {
+    const user = await auth.use(this.authGuard).authenticate();
+    const info = await this.userRepository.updateInfo(user.id, data);
+
+    if (info) {
+      const { about } = info;
+
+      return {
+        success: true,
+        status: HttpStatusEnum.OK,
+        message: 'User info updated.',
+        data: {
+          about,
+        },
+      };
+    }
+
+    return {
+      success: false,
+      status: HttpStatusEnum.SERVICE_UNAVAILABLE,
+      message: 'Cannot update personal info.',
+      data: {},
+      error: {
+        code: 'E_SERVICE_UNAVAILABLE',
+      },
     };
   }
 }
