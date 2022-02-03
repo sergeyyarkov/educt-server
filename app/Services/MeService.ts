@@ -248,9 +248,9 @@ export default class MeService {
   /**
    * Update user conctact
    *
-   * @param data Data to update
+   * @param data Fields to update
    * @param auth AuthContract
-   * @returns Updated user contacts
+   * @returns IResponse
    */
   public async updateUserContacts(
     data: UpdateContactsValidator['schema']['props'],
@@ -281,34 +281,59 @@ export default class MeService {
     };
   }
 
+  /**
+   * Update info about user
+   *
+   * @param data Fields to update
+   * @param auth AuthContract
+   * @returns IResponse
+   */
   public async updateUserInfo(
     data: UpdateUserInfoValidator['schema']['props'],
     auth: AuthContract
   ): Promise<IResponse> {
     const user = await auth.use(this.authGuard).authenticate();
-    const info = await this.userRepository.updateInfo(user.id, data);
 
-    if (info) {
-      const { about } = info;
-
+    if (Object.keys(data).length === 0) {
       return {
-        success: true,
-        status: HttpStatusEnum.OK,
-        message: 'User info updated.',
-        data: {
-          about,
+        success: false,
+        status: HttpStatusEnum.BAD_REQUEST,
+        message: 'You must specify at least one field.',
+        data: {},
+        error: {
+          code: 'E_BAD_REQUEST',
         },
       };
     }
 
+    /**
+     * Personal info updating
+     */
+    if (data.about !== undefined) {
+      await this.userRepository.updateInfo(user.id, data);
+    }
+
+    /**
+     * Contacts updating
+     */
+    if (data.phone_number !== undefined || data.twitter_id !== undefined || data.telegram_id !== undefined) {
+      const contacts = await this.contactRepository.update(user, {
+        phone_number: data.phone_number,
+        twitter_id: data.twitter_id,
+        telegram_id: data.telegram_id,
+        vk_id: data.vk_id,
+      });
+
+      if (!contacts) {
+        await this.contactRepository.create(user, data);
+      }
+    }
+
     return {
-      success: false,
-      status: HttpStatusEnum.SERVICE_UNAVAILABLE,
-      message: 'Cannot update personal info.',
-      data: {},
-      error: {
-        code: 'E_SERVICE_UNAVAILABLE',
-      },
+      success: true,
+      status: HttpStatusEnum.OK,
+      message: 'User contacts updated.',
+      data: { ...data },
     };
   }
 }

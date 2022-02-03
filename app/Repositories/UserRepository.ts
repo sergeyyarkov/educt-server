@@ -177,9 +177,10 @@ export default class UserRepository {
    */
   public async updateInfo(id: string | number, data: UpdateUserInfoValidator['schema']['props']) {
     const user = await this.User.query().preload('contacts').preload('roles').where('id', id).first();
+    const { about } = data;
 
     if (user) {
-      await user.merge(data).save();
+      await user.merge({ about }).save();
       return { about: user.about };
     }
 
