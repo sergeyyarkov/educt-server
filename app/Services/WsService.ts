@@ -19,7 +19,7 @@ export interface ServerToClientEvents {
    */
   'user:session': (data: { sessionId: string | undefined; userId: string | undefined }) => void;
   'user:connected': (data: { userId: string; userName: string }) => void;
-  'user:online': (data: number) => void;
+  'user:online': (data: string[]) => void;
 }
 
 export interface ClientToServerEvents {

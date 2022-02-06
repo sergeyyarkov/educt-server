@@ -9,6 +9,7 @@
 ## Added
 
 - About description for user and `last_login` column date
+- Updating info api route of authorized user
 
 ### Fix
 

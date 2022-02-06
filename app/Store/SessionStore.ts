@@ -57,7 +57,7 @@ class RedisSessionStore {
     const keys = await this.scanSessionKeys();
     const commands = Array.from(keys).map(key => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const [prefix, ...id] = key.split('-');
+      const [, ...id] = key.split('-');
       return ['hmget', id.join('-'), 'userId', 'userName', 'connected'];
     });
 
@@ -70,11 +70,11 @@ class RedisSessionStore {
   /**
    * Returns the unique sessions with connected flag `true`
    */
-  public async getOnlineSessionsCount() {
+  public async getOnlineSessions() {
     const sessions = await this.getSessions();
-    const online = new Set(sessions.filter(s => s?.connected === true).map(s => s?.userId));
+    const online = new Set(sessions.filter((s): s is SessionDataType => s?.connected === true).map(s => s?.userId));
 
-    return online.size;
+    return Array.from(online);
   }
 
   /**

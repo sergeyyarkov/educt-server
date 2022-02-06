@@ -23,9 +23,8 @@ export default class OnlineController {
     this.socket.on('disconnect', reason => this.onDisconnected(reason));
   }
 
-  public sendOnlineCount(online: number) {
-    this.socket.emit('user:online', online);
-    this.socket.broadcast.emit('user:online', online);
+  public sendOnline(online: string[]) {
+    this.io.sockets.emit('user:online', online);
   }
 
   public setUserOnline() {
@@ -37,8 +36,8 @@ export default class OnlineController {
        */
       this.sessionStore
         .saveSession(sessionId, { userId, userName, connected: true })
-        .then(() => this.sessionStore.getOnlineSessionsCount())
-        .then(online => this.sendOnlineCount(online));
+        .then(() => this.sessionStore.getOnlineSessions())
+        .then(online => this.sendOnline(online));
     }
   }
 
@@ -54,7 +53,7 @@ export default class OnlineController {
          */
         this.sessionStore
           .saveSession(sessionId, { userId, userName, connected: false })
-          .then(() => this.sessionStore.getOnlineSessionsCount())
+          .then(() => this.sessionStore.getOnlineSessions())
           .then(online => this.socket.broadcast.emit('user:online', online));
       }
     }
