@@ -15,5 +15,7 @@ export default class UpdateUserInfoValidator {
     telegram_id: schema.string.nullableAndOptional({}, [rules.regex(/(^|[^@\w])@(\w{1,64})\b/)]),
   });
 
-  public messages = {};
+  public messages = {
+    'phone_number.unique': 'This phone number is not available.',
+  };
 }
