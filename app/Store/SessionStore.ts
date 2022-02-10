@@ -72,7 +72,13 @@ class RedisSessionStore {
    */
   public async getOnlineSessions() {
     const sessions = await this.getSessions();
-    const online = new Set(sessions.filter((s): s is SessionDataType => s?.connected === true).map(s => s?.userId));
+    const online = new Map<string, { userId: string; userName: string }>();
+
+    sessions.forEach(s => {
+      if (s?.connected === true) {
+        online.set(s.userId, s);
+      }
+    });
 
     return Array.from(online);
   }

@@ -23,7 +23,7 @@ export default class OnlineController {
     this.socket.on('disconnect', reason => this.onDisconnected(reason));
   }
 
-  public sendOnline(online: string[]) {
+  public sendOnline(online: [string, { userId: string; userName: string }][]) {
     this.io.sockets.emit('user:online', online);
   }
 

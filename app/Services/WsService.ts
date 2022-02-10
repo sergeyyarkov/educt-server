@@ -19,7 +19,12 @@ export interface ServerToClientEvents {
    */
   'user:session': (data: { sessionId: string | undefined; userId: string | undefined }) => void;
   'user:connected': (data: { userId: string; userName: string }) => void;
-  'user:online': (data: string[]) => void;
+  'user:online': (data: [string, { userId: string; userName: string }][]) => void;
+
+  /**
+   * Message
+   */
+  'message:private': (data: { content: string; from: string; to: string }) => void;
 }
 
 export interface ClientToServerEvents {
@@ -28,6 +33,11 @@ export interface ClientToServerEvents {
    */
   'user:logout': () => void;
   'user:status': () => void;
+
+  /**
+   * Message
+   */
+  'message:private': (data: { content: string; to: string }) => void;
 }
 
 export interface InterServerEvents {}
@@ -76,17 +86,27 @@ class WsService {
   }
 
   private listen() {
-    this.io.on('connection', socket => {
+    this.io.on('connection', async socket => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const onlineController = new OnlineController(socket, this.io, this.sessionStore);
 
       const { sessionId, userId, userName } = socket.data;
       const isExistSocketData = !!(sessionId && userId && userName);
 
+      if (isExistSocketData) {
+        socket.join(userId);
+      }
+
       /**
        * Send session to client
        */
       socket.emit('user:session', { sessionId: socket.data.sessionId, userId: socket.data.userId });
+
+      socket.on('message:private', ({ content, to }) => {
+        if (isExistSocketData) {
+          this.io.to(to).emit('message:private', { content, from: userId, to });
+        }
+      });
 
       /**
        * Destroy session on user logout request
