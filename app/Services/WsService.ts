@@ -12,6 +12,7 @@ import OnlineController from 'App/Controllers/Ws/OnlineController';
  */
 import AuthMiddleware from 'App/Middleware/Ws/Auth';
 import RedisSessionStore from 'App/Store/SessionStore';
+import { DateTime } from 'luxon';
 
 export interface ServerToClientEvents {
   /**
@@ -22,9 +23,9 @@ export interface ServerToClientEvents {
   'user:online': (data: [string, { userId: string; userName: string }][]) => void;
 
   /**
-   * Message
+   * Chat
    */
-  'message:private': (data: { content: string; from: string; to: string }) => void;
+  'chat:message': (data: { content: string; time: string; from: string; to: string }) => void;
 }
 
 export interface ClientToServerEvents {
@@ -35,9 +36,9 @@ export interface ClientToServerEvents {
   'user:status': () => void;
 
   /**
-   * Message
+   * Chat
    */
-  'message:private': (data: { content: string; to: string }) => void;
+  'chat:message': (data: { content: string; to: string }) => void;
 }
 
 export interface InterServerEvents {}
@@ -102,9 +103,9 @@ class WsService {
        */
       socket.emit('user:session', { sessionId: socket.data.sessionId, userId: socket.data.userId });
 
-      socket.on('message:private', ({ content, to }) => {
+      socket.on('chat:message', ({ content, to }) => {
         if (isExistSocketData) {
-          this.io.to(to).emit('message:private', { content, from: userId, to });
+          this.io.to(to).emit('chat:message', { content, from: userId, to, time: DateTime.now().toISO() });
         }
       });
 
