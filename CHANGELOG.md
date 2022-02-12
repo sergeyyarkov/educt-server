@@ -8,11 +8,13 @@
 
 ## Added
 
+- Chat between users. (chat history).
 - About description for user and `last_login` column date
 - Updating info api route of authorized user
 
 ### Fix
 
+- Fixed updating user info
 - Cleaning up session store before starting websocket server
 
 ## [1.1.0] - 2022-01-31

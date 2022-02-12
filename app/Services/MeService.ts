@@ -314,6 +314,7 @@ export default class MeService {
     auth: AuthContract
   ): Promise<IResponse> {
     const user = await auth.use(this.authGuard).authenticate();
+    const { about, ...newContacts } = data;
 
     if (Object.keys(data).length === 0) {
       return {
@@ -330,7 +331,7 @@ export default class MeService {
     /**
      * Personal info updating
      */
-    if (data.about !== undefined) {
+    if (about !== undefined) {
       await this.userRepository.updateInfo(user.id, data);
     }
 
@@ -338,15 +339,10 @@ export default class MeService {
      * Contacts updating
      */
     if (data.phone_number !== undefined || data.twitter_id !== undefined || data.telegram_id !== undefined) {
-      const contacts = await this.contactRepository.update(user, {
-        phone_number: data.phone_number,
-        twitter_id: data.twitter_id,
-        telegram_id: data.telegram_id,
-        vk_id: data.vk_id,
-      });
+      const contacts = await this.contactRepository.update(user, newContacts);
 
       if (!contacts) {
-        await this.contactRepository.create(user, data);
+        await this.contactRepository.create(user, newContacts);
       }
     }
 
