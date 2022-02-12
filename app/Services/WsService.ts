@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
 import Redis from '@ioc:Adonis/Addons/Redis';
 import AdonisServer from '@ioc:Adonis/Core/Server';
+import { DateTime } from 'luxon';
 
 /**
  * Controllers
@@ -11,8 +12,12 @@ import OnlineController from 'App/Controllers/Ws/OnlineController';
  * Middlewares
  */
 import AuthMiddleware from 'App/Middleware/Ws/Auth';
+
+/**
+ * Stores
+ */
 import RedisSessionStore from 'App/Store/SessionStore';
-import { DateTime } from 'luxon';
+import RedisMessageStore from 'App/Store/MessageStore';
 
 export interface ServerToClientEvents {
   /**
@@ -54,6 +59,8 @@ class WsService {
 
   public sessionStore: RedisSessionStore;
 
+  public messageStore: RedisMessageStore;
+
   public booted = false;
 
   public boot() {
@@ -68,7 +75,12 @@ class WsService {
         credentials: true,
       },
     });
+
+    /**
+     * Stores
+     */
     this.sessionStore = new RedisSessionStore(Redis.connection('session'));
+    this.messageStore = new RedisMessageStore(Redis.connection('message'));
 
     /**
      * Clean up sessions before start
@@ -103,9 +115,17 @@ class WsService {
        */
       socket.emit('user:session', { sessionId: socket.data.sessionId, userId: socket.data.userId });
 
-      socket.on('chat:message', ({ content, to }) => {
+      socket.on('chat:message', async ({ content, to }) => {
         if (isExistSocketData) {
-          this.io.to(to).emit('chat:message', { content, from: userId, to, time: DateTime.now().toISO() });
+          const message = {
+            content,
+            from: userId,
+            to,
+            time: DateTime.now().toISO(),
+          };
+
+          await this.messageStore.add(userId, to, message);
+          this.io.to(to).emit('chat:message', message);
         }
       });
 

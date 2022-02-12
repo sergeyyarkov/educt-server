@@ -124,6 +124,20 @@ export default class MeController extends BaseController {
 
     return this.sendResponse(ctx, result.data, result.message, result.status);
   }
+
+  /**
+   * Get messages of conversation by chat id
+   * GET /me/messages
+   */
+  public async chatHistory(ctx: HttpContextContract) {
+    const result = await this.meService.fetchChatHistory(ctx.params.chat_id, ctx.auth);
+
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
+  }
 }
 
 new Ioc().make(MeController);

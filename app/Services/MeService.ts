@@ -5,15 +5,36 @@ import Redis from '@ioc:Adonis/Addons/Redis';
 import Mail from '@ioc:Adonis/Addons/Mail';
 import Hash from '@ioc:Adonis/Core/Hash';
 import Logger from '@ioc:Adonis/Core/Logger';
+
+/**
+ * Datatypes
+ */
+import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
 import HttpStatusEnum from 'App/Datatypes/Enums/HttpStatusEnum';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
+import CodeErrorEnum from 'App/Datatypes/Enums/CodeErrorEnum';
+
+/**
+ * Repositories
+ */
 import ContactRepository from 'App/Repositories/ContactRepository';
 import UserRepository from 'App/Repositories/UserRepository';
-import UpdateContactsValidator from 'App/Validators/Contacts/UpdateContactsValidator';
-import CodeErrorEnum from 'App/Datatypes/Enums/CodeErrorEnum';
-import RoleHelper from 'App/Helpers/RoleHelper';
-import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
+
+/**
+ * Validator
+ */
 import UpdateUserInfoValidator from 'App/Validators/User/UpdateUserInfoValidator';
+import UpdateContactsValidator from 'App/Validators/Contacts/UpdateContactsValidator';
+
+/**
+ * Helpers
+ */
+import RoleHelper from 'App/Helpers/RoleHelper';
+
+/**
+ * Services
+ */
+import Ws from './WsService';
 
 @inject()
 export default class MeService {
@@ -334,6 +355,41 @@ export default class MeService {
       status: HttpStatusEnum.OK,
       message: 'User contacts updated.',
       data: { ...data },
+    };
+  }
+
+  /**
+   * Fetch history of chat
+   *
+   * @param chatId Id of user
+   * @param auth AuthContract
+   * @returns IResponse
+   */
+  public async fetchChatHistory(chatId: string, auth: AuthContract): Promise<IResponse> {
+    const firstUser = await auth.use(this.authGuard).authenticate();
+    const secondUser = await this.userRepository.getById(chatId);
+
+    if (!secondUser) {
+      return {
+        success: false,
+        status: HttpStatusEnum.NOT_FOUND,
+        message: 'Chat not found.',
+        data: {},
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    const history = await Ws.messageStore.getHistory(firstUser.id, secondUser.id);
+
+    return {
+      success: true,
+      status: HttpStatusEnum.OK,
+      message: 'Chat history fetched.',
+      data: {
+        history,
+      },
     };
   }
 }
