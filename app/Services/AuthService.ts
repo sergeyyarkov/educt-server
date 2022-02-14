@@ -66,6 +66,7 @@ export default class AuthService {
      */
     const token = await ctx.auth.use(this.authGuard).generate(user, {
       expiresIn: '1d',
+      userId: user.id,
       userRoles: user.roles.map(role => role.slug),
       userName: user.fullname,
     });
