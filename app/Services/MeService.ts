@@ -77,11 +77,16 @@ export default class MeService {
       });
     }
 
+    const notifications = await Ws.notificationStore.getNotifications(user.id);
+
     return {
       success: true,
       status: HttpStatusEnum.OK,
       message: 'Fetched authorized user data.',
-      data: user,
+      data: {
+        ...user.toJSON(),
+        notifications,
+      },
     };
   }
 

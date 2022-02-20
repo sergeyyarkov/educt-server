@@ -10,5 +10,6 @@ declare module '@ioc:Adonis/Addons/Redis' {
     local: RedisConnectionConfig;
     session: RedisConnectionConfig;
     message: RedisConnectionConfig;
+    notification: RedisConnectionConfig;
   }
 }

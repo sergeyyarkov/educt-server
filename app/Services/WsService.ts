@@ -18,6 +18,7 @@ import AuthMiddleware from 'App/Middleware/Ws/Auth';
  */
 import RedisSessionStore from 'App/Store/SessionStore';
 import RedisMessageStore from 'App/Store/MessageStore';
+import RedisNotificationStore from 'App/Store/NotificationStore';
 
 export interface ServerToClientEvents {
   /**
@@ -61,6 +62,8 @@ class WsService {
 
   public messageStore: RedisMessageStore;
 
+  public notificationStore: RedisNotificationStore;
+
   public booted = false;
 
   public boot() {
@@ -81,6 +84,7 @@ class WsService {
      */
     this.sessionStore = new RedisSessionStore(Redis.connection('session'));
     this.messageStore = new RedisMessageStore(Redis.connection('message'));
+    this.notificationStore = new RedisNotificationStore(Redis.connection('notification'));
 
     /**
      * Clean up sessions before start
@@ -125,6 +129,7 @@ class WsService {
           };
 
           await this.messageStore.add(userId, to, message);
+          await this.notificationStore.add(to, `You received a new message.`);
           this.io.to(to).emit('chat:message', message);
         }
       });
