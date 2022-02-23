@@ -11,6 +11,7 @@ type MessageDataType = {
 };
 
 const MESSAGE_TTL = 185 * 24 * 60 * 60; // 185 days
+const MAX_MESSAGES_HISTORY = 100;
 
 class RedisMessageStore {
   public redisClient: RedisConnectionContract;
@@ -37,7 +38,14 @@ class RedisMessageStore {
         .exec();
 
       const convKey = this.createConversationKey(firstUserId, secondUserId);
+      const msgKeys = await this.redisClient.lrange(convKey, 0, -1);
+
       await this.redisClient.lpush(convKey, msgKey);
+
+      if (msgKeys.length >= MAX_MESSAGES_HISTORY) {
+        const deletedMsgKey = await this.redisClient.rpop(convKey);
+        await this.redisClient.del(`message:${deletedMsgKey}`);
+      }
 
       return 'OK';
     } catch (error) {

@@ -31,7 +31,7 @@ export interface ServerToClientEvents {
   /**
    * Chat
    */
-  'chat:message': (data: { content: string; time: string; from: string; to: string }) => void;
+  'chat:message': (data: { content: string; time: string; from: string; to: string; notificationId: string }) => void;
 }
 
 export interface ClientToServerEvents {
@@ -129,8 +129,9 @@ class WsService {
           };
 
           await this.messageStore.add(userId, to, message);
-          await this.notificationStore.add(to, `You received a new message.`);
-          this.io.to(to).emit('chat:message', message);
+
+          const notification = await this.notificationStore.add(to, `You received a new private message`, 'MESSAGE');
+          this.io.to(to).emit('chat:message', { ...message, notificationId: notification.id });
         }
       });
 

@@ -8,6 +8,7 @@
 
 ## Added
 
+- Saving latest notifications about new messages
 - Chat between users. (chat history).
 - About description for user and `last_login` column date
 - Updating info api route of authorized user

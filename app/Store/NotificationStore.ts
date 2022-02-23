@@ -5,6 +5,8 @@ import { nanoid } from 'nanoid';
 const NOTIFICATION_TTL = 185 * 24 * 60 * 60; // 185 days
 
 type NotificationType = {
+  id: string;
+  type: 'SYSTEM' | 'MESSAGE';
   content: string;
   time: string;
 };
@@ -16,25 +18,25 @@ class RedisNotificationStore {
     this.redisClient = redisClient;
   }
 
-  public async add(userId: string, message: string): Promise<'OK' | 'ERROR'> {
+  public async add(userId: string, content: string, type: NotificationType['type']): Promise<NotificationType> {
     try {
-      const key = `notification:${nanoid()}`;
+      const id = nanoid();
+      const key = `notification:${id}`;
       const timestamp = Date.now();
+      const notification = {
+        id,
+        content,
+        time: new Date(timestamp).toISOString(),
+        type,
+      };
 
       await this.redisClient.zadd(`user:${userId}`, timestamp, key);
-      await this.redisClient
-        .multi()
-        .hmset(key, {
-          content: message,
-          time: new Date(timestamp).toISOString(),
-        })
-        .expire(key, NOTIFICATION_TTL)
-        .exec();
+      await this.redisClient.multi().hmset(key, notification).expire(key, NOTIFICATION_TTL).exec();
 
-      return 'OK';
+      return notification;
     } catch (error) {
       Logger.error(error);
-      return 'ERROR';
+      return Promise.reject(error);
     }
   }
 
