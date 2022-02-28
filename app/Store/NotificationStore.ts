@@ -50,6 +50,14 @@ class RedisNotificationStore {
     const notification = (await this.redisClient.hgetall(key)) as NotificationType;
     return notification;
   }
+
+  public async del(userId: string, keys: string[]): Promise<number> {
+    const k = keys.map(v => `notification:${v}`);
+    const count = await this.redisClient.zrem(`user:${userId}`, k);
+    await this.redisClient.del(k);
+
+    return count;
+  }
 }
 
 export default RedisNotificationStore;

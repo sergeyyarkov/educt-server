@@ -31,7 +31,13 @@ export interface ServerToClientEvents {
   /**
    * Chat
    */
-  'chat:message': (data: { content: string; time: string; from: string; to: string; notificationId: string }) => void;
+  'chat:message': (data: {
+    content: string;
+    time: string;
+    from: string;
+    to: string;
+    notificationId?: string | undefined;
+  }) => void;
 }
 
 export interface ClientToServerEvents {
@@ -45,6 +51,11 @@ export interface ClientToServerEvents {
    * Chat
    */
   'chat:message': (data: { content: string; to: string }) => void;
+
+  /**
+   * Notification
+   */
+  'notification:read': (data: { userId: string; ids: string[] }) => void;
 }
 
 export interface InterServerEvents {}
@@ -130,10 +141,16 @@ class WsService {
 
           await this.messageStore.add(userId, to, message);
 
-          const notification = await this.notificationStore.add(to, `You received a new private message`, 'MESSAGE');
-          this.io.to(to).emit('chat:message', { ...message, notificationId: notification.id });
+          if (userId !== to) {
+            const notification = await this.notificationStore.add(to, `You received a new private message`, 'MESSAGE');
+            this.io.to(to).emit('chat:message', { ...message, notificationId: notification.id });
+          } else {
+            this.io.to(to).emit('chat:message', { ...message });
+          }
         }
       });
+
+      socket.on('notification:read', data => this.notificationStore.del(data.userId, data.ids));
 
       /**
        * Destroy session on user logout request
