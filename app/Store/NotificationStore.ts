@@ -52,6 +52,8 @@ class RedisNotificationStore {
   }
 
   public async del(userId: string, keys: string[]): Promise<number> {
+    if (keys.length === 0) return 0;
+
     const k = keys.map(v => `notification:${v}`);
     const count = await this.redisClient.zrem(`user:${userId}`, k);
     await this.redisClient.del(k);
