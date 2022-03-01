@@ -68,6 +68,11 @@ Route.group(() => {
      * Stat module
      */
     require('./stat');
+
+    /**
+     * Chat module
+     */
+    require('./chat');
   }).middleware('auth');
 })
   .prefix('v1')

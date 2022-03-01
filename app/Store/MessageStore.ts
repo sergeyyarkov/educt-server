@@ -1,5 +1,6 @@
 import { RedisConnectionContract } from '@ioc:Adonis/Addons/Redis';
 import Logger from '@ioc:Adonis/Core/Logger';
+import User from 'App/Models/User';
 import { DateTime } from 'luxon';
 import { nanoid } from 'nanoid';
 
@@ -8,6 +9,12 @@ type MessageDataType = {
   to: string;
   content: string;
   time: string;
+};
+
+export type ConversationType = {
+  userId: string;
+  fullname: string;
+  lastMessage: MessageDataType;
 };
 
 const MESSAGE_TTL = 185 * 24 * 60 * 60; // 185 days
@@ -62,6 +69,40 @@ class RedisMessageStore {
     return messages.sort((m1, m2) => new Date(m1.time).valueOf() - new Date(m2.time).valueOf());
   }
 
+  public async getConversations(userId: string): Promise<ConversationType[]> {
+    /**
+     * Getting conversations that had some message history
+     */
+    const conversations = await this.redisClient.keys(`conversation:*${userId}*`);
+    const userIds = conversations
+      .map(id => id.split(':')[1])
+      .map(id => (userId !== id.split('&')[0] ? id.split('&')[0] : id.split('&')[1]));
+
+    /**
+     * Fetch this users
+     */
+    const users = await User.query().select('id', 'first_name', 'last_name').where('id', 'in', userIds);
+
+    /**
+     * Fetch last message of each conversation
+     */
+    const result = await Promise.all(
+      users.map(async u => {
+        const convKey = this.createConversationKey(userId, u.id);
+        const msgKey = await this.redisClient.lindex(convKey, 0);
+        const lastMessage = await this.getMessage(`message:${msgKey}`);
+
+        return {
+          userId: u.id,
+          fullname: `${u.first_name} ${u.last_name}`,
+          lastMessage,
+        };
+      })
+    );
+
+    return result;
+  }
+
   private async getMessage(key: string): Promise<MessageDataType> {
     const message = (await this.redisClient.hgetall(key)) as MessageDataType;
     return message;
@@ -70,7 +111,7 @@ class RedisMessageStore {
   // eslint-disable-next-line class-methods-use-this
   private createConversationKey(userId1: string, userId2: string): string {
     const [id1, id2] = [userId1, userId2].sort();
-    return `conversation:${id1}-${id2}`;
+    return `conversation:${id1}&${id2}`;
   }
 }
 
