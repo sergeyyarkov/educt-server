@@ -1,3 +1,5 @@
+import './routes/index';
+
 /**
  * API v1
  */
