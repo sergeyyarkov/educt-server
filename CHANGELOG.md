@@ -4,17 +4,19 @@
 
 - API deployment with Docker and Nginx web server.
 
-## [1.1.1] -
+## [1.2.1] - 2022-03-06
 
 ## Added
 
 - Saving latest notifications about new messages
-- Chat between users. (chat history).
-- About description for user and `last_login` column date
+- Saving recent conversation messages based on constant (now 100)
+- Simple chat implementation between users
+- Added `about` and `last_login` columns for user
 - Updating info api route of authorized user
 
 ### Fix
 
+- Refactored routes import
 - Fixed updating user info
 - Cleaning up session store before starting websocket server
 
