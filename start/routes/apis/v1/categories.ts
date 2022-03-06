@@ -6,4 +6,6 @@ Route.group(() => {
   Route.post('/', 'Api/v1/CategoriesController.create').middleware('role:admin,teacher').as('categories.create');
   Route.delete('/:id', 'Api/v1/CategoriesController.delete').middleware('role:admin,teacher').as('categories.delete');
   Route.patch('/:id', 'Api/v1/CategoriesController.update').middleware('role:admin,teacher').as('categories.update');
-}).prefix('categories');
+})
+  .prefix('api/v1/categories')
+  .middleware('auth');

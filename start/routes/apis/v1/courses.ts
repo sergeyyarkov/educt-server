@@ -61,4 +61,6 @@ Route.group(() => {
   Route.get('/:id/lessons-progress', 'Api/v1/CoursesController.getLessonsProgress')
     .middleware('role:admin,teacher,student')
     .as('courses.get-lessons-progress');
-}).prefix('courses');
+})
+  .prefix('api/v1/courses')
+  .middleware('auth');

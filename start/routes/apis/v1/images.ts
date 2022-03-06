@@ -5,4 +5,6 @@ Route.group(() => {
   Route.delete('/:id', 'Api/v1/ImagesController.delete').as('images.delete');
   Route.get('/', 'Api/v1/ImagesController.list').as('images.list');
   Route.get('/:id', 'Api/v1/ImagesController.show').as('images.show');
-}).prefix('images');
+})
+  .prefix('api/v1/images')
+  .middleware('auth');

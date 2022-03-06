@@ -4,4 +4,6 @@ Route.group(() => {
   Route.get('/conversations', 'Api/v1/ChatController.getConversations')
     .middleware('role:admin,teacher,student')
     .as('chat.get-conversations');
-}).prefix('chat');
+})
+  .prefix('api/v1/chat')
+  .middleware('auth');

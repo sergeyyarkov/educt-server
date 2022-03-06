@@ -18,4 +18,6 @@ Route.group(() => {
   Route.patch('/contacts', 'Api/v1/MeController.updateContacts')
     .middleware('role:admin,teacher,student')
     .as('me.update-contacts');
-}).prefix('me');
+})
+  .prefix('api/v1/me')
+  .middleware('auth');
