@@ -1,6 +1,6 @@
 {
   "name": "server",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "private": true,
   "scripts": {
     "build": "node ace build --production",
@@ -40,7 +40,7 @@
     "@adonisjs/drive-s3": "^1.0.5",
     "@adonisjs/lucid": "^16.3.2",
     "@adonisjs/mail": "^7.2.4",
-    "@adonisjs/redis": "^7.0.9",
+    "@adonisjs/redis": "^7.1.0",
     "@adonisjs/repl": "^3.1.7",
     "@adonisjs/view": "^6.1.1",
     "@types/socket.io": "^3.0.2",

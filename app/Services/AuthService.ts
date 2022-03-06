@@ -66,11 +66,20 @@ export default class AuthService {
      */
     const token = await ctx.auth.use(this.authGuard).generate(user, {
       expiresIn: '1d',
+      userId: user.id,
       userRoles: user.roles.map(role => role.slug),
       userName: user.fullname,
     });
 
+    /**
+     * Set cookie toke to response
+     */
     ctx.response.cookie('token', token.token);
+
+    /**
+     * Save last login date
+     */
+    await this.userRepository.updateLastLogin(user.id);
 
     return {
       success: true,

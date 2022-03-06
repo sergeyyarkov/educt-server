@@ -5,14 +5,36 @@ import Redis from '@ioc:Adonis/Addons/Redis';
 import Mail from '@ioc:Adonis/Addons/Mail';
 import Hash from '@ioc:Adonis/Core/Hash';
 import Logger from '@ioc:Adonis/Core/Logger';
+
+/**
+ * Datatypes
+ */
+import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
 import HttpStatusEnum from 'App/Datatypes/Enums/HttpStatusEnum';
 import IResponse from 'App/Datatypes/Interfaces/IResponse';
+import CodeErrorEnum from 'App/Datatypes/Enums/CodeErrorEnum';
+
+/**
+ * Repositories
+ */
 import ContactRepository from 'App/Repositories/ContactRepository';
 import UserRepository from 'App/Repositories/UserRepository';
+
+/**
+ * Validator
+ */
+import UpdateUserInfoValidator from 'App/Validators/User/UpdateUserInfoValidator';
 import UpdateContactsValidator from 'App/Validators/Contacts/UpdateContactsValidator';
-import CodeErrorEnum from 'App/Datatypes/Enums/CodeErrorEnum';
+
+/**
+ * Helpers
+ */
 import RoleHelper from 'App/Helpers/RoleHelper';
-import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
+
+/**
+ * Services
+ */
+import Ws from './WsService';
 
 @inject()
 export default class MeService {
@@ -55,11 +77,16 @@ export default class MeService {
       });
     }
 
+    const notifications = await Ws.notificationStore.getNotifications(user.id);
+
     return {
       success: true,
       status: HttpStatusEnum.OK,
       message: 'Fetched authorized user data.',
-      data: user,
+      data: {
+        ...user.toJSON(),
+        notifications,
+      },
     };
   }
 
@@ -247,9 +274,9 @@ export default class MeService {
   /**
    * Update user conctact
    *
-   * @param data Data to update
+   * @param data Fields to update
    * @param auth AuthContract
-   * @returns Updated user contacts
+   * @returns IResponse
    */
   public async updateUserContacts(
     data: UpdateContactsValidator['schema']['props'],
@@ -277,6 +304,93 @@ export default class MeService {
       status: HttpStatusEnum.OK,
       message: 'User contacts updated.',
       data: user.contacts,
+    };
+  }
+
+  /**
+   * Update info about user
+   *
+   * @param data Fields to update
+   * @param auth AuthContract
+   * @returns IResponse
+   */
+  public async updateUserInfo(
+    data: UpdateUserInfoValidator['schema']['props'],
+    auth: AuthContract
+  ): Promise<IResponse> {
+    const user = await auth.use(this.authGuard).authenticate();
+    const { about, ...newContacts } = data;
+
+    if (Object.keys(data).length === 0) {
+      return {
+        success: false,
+        status: HttpStatusEnum.BAD_REQUEST,
+        message: 'You must specify at least one field.',
+        data: {},
+        error: {
+          code: 'E_BAD_REQUEST',
+        },
+      };
+    }
+
+    /**
+     * Personal info updating
+     */
+    if (about !== undefined) {
+      await this.userRepository.updateInfo(user.id, data);
+    }
+
+    /**
+     * Contacts updating
+     */
+    if (data.phone_number !== undefined || data.twitter_id !== undefined || data.telegram_id !== undefined) {
+      const contacts = await this.contactRepository.update(user, newContacts);
+
+      if (!contacts) {
+        await this.contactRepository.create(user, newContacts);
+      }
+    }
+
+    return {
+      success: true,
+      status: HttpStatusEnum.OK,
+      message: 'User contacts updated.',
+      data: { ...data },
+    };
+  }
+
+  /**
+   * Fetch history of chat
+   *
+   * @param chatId Id of user
+   * @param auth AuthContract
+   * @returns IResponse
+   */
+  public async fetchChatHistory(chatId: string, auth: AuthContract): Promise<IResponse> {
+    const firstUser = await auth.use(this.authGuard).authenticate();
+    const secondUser = await this.userRepository.getById(chatId);
+
+    if (!secondUser) {
+      return {
+        success: false,
+        status: HttpStatusEnum.NOT_FOUND,
+        message: 'Chat not found.',
+        data: {},
+        error: {
+          code: 'E_NOT_FOUND',
+        },
+      };
+    }
+
+    const history = await Ws.messageStore.getHistory(firstUser.id, secondUser.id);
+
+    return {
+      success: true,
+      status: HttpStatusEnum.OK,
+      message: 'Chat history fetched.',
+      data: {
+        history,
+      },
     };
   }
 }

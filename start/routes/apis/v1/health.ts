@@ -8,4 +8,6 @@ Route.group(() => {
 
     return report.healthy ? ctx.response.ok(report) : ctx.response.badRequest(report);
   }).as('health');
-}).prefix('health');
+})
+  .prefix('api/v1/health')
+  .middleware('auth');

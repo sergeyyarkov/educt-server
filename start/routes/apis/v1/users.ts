@@ -12,4 +12,6 @@ Route.group(() => {
   Route.delete('/:id/detach-roles', 'Api/v1/UsersController.detachRoles')
     .middleware('role:admin')
     .as('users.detach-role');
-}).prefix('users');
+})
+  .prefix('api/v1/users')
+  .middleware('auth');

@@ -1,5 +1,6 @@
 import { Exception } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+import User from 'App/Models/User';
 
 export default class Role {
   error: {
@@ -23,7 +24,7 @@ export default class Role {
    * @param {string[]} roles - Array of roles for route
    * @param {string[]} userRole - Array of roles of current user
    */
-  protected checkRoles(roles: string[], userRoles: string[]): void {
+  protected check(roles: string[], userRoles: string[]): void {
     if (!roles.some(role => userRoles.includes(role))) {
       /**
        * Failed to verify user rights
@@ -33,8 +34,20 @@ export default class Role {
   }
 
   public async handle({ auth }: HttpContextContract, next: () => Promise<void>, roles: string[]) {
-    const { userRoles } = auth.use('api').token?.meta;
-    this.checkRoles(roles, userRoles);
+    const { userId } = auth.use('api').token?.meta;
+    const user = await User.query().where('id', userId).preload('roles').first();
+
+    if (!user) {
+      /**
+       * User not found
+       */
+      throw new Exception('Cannot identify current user.', this.error.status, this.error.code);
+    }
+
+    this.check(
+      roles,
+      user.roles.map(role => role.slug)
+    );
     await next();
   }
 }

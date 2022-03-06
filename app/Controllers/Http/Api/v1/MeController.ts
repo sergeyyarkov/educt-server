@@ -12,6 +12,7 @@ import MeService from 'App/Services/MeService';
  */
 import ChangePasswordValidator from 'App/Validators/Password/ChangePasswordValidator';
 import UpdateContactsValidator from 'App/Validators/Contacts/UpdateContactsValidator';
+import UpdateUserInfoValidator from 'App/Validators/User/UpdateUserInfoValidator';
 
 import BaseController from '../../BaseController';
 
@@ -101,6 +102,35 @@ export default class MeController extends BaseController {
   public async updateContacts(ctx: HttpContextContract) {
     const payload = await ctx.request.validate(UpdateContactsValidator);
     const result = await this.meService.updateUserContacts(payload, ctx.auth);
+
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
+  }
+
+  /**
+   * Update personal info of user
+   * PATCH /me/info
+   */
+  public async updateInfo(ctx: HttpContextContract) {
+    const payload = await ctx.request.validate(UpdateUserInfoValidator);
+    const result = await this.meService.updateUserInfo(payload, ctx.auth);
+
+    if (!result.success && result.error) {
+      throw new Exception(result.message, result.status, result.error.code);
+    }
+
+    return this.sendResponse(ctx, result.data, result.message, result.status);
+  }
+
+  /**
+   * Get messages of conversation by chat id
+   * GET /me/messages
+   */
+  public async chatHistory(ctx: HttpContextContract) {
+    const result = await this.meService.fetchChatHistory(ctx.params.chat_id, ctx.auth);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);

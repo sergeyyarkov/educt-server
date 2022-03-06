@@ -20,7 +20,7 @@ export default class StatService {
       `
     );
 
-    const online = await Ws.sessionStore.getOnlineSessionsCount();
+    const online = await Ws.sessionStore.getOnlineSessions();
 
     return {
       success: true,
@@ -28,7 +28,7 @@ export default class StatService {
       message: 'Fetched stat.',
       data: {
         ...count.rows[0],
-        online,
+        online: online.length,
       },
     };
   }

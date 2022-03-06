@@ -51,6 +51,22 @@ const redisConfig: RedisConfig = {
       keyPrefix: 'session-',
       healthCheck: true,
     },
+    message: {
+      host: Env.get('REDIS_HOST'),
+      port: Env.get('REDIS_PORT'),
+      password: Env.get('REDIS_PASSWORD', ''),
+      keyPrefix: '',
+      db: 2,
+      healthCheck: true,
+    },
+    notification: {
+      host: Env.get('REDIS_HOST'),
+      port: Env.get('REDIS_PORT'),
+      password: Env.get('REDIS_PASSWORD', ''),
+      keyPrefix: '',
+      db: 3,
+      healthCheck: true,
+    },
   },
 };
 

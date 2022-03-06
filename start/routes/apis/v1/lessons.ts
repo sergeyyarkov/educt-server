@@ -18,4 +18,6 @@ Route.group(() => {
   Route.get('/:id/progress', 'Api/v1/LessonsController.getVideoProgress')
     .middleware('role:admin,teacher,student')
     .as('lessons.get-video-progress');
-}).prefix('lessons');
+})
+  .prefix('api/v1/lessons')
+  .middleware('auth');

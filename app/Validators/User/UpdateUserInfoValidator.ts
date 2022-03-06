@@ -1,15 +1,13 @@
 import { schema, rules } from '@ioc:Adonis/Core/Validator';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 
-export default class UpdateContactsValidator {
+export default class UpdateUserInfoValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public schema = schema.create({
+    about: schema.string.nullableAndOptional(),
     phone_number: schema.string.nullableAndOptional({}, [
-      rules.mobile({
-        locales: ['ru-RU', 'en-US'],
-        strict: true,
-      }),
+      rules.mobile({ locales: ['ru-RU', 'en-US'], strict: true }),
       rules.unique({ table: 'contacts', column: 'phone_number' }),
     ]),
     vk_id: schema.string.nullableAndOptional({}, [
