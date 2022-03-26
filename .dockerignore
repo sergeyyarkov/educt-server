@@ -1,12 +1,12 @@
 # Adonis default .gitignore ignores
 node_modules
 build
-uploads
 coverage
 .vscode
 .DS_STORE
 .env
 tmp
+uploads
 
 # Additional .gitignore ignores (any custom file you wish)
 .idea

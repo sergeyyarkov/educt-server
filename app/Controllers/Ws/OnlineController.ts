@@ -17,9 +17,10 @@ export default class OnlineController {
     this.socket = socket;
     this.io = io;
     this.sessionStore = sessionStore;
+  }
 
-    this.onConnected(socket);
-
+  public handle() {
+    this.onConnected(this.socket);
     this.socket.on('disconnect', reason => this.onDisconnected(reason));
   }
 
