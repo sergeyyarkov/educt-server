@@ -13,6 +13,16 @@ services:
       - api
     networks:
       - app-network
+  client:
+    container_name: client
+    restart: always
+    image: educt-client
+    ports:
+      - 5000:80
+    depends_on:
+      - api
+    networks:
+      - app-network
   api:
     container_name: api
     restart: always
