@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## [1.3.1] - 2022-04-10
 
-- API deployment with Docker and Nginx web server.
+## Added
+
+- Docker files for building container
 
 ## [1.2.1] - 2022-03-06
 
