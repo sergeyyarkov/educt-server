@@ -115,8 +115,9 @@ class WsService {
 
   private listen() {
     this.io.on('connection', async socket => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const onlineController = new OnlineController(socket, this.io, this.sessionStore);
+
+      onlineController.handle();
 
       const { sessionId, userId, userName } = socket.data;
       const isExistSocketData = !!(sessionId && userId && userName);

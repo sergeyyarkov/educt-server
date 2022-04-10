@@ -43,6 +43,7 @@ const databaseConfig: DatabaseConfig = {
         database: Env.get('PG_DB_NAME'),
       },
       migrations: {
+        disableRollbacksInProduction: true,
         naturalSort: true,
         tableName: 'migrations',
       },
