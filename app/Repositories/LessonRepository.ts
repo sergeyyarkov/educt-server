@@ -144,12 +144,13 @@ export default class LessonRepository {
 
     if (lesson) {
       /**
-       * Update files
+       * Update fields
        */
       lesson.merge({
         title: data.title,
         description: data.description,
         course_id: data.course_id,
+        ...(data.duration && { duration: data.duration.toFormat('HH:mm:ss') }),
       });
 
       /**

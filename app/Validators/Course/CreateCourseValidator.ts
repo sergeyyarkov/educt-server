@@ -11,7 +11,7 @@ export default class CreateCourseValidator {
     education_description: schema.string.nullable(),
     image: schema.file.optional({
       size: '10mb',
-      extnames: ['jpg', 'jpeg', 'png'],
+      extnames: ['jpg', 'jpeg', 'png', 'webp'],
     }),
     teacher_id: schema.string({}, [rules.exists({ table: 'users', column: 'id' })]),
     category_id: schema.string({}, [rules.exists({ table: 'categories', column: 'id' })]),
