@@ -19,5 +19,5 @@ Route.group(() => {
     .middleware('role:admin,teacher,student')
     .as('me.update-contacts');
 })
-  .prefix('api/v1/me')
+  .prefix('v1/me')
   .middleware('auth');

@@ -72,7 +72,7 @@ export default class AuthService {
     });
 
     /**
-     * Set cookie toke to response
+     * Set cookie token to response
      */
     ctx.response.cookie('token', token.token);
 

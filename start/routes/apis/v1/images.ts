@@ -6,5 +6,5 @@ Route.group(() => {
   Route.get('/', 'Api/v1/ImagesController.list').as('images.list');
   Route.get('/:id', 'Api/v1/ImagesController.show').as('images.show');
 })
-  .prefix('api/v1/images')
+  .prefix('v1/images')
   .middleware('auth');

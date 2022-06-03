@@ -13,5 +13,5 @@ Route.group(() => {
     .middleware('role:admin')
     .as('users.detach-role');
 })
-  .prefix('api/v1/users')
+  .prefix('v1/users')
   .middleware('auth');

@@ -5,5 +5,5 @@ Route.group(() => {
     .middleware('role:admin,teacher,student')
     .as('chat.get-conversations');
 })
-  .prefix('api/v1/chat')
+  .prefix('v1/chat')
   .middleware('auth');

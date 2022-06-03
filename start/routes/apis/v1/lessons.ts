@@ -19,5 +19,5 @@ Route.group(() => {
     .middleware('role:admin,teacher,student')
     .as('lessons.get-video-progress');
 })
-  .prefix('api/v1/lessons')
+  .prefix('v1/lessons')
   .middleware('auth');
