@@ -18,7 +18,7 @@ const mailConfig: MailConfig = {
   | a mailer
   |
   */
-  mailer: 'mailgun',
+  mailer: Env.get('MAILER'),
 
   /*
   |--------------------------------------------------------------------------
