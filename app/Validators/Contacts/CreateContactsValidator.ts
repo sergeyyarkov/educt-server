@@ -7,7 +7,7 @@ export default class CreateContactsValidator {
   public schema = schema.create({
     phone_number: schema.string.nullableAndOptional({}, [
       rules.mobile({
-        locales: ['ru-RU', 'en-US'],
+        locale: ['ru-RU', 'en-US'],
         strict: true,
       }),
     ]),

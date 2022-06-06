@@ -25,6 +25,7 @@ import CreateCourseValidator from 'App/Validators/Course/CreateCourseValidator';
 import UpdateCourseValidator from 'App/Validators/Course/UpdateCourseValidator';
 import FetchCoursesValidator from 'App/Validators/Course/FetchCoursesValidator';
 import Course from 'App/Models/Course';
+import Drive from '@ioc:Adonis/Core/Drive';
 
 @inject()
 export default class CourseService {
@@ -309,6 +310,24 @@ export default class CourseService {
         },
       };
     }
+
+    /**
+     * Collect all file names from lessons in course and delete files
+     */
+    const videos: string[] = course.lessons.map(lesson => lesson.video.name);
+    const materials: string[] = course.lessons.map(lesson => lesson.materials.map(m => m.name)).flat();
+
+    await Promise.all(
+      videos.map(async name => {
+        await Drive.delete(`videos/${name}`);
+      })
+    );
+
+    await Promise.all(
+      materials.map(async name => {
+        await Drive.delete(`materials/${name}`);
+      })
+    );
 
     return {
       success: true,

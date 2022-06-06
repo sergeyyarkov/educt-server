@@ -6,9 +6,9 @@
  */
 
 import Env from '@ioc:Adonis/Core/Env';
-import { MailConfig } from '@ioc:Adonis/Addons/Mail';
+import { mailConfig } from '@adonisjs/mail/build/config';
 
-const mailConfig: MailConfig = {
+export default mailConfig({
   /*
   |--------------------------------------------------------------------------
   | Default mailer
@@ -71,6 +71,4 @@ const mailConfig: MailConfig = {
       domain: Env.get('MAILGUN_DOMAIN'),
     },
   },
-};
-
-export default mailConfig;
+});

@@ -4,10 +4,12 @@
 
 ## Added
 
+- Updated npm dependencies
 - [Added](https://github.com/sergeyyarkov/educt-server/commit/294a4f584dd39d295372802305004365fb01fdb2) `MAILER` env variable
 
 ## Fix
 
+- Fixed schema validator on saving lesson order
 - Fixed lesson [duration updating](https://github.com/sergeyyarkov/educt-server/commit/ffdebc4f927abe3b63c62c84268f40f9e6663895#diff-86d18314585862595621b4e90f675b79ac74e7a0a47b2797556902eeff75e14a)
 - Updated cors config
 - Deleted `api` from path url

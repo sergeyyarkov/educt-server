@@ -1,6 +1,6 @@
 import { Exception, inject, Ioc } from '@adonisjs/core/build/standalone';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
-import { schema } from '@ioc:Adonis/Core/Validator';
+import { schema, rules } from '@ioc:Adonis/Core/Validator';
 
 /**
  * Services
@@ -141,7 +141,7 @@ export default class LessonsController extends BaseController {
   // eslint-disable-next-line class-methods-use-this
   public async saveOrder(ctx: HttpContextContract) {
     const saveOrderSchema = schema.create({
-      ids: schema.array().members(schema.string()),
+      ids: schema.array([rules.minLength(1)]).members(schema.string()),
     });
     const payload = await ctx.request.validate({ schema: saveOrderSchema });
     const { data, message, status, success, error } = await this.lessonService.updateOrder(payload.ids);
