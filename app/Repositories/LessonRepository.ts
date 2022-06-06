@@ -202,7 +202,10 @@ export default class LessonRepository {
       /**
        * Delete files from disk
        */
-      await this.Drive.delete(`videos/${lesson.video.name}`);
+      if (lesson.video) {
+        await this.Drive.delete(`videos/${lesson.video.name}`);
+      }
+
       await this.deleteMaterials(lesson);
 
       /**
