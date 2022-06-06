@@ -21,5 +21,3 @@ const server = new Ignitor(__dirname).httpServer();
 server.start().catch(error => {
   throw new Error(error);
 });
-
-process.on('SIGINT', () => server.kill(10));

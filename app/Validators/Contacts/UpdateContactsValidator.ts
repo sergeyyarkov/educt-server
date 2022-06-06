@@ -7,7 +7,7 @@ export default class UpdateContactsValidator {
   public schema = schema.create({
     phone_number: schema.string.nullableAndOptional({}, [
       rules.mobile({
-        locales: ['ru-RU', 'en-US'],
+        locale: ['ru-RU', 'en-US'],
         strict: true,
       }),
       rules.unique({ table: 'contacts', column: 'phone_number' }),

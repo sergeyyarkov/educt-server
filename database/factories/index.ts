@@ -1,4 +1,4 @@
-import Factory from '@ioc:Adonis/Lucid/Factory';
+import Factory, { FactoryContextContract } from '@ioc:Adonis/Lucid/Factory';
 import { string } from '@ioc:Adonis/Core/Helpers';
 
 /**
@@ -18,7 +18,7 @@ import Role from 'App/Models/Role';
 import User from 'App/Models/User';
 import { DateTime } from 'luxon';
 
-const makeFakeUser = (faker: Faker.FakerStatic, loginPrefix?: string) => {
+const makeFakeUser = (faker: FactoryContextContract['faker'], loginPrefix?: string) => {
   return {
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),

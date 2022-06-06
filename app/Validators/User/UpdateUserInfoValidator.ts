@@ -7,7 +7,7 @@ export default class UpdateUserInfoValidator {
   public schema = schema.create({
     about: schema.string.nullableAndOptional(),
     phone_number: schema.string.nullableAndOptional({}, [
-      rules.mobile({ locales: ['ru-RU', 'en-US'], strict: true }),
+      rules.mobile({ locale: ['ru-RU', 'en-US'], strict: true }),
       rules.unique({ table: 'contacts', column: 'phone_number' }),
     ]),
     vk_id: schema.string.nullableAndOptional({}, [
