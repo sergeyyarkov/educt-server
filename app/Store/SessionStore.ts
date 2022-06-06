@@ -56,7 +56,6 @@ class RedisSessionStore {
   public async getSessions(): Promise<Array<SessionDataType | undefined>> {
     const keys = await this.scanSessionKeys();
     const commands = Array.from(keys).map(key => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [, ...id] = key.split('-');
       return ['hmget', id.join('-'), 'userId', 'userName', 'connected'];
     });
@@ -64,7 +63,10 @@ class RedisSessionStore {
     return this.redisClient
       .multi(commands)
       .exec()
-      .then(results => results.map(([err, session]) => (err ? undefined : this.transform(session))));
+      .then(results => {
+        if (results === null) return [];
+        return results.map(([err, session]: [Error, (string | null)[]]) => (err ? undefined : this.transform(session)));
+      });
   }
 
   /**
