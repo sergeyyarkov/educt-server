@@ -93,7 +93,7 @@ export default class UsersController extends BaseController {
    */
 
   public async delete(ctx: HttpContextContract) {
-    const result = await this.userService.deleteUser(ctx.params.id);
+    const result = await this.userService.deleteUser(ctx.params.id, ctx);
 
     if (!result.success && result.error) {
       throw new Exception(result.message, result.status, result.error.code);

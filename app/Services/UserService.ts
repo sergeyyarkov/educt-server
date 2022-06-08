@@ -27,6 +27,7 @@ import UserRepository from 'App/Repositories/UserRepository';
  */
 import CreateUserValidator from 'App/Validators/User/CreateUserValidator';
 import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator';
+import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
 
 @inject()
 export default class UserService {
@@ -120,20 +121,7 @@ export default class UserService {
       };
     }
 
-    /**
-     * Check user permissions
-     */
-    if (await ctx.bouncer.denies('manageUserRole', role)) {
-      return {
-        success: false,
-        status: HttpStatusEnum.FORBIDDEN,
-        message: 'You dont have permissions to permorm that action',
-        data: {},
-        error: {
-          code: 'E_FORBIDDEN',
-        },
-      };
-    }
+    await ctx.bouncer.with('RolePolicy').authorize('manage', [role.slug as RoleEnum]);
 
     /**
      * Create new user
@@ -166,7 +154,7 @@ export default class UserService {
     data: UpdateUserValidator['schema']['props'],
     ctx: HttpContextContract
   ): Promise<IResponse> {
-    const user = await this.userRepository.update(id, data);
+    const user = await this.userRepository.getById(id);
 
     if (!user) {
       return {
@@ -180,6 +168,9 @@ export default class UserService {
       };
     }
 
+    await ctx.bouncer.with('RolePolicy').authorize('manage', user.roles.map(r => r.slug) as [RoleEnum]);
+    await this.userRepository.update(id, data);
+
     /**
      * Update user role
      */
@@ -187,18 +178,7 @@ export default class UserService {
       const role = await this.roleRepository.getBySlug(data.role);
 
       if (role) {
-        if (await ctx.bouncer.denies('manageUserRole', role)) {
-          return {
-            success: false,
-            status: HttpStatusEnum.FORBIDDEN,
-            message: 'You dont have permissions to permorm that action',
-            data: {},
-            error: {
-              code: 'E_FORBIDDEN',
-            },
-          };
-        }
-
+        await ctx.bouncer.with('RolePolicy').authorize('manage', [data.role]);
         await this.userRepository.updateRoles(user, [role]);
       }
     }
@@ -217,8 +197,8 @@ export default class UserService {
    * @param id User id
    * @returns Response
    */
-  public async deleteUser(id: string | number): Promise<IResponse> {
-    const user = await this.userRepository.delete(id);
+  public async deleteUser(id: string | number, ctx: HttpContextContract): Promise<IResponse> {
+    const user = await this.userRepository.getById(id);
 
     if (!user) {
       return {
@@ -231,6 +211,9 @@ export default class UserService {
         },
       };
     }
+
+    await ctx.bouncer.with('RolePolicy').authorize('manage', user.roles.map(r => r.slug) as [RoleEnum]);
+    await this.userRepository.delete(id);
 
     return {
       success: true,

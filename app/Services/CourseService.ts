@@ -234,9 +234,9 @@ export default class CourseService {
     /**
      * Find course teacher
      */
-    const teacher = await this.userRepository.getById(data.teacher_id);
+    const user = await this.userRepository.getById(data.teacher_id);
 
-    if (!teacher) {
+    if (!user) {
       return {
         success: false,
         status: HttpStatusEnum.NOT_FOUND,
@@ -248,13 +248,13 @@ export default class CourseService {
       };
     }
 
-    const isTeacher = RoleHelper.userHasRoles(teacher.roles, [RoleEnum.TEACHER]);
+    const isHasPermissions = RoleHelper.userContainRoles(user.roles, [RoleEnum.ADMIN, RoleEnum.TEACHER]);
 
-    if (!isTeacher) {
+    if (!isHasPermissions) {
       return {
         success: false,
         status: HttpStatusEnum.BAD_REQUEST,
-        message: `User with id "${teacher.id}" not a teacher.`,
+        message: `User with id "${user.id}" does not have sufficient permissions.`,
         data: {},
         error: {
           code: 'E_BAD_REQUEST',
@@ -358,6 +358,10 @@ export default class CourseService {
         },
       };
     }
+
+    // if (data.teacher_id) {
+
+    // }
 
     return {
       success: true,
