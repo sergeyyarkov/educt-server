@@ -26,6 +26,7 @@ import UpdateCourseValidator from 'App/Validators/Course/UpdateCourseValidator';
 import FetchCoursesValidator from 'App/Validators/Course/FetchCoursesValidator';
 import Course from 'App/Models/Course';
 import Drive from '@ioc:Adonis/Core/Drive';
+import CourseHelper, { FileEntry } from 'App/Helpers/CourseHelper';
 
 @inject()
 export default class CourseService {
@@ -719,6 +720,32 @@ export default class CourseService {
       message: 'Fetched course likes count.',
       data: { count },
     };
+  }
+
+  /**
+   * This function will delete all associated course files on disk
+   *
+   * @param courses List of courses
+   */
+  public async deleteAllFiles(courses: Course[]): Promise<void> {
+    /**
+     * Collect file names
+     */
+    const images = courses.map(course => CourseHelper.getImageFileName(course)).filter(Boolean) as FileEntry[];
+    const videos = courses
+      .map(course => CourseHelper.getVideoFileNames(course))
+      .flat()
+      .filter(Boolean) as FileEntry[];
+    const materials = courses.map(course => CourseHelper.getMaterialFileNames(course)).flat();
+
+    /**
+     * Remove files from disk
+     */
+    const promises = videos
+      .concat(images, materials)
+      .map(file => Drive.delete(`${file.path}${file.name.substring(file.name.lastIndexOf('/') + 1)}`));
+
+    await Promise.all(promises);
   }
 }
 

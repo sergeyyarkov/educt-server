@@ -23,11 +23,26 @@ import RoleRepository from 'App/Repositories/RoleRepository';
 import UserRepository from 'App/Repositories/UserRepository';
 
 /**
+ * Services
+ */
+import CourseService from './CourseService';
+
+/**
  * Validators
  */
 import CreateUserValidator from 'App/Validators/User/CreateUserValidator';
 import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator';
+
+/**
+ * Datatypes
+ */
 import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
+
+/**
+ * Helpers
+ */
+import RoleHelper from 'App/Helpers/RoleHelper';
+import CourseRepository from 'App/Repositories/CourseRepository';
 
 @inject()
 export default class UserService {
@@ -35,9 +50,20 @@ export default class UserService {
 
   private roleRepository: RoleRepository;
 
-  constructor(userRepository: UserRepository, roleRepository: RoleRepository) {
+  private courseRepository: CourseRepository;
+
+  private courseService: CourseService;
+
+  constructor(
+    userRepository: UserRepository,
+    roleRepository: RoleRepository,
+    courseRepository: CourseRepository,
+    courseService: CourseService
+  ) {
     this.userRepository = userRepository;
     this.roleRepository = roleRepository;
+    this.courseRepository = courseRepository;
+    this.courseService = courseService;
   }
 
   /**
@@ -213,6 +239,12 @@ export default class UserService {
     }
 
     await ctx.bouncer.with('RolePolicy').authorize('manage', user.roles.map(r => r.slug) as [RoleEnum]);
+
+    if (RoleHelper.userContainRoles(user.roles, [RoleEnum.TEACHER, RoleEnum.ADMIN])) {
+      const courses = await this.courseRepository.getByTeacherId(id);
+      await this.courseService.deleteAllFiles(courses);
+    }
+
     await this.userRepository.delete(id);
 
     return {

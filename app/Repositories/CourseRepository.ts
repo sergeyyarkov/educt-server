@@ -33,6 +33,32 @@ export default class CourseRepository {
   }
 
   /**
+   * Get list of courses by teacher id
+   *
+   * @param id Teacher id
+   * @returns Array of courses
+   */
+  public async getByTeacherId(id: string | number): Promise<Course[]> {
+    const data = await this.Course.query()
+      .preload('lessons', q => q.preload('video').preload('materials'))
+      .where('teacher_id', id);
+    return data;
+  }
+
+  /**
+   * Get list of courses by category id
+   *
+   * @param id Category id
+   * @returns Array of courses
+   */
+  public async getByCategoryId(id: string | number): Promise<Course[]> {
+    const data = await this.Course.query()
+      .preload('lessons', q => q.preload('video').preload('materials'))
+      .where('category_id', id);
+    return data;
+  }
+
+  /**
    * Set status on course
    *
    * @param id Course id
