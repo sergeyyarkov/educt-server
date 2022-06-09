@@ -195,7 +195,6 @@ export default class UserService {
     }
 
     await ctx.bouncer.with('RolePolicy').authorize('manage', user.roles.map(r => r.slug) as [RoleEnum]);
-    const updated = await this.userRepository.update(id, data);
 
     /**
      * Update user role
@@ -208,6 +207,8 @@ export default class UserService {
         await this.userRepository.updateRoles(user, [role]);
       }
     }
+
+    const updated = await this.userRepository.update(id, data);
 
     return {
       success: true,
