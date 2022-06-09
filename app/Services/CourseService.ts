@@ -732,11 +732,8 @@ export default class CourseService {
      * Collect file names
      */
     const images = courses.map(course => CourseHelper.getImageFileName(course)).filter(Boolean) as FileEntry[];
-    const videos = courses
-      .map(course => CourseHelper.getVideoFileNames(course))
-      .flat()
-      .filter(Boolean) as FileEntry[];
-    const materials = courses.map(course => CourseHelper.getMaterialFileNames(course)).flat();
+    const videos = courses.flatMap(course => CourseHelper.getVideoFileNames(course)).filter(Boolean) as FileEntry[];
+    const materials = courses.flatMap(course => CourseHelper.getMaterialFileNames(course));
 
     /**
      * Remove files from disk

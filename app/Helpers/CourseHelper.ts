@@ -16,7 +16,7 @@ export default class CourseHelper {
   }
 
   public static getMaterialFileNames(course: Course): FileEntry[] {
-    const data = course.lessons.map(l => l.materials.map(m => ({ path: 'materials/', name: m.name }))).flat();
+    const data = course.lessons.flatMap(l => l.materials.map(m => ({ path: 'materials/', name: m.name })));
     return data;
   }
 
