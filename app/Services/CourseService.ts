@@ -345,7 +345,7 @@ export default class CourseService {
    * @returns Response
    */
   public async updateCourse(id: string | number, data: UpdateCourseValidator['schema']['props']): Promise<IResponse> {
-    const course = await this.courseRepository.update(id, data);
+    const course = await this.courseRepository.getById(id);
 
     if (!course) {
       return {
@@ -359,9 +359,39 @@ export default class CourseService {
       };
     }
 
-    // if (data.teacher_id) {
+    if (data.teacher_id) {
+      const teacher = await this.userRepository.getById(data.teacher_id);
 
-    // }
+      if (!teacher) {
+        return {
+          success: false,
+          status: HttpStatusEnum.NOT_FOUND,
+          message: 'Teacher not found.',
+          data: {},
+          error: {
+            code: 'E_NOT_FOUND',
+          },
+        };
+      }
+
+      await teacher.load('roles');
+
+      const isTeacher = RoleHelper.userContainRoles(teacher.roles, [RoleEnum.TEACHER]);
+
+      if (!isTeacher) {
+        return {
+          success: false,
+          status: HttpStatusEnum.BAD_REQUEST,
+          message: 'Author is not a teacher.',
+          data: {},
+          error: {
+            code: 'E_BAD_REQUEST',
+          },
+        };
+      }
+    }
+
+    await this.courseRepository.update(id, data);
 
     return {
       success: true,

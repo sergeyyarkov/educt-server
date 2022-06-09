@@ -169,7 +169,7 @@ export default class UserService {
     }
 
     await ctx.bouncer.with('RolePolicy').authorize('manage', user.roles.map(r => r.slug) as [RoleEnum]);
-    await this.userRepository.update(id, data);
+    const updated = await this.userRepository.update(id, data);
 
     /**
      * Update user role
@@ -187,7 +187,7 @@ export default class UserService {
       success: true,
       status: HttpStatusEnum.OK,
       message: 'User updated.',
-      data: user,
+      data: updated || {},
     };
   }
 
