@@ -6,3 +6,4 @@ coverage
 .env
 tmp
 uploads
+npm-debug.log
