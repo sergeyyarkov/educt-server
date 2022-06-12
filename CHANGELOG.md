@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.4.2] - 2022-12-06
+
+## Added
+
+- Uploading video from url source (YouTube, Vimeo, .mp4, etc..)
+- Added student and teacher to seeders
+
+## Fix
+
+- Removing lesson files from drive when deleting course, category or user.
+- Fixed lesson display ordering when seeding database
+- Refactored bouncer actions
+
 ## [1.3.2] - 2022-06-06
 
 ## Added
