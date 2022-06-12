@@ -38,6 +38,9 @@ export default class Lesson extends BaseModel {
   public description: string;
 
   @column()
+  public linked_video_url: string | null;
+
+  @column()
   public duration: string;
 
   @belongsTo(() => Course, {

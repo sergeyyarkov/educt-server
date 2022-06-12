@@ -7,7 +7,13 @@ export default class CourseSeeder extends BaseSeeder {
   public async run() {
     this.CourseFactory = CourseFactory;
 
-    await this.CourseFactory.with('lessons', 10, lessonFactory => lessonFactory.with('content'))
+    const LESSONS_COUNT = 10;
+
+    await this.CourseFactory.with('lessons', LESSONS_COUNT, lessonFactory =>
+      lessonFactory
+        .with('content')
+        .merge(new Array(LESSONS_COUNT).fill(LESSONS_COUNT).map((_, i) => ({ display_order: i + 1 })))
+    )
       .with('category')
       .with('teacher')
       .createMany(3);

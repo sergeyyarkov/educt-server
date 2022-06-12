@@ -23,10 +23,26 @@ import RoleRepository from 'App/Repositories/RoleRepository';
 import UserRepository from 'App/Repositories/UserRepository';
 
 /**
+ * Services
+ */
+import CourseService from './CourseService';
+
+/**
  * Validators
  */
 import CreateUserValidator from 'App/Validators/User/CreateUserValidator';
 import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator';
+
+/**
+ * Datatypes
+ */
+import RoleEnum from 'App/Datatypes/Enums/RoleEnum';
+
+/**
+ * Helpers
+ */
+import RoleHelper from 'App/Helpers/RoleHelper';
+import CourseRepository from 'App/Repositories/CourseRepository';
 
 @inject()
 export default class UserService {
@@ -34,9 +50,20 @@ export default class UserService {
 
   private roleRepository: RoleRepository;
 
-  constructor(userRepository: UserRepository, roleRepository: RoleRepository) {
+  private courseRepository: CourseRepository;
+
+  private courseService: CourseService;
+
+  constructor(
+    userRepository: UserRepository,
+    roleRepository: RoleRepository,
+    courseRepository: CourseRepository,
+    courseService: CourseService
+  ) {
     this.userRepository = userRepository;
     this.roleRepository = roleRepository;
+    this.courseRepository = courseRepository;
+    this.courseService = courseService;
   }
 
   /**
@@ -120,20 +147,7 @@ export default class UserService {
       };
     }
 
-    /**
-     * Check user permissions
-     */
-    if (await ctx.bouncer.denies('manageUserRole', role)) {
-      return {
-        success: false,
-        status: HttpStatusEnum.FORBIDDEN,
-        message: 'You dont have permissions to permorm that action',
-        data: {},
-        error: {
-          code: 'E_FORBIDDEN',
-        },
-      };
-    }
+    await ctx.bouncer.with('RolePolicy').authorize('manage', [role.slug as RoleEnum]);
 
     /**
      * Create new user
@@ -166,7 +180,7 @@ export default class UserService {
     data: UpdateUserValidator['schema']['props'],
     ctx: HttpContextContract
   ): Promise<IResponse> {
-    const user = await this.userRepository.update(id, data);
+    const user = await this.userRepository.getById(id);
 
     if (!user) {
       return {
@@ -180,6 +194,8 @@ export default class UserService {
       };
     }
 
+    await ctx.bouncer.with('RolePolicy').authorize('manage', user.roles.map(r => r.slug) as [RoleEnum]);
+
     /**
      * Update user role
      */
@@ -187,27 +203,18 @@ export default class UserService {
       const role = await this.roleRepository.getBySlug(data.role);
 
       if (role) {
-        if (await ctx.bouncer.denies('manageUserRole', role)) {
-          return {
-            success: false,
-            status: HttpStatusEnum.FORBIDDEN,
-            message: 'You dont have permissions to permorm that action',
-            data: {},
-            error: {
-              code: 'E_FORBIDDEN',
-            },
-          };
-        }
-
+        await ctx.bouncer.with('RolePolicy').authorize('manage', [data.role]);
         await this.userRepository.updateRoles(user, [role]);
       }
     }
+
+    const updated = await this.userRepository.update(id, data);
 
     return {
       success: true,
       status: HttpStatusEnum.OK,
       message: 'User updated.',
-      data: user,
+      data: updated || {},
     };
   }
 
@@ -217,8 +224,8 @@ export default class UserService {
    * @param id User id
    * @returns Response
    */
-  public async deleteUser(id: string | number): Promise<IResponse> {
-    const user = await this.userRepository.delete(id);
+  public async deleteUser(id: string | number, ctx: HttpContextContract): Promise<IResponse> {
+    const user = await this.userRepository.getById(id);
 
     if (!user) {
       return {
@@ -231,6 +238,15 @@ export default class UserService {
         },
       };
     }
+
+    await ctx.bouncer.with('RolePolicy').authorize('manage', user.roles.map(r => r.slug) as [RoleEnum]);
+
+    if (RoleHelper.userContainRoles(user.roles, [RoleEnum.TEACHER, RoleEnum.ADMIN])) {
+      const courses = await this.courseRepository.getByTeacherId(id);
+      await this.courseService.deleteAllFiles(courses);
+    }
+
+    await this.userRepository.delete(id);
 
     return {
       success: true,

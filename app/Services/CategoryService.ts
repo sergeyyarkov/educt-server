@@ -10,6 +10,7 @@ import HttpStatusEnum from 'App/Datatypes/Enums/HttpStatusEnum';
  * Repositories
  */
 import CategoryRepository from 'App/Repositories/CategoryRepository';
+import CourseRepository from 'App/Repositories/CourseRepository';
 
 /**
  * Validators
@@ -17,12 +18,27 @@ import CategoryRepository from 'App/Repositories/CategoryRepository';
 import CreateCategoryValidator from 'App/Validators/Category/CreateCategoryValidator';
 import UpdateCategoryValidator from 'App/Validators/Category/UpdateCategoryValidator';
 
+/**
+ * Services
+ */
+import CourseService from 'App/Services/CourseService';
+
 @inject()
 export default class CategoryService {
   private categoryRepository: CategoryRepository;
 
-  constructor(categoryRepository: CategoryRepository) {
+  private courseRepository: CourseRepository;
+
+  private courseService: CourseService;
+
+  constructor(
+    categoryRepository: CategoryRepository,
+    courseRepository: CourseRepository,
+    courseService: CourseService
+  ) {
     this.categoryRepository = categoryRepository;
+    this.courseRepository = courseRepository;
+    this.courseService = courseService;
   }
 
   /**
@@ -94,7 +110,7 @@ export default class CategoryService {
    * @returns Deleted category
    */
   public async deleteCategory(id: string | number): Promise<IResponse> {
-    const data = await this.categoryRepository.delete(id);
+    const data = await this.categoryRepository.getById(id);
 
     if (!data) {
       return {
@@ -107,6 +123,10 @@ export default class CategoryService {
         },
       };
     }
+
+    const courses = await this.courseRepository.getByCategoryId(id);
+    await this.courseService.deleteAllFiles(courses);
+    await this.categoryRepository.delete(id);
 
     return {
       success: true,

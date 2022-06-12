@@ -26,6 +26,7 @@ import UpdateCourseValidator from 'App/Validators/Course/UpdateCourseValidator';
 import FetchCoursesValidator from 'App/Validators/Course/FetchCoursesValidator';
 import Course from 'App/Models/Course';
 import Drive from '@ioc:Adonis/Core/Drive';
+import CourseHelper, { FileEntry } from 'App/Helpers/CourseHelper';
 
 @inject()
 export default class CourseService {
@@ -234,9 +235,9 @@ export default class CourseService {
     /**
      * Find course teacher
      */
-    const teacher = await this.userRepository.getById(data.teacher_id);
+    const user = await this.userRepository.getById(data.teacher_id);
 
-    if (!teacher) {
+    if (!user) {
       return {
         success: false,
         status: HttpStatusEnum.NOT_FOUND,
@@ -248,13 +249,13 @@ export default class CourseService {
       };
     }
 
-    const isTeacher = RoleHelper.userHasRoles(teacher.roles, [RoleEnum.TEACHER]);
+    const isHasPermissions = RoleHelper.userContainRoles(user.roles, [RoleEnum.ADMIN, RoleEnum.TEACHER]);
 
-    if (!isTeacher) {
+    if (!isHasPermissions) {
       return {
         success: false,
         status: HttpStatusEnum.BAD_REQUEST,
-        message: `User with id "${teacher.id}" not a teacher.`,
+        message: `User with id "${user.id}" does not have sufficient permissions.`,
         data: {},
         error: {
           code: 'E_BAD_REQUEST',
@@ -311,23 +312,7 @@ export default class CourseService {
       };
     }
 
-    /**
-     * Collect all file names from lessons in course and delete files
-     */
-    const videos: string[] = course.lessons.map(lesson => lesson.video.name);
-    const materials: string[] = course.lessons.map(lesson => lesson.materials.map(m => m.name)).flat();
-
-    await Promise.all(
-      videos.map(async name => {
-        await Drive.delete(`videos/${name}`);
-      })
-    );
-
-    await Promise.all(
-      materials.map(async name => {
-        await Drive.delete(`materials/${name}`);
-      })
-    );
+    await this.deleteAllFiles([course]);
 
     return {
       success: true,
@@ -345,7 +330,7 @@ export default class CourseService {
    * @returns Response
    */
   public async updateCourse(id: string | number, data: UpdateCourseValidator['schema']['props']): Promise<IResponse> {
-    const course = await this.courseRepository.update(id, data);
+    const course = await this.courseRepository.getById(id);
 
     if (!course) {
       return {
@@ -359,11 +344,45 @@ export default class CourseService {
       };
     }
 
+    if (data.teacher_id) {
+      const teacher = await this.userRepository.getById(data.teacher_id);
+
+      if (!teacher) {
+        return {
+          success: false,
+          status: HttpStatusEnum.NOT_FOUND,
+          message: 'Teacher not found.',
+          data: {},
+          error: {
+            code: 'E_NOT_FOUND',
+          },
+        };
+      }
+
+      await teacher.load('roles');
+
+      const isTeacherOrAdmin = RoleHelper.userContainRoles(teacher.roles, [RoleEnum.ADMIN, RoleEnum.TEACHER]);
+
+      if (!isTeacherOrAdmin) {
+        return {
+          success: false,
+          status: HttpStatusEnum.BAD_REQUEST,
+          message: 'Author is not a teacher or admin.',
+          data: {},
+          error: {
+            code: 'E_BAD_REQUEST',
+          },
+        };
+      }
+    }
+
+    const updated = await this.courseRepository.update(id, data);
+
     return {
       success: true,
       status: HttpStatusEnum.OK,
       message: 'Course updated.',
-      data: course,
+      data: updated || {},
     };
   }
 
@@ -685,6 +704,29 @@ export default class CourseService {
       message: 'Fetched course likes count.',
       data: { count },
     };
+  }
+
+  /**
+   * This function will delete all associated course files on disk
+   *
+   * @param courses List of courses
+   */
+  public async deleteAllFiles(courses: Course[]): Promise<void> {
+    /**
+     * Collect file names
+     */
+    const images = courses.map(course => CourseHelper.getImageFileName(course)).filter(Boolean) as FileEntry[];
+    const videos = courses.flatMap(course => CourseHelper.getVideoFileNames(course)).filter(Boolean) as FileEntry[];
+    const materials = courses.flatMap(course => CourseHelper.getMaterialFileNames(course));
+
+    /**
+     * Remove files from disk
+     */
+    const promises = videos
+      .concat(images, materials)
+      .map(file => Drive.delete(`${file.path}${file.name.substring(file.name.lastIndexOf('/') + 1)}`));
+
+    await Promise.all(promises);
   }
 }
 

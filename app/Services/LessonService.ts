@@ -78,20 +78,7 @@ export default class LessonService {
       };
     }
 
-    /**
-     * Allow user to view lesson content
-     */
-    if (await ctx.bouncer.denies('viewLessonContent', lesson)) {
-      return {
-        success: false,
-        status: HttpStatusEnum.FORBIDDEN,
-        message: 'The user is not a student of this course.',
-        data: {},
-        error: {
-          code: 'E_FORBIDDEN',
-        },
-      };
-    }
+    await ctx.bouncer.with('LessonPolicy').authorize('view', lesson);
 
     /**
      * Load lesson with materials
@@ -109,7 +96,8 @@ export default class LessonService {
   /**
    * Fetch lesson material by file name
    *
-   * @param fileName Name of file
+   * @param ctx Http context
+   * @param name Filename
    * @returns Response
    */
   public async fetchMaterialFile(ctx: HttpContextContract, name: string): Promise<IResponse<LessonMaterial>> {
@@ -131,18 +119,7 @@ export default class LessonService {
      * Allow user to view lesson material
      */
     await material.load('lesson');
-
-    if (await ctx.bouncer.denies('viewLessonContent', material.lesson)) {
-      return {
-        success: false,
-        status: HttpStatusEnum.FORBIDDEN,
-        message: 'You are not able to view this file.',
-        data: {},
-        error: {
-          code: 'E_FORBIDDEN',
-        },
-      };
-    }
+    await ctx.bouncer.with('LessonPolicy').authorize('view', material.lesson);
 
     return {
       success: true,
@@ -168,18 +145,7 @@ export default class LessonService {
     }
 
     await video.load('lesson');
-
-    if (await ctx.bouncer.denies('viewLessonContent', video.lesson)) {
-      return {
-        success: false,
-        status: HttpStatusEnum.FORBIDDEN,
-        message: 'You are not able to view this file.',
-        data: {},
-        error: {
-          code: 'E_FORBIDDEN',
-        },
-      };
-    }
+    await ctx.bouncer.with('LessonPolicy').authorize('view', video.lesson);
 
     return {
       success: true,
@@ -211,17 +177,7 @@ export default class LessonService {
       };
     }
 
-    if (await ctx.bouncer.denies('viewLessonContent', lesson)) {
-      return {
-        success: false,
-        status: HttpStatusEnum.FORBIDDEN,
-        message: 'The user is not a student of this course.',
-        data: {},
-        error: {
-          code: 'E_FORBIDDEN',
-        },
-      };
-    }
+    await ctx.bouncer.with('LessonPolicy').authorize('view', lesson);
 
     const progress = await this.lessonProgressRepository.get(user.id, lesson.id);
 
@@ -354,20 +310,7 @@ export default class LessonService {
       };
     }
 
-    /**
-     * Allow user to view lesson content
-     */
-    if (await ctx.bouncer.denies('viewLessonContent', lesson)) {
-      return {
-        success: false,
-        status: HttpStatusEnum.FORBIDDEN,
-        message: 'The user is not a student of this course.',
-        data: {},
-        error: {
-          code: 'E_FORBIDDEN',
-        },
-      };
-    }
+    await ctx.bouncer.with('LessonPolicy').authorize('view', lesson);
 
     /**
      * Load lesson with materials

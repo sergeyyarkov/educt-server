@@ -11,6 +11,7 @@ export default class Lessons extends BaseSchema {
       table.integer('display_order').notNullable();
       table.integer('color_id').unsigned().references('colors.id');
       table.string('description');
+      table.text('linked_video_url').nullable();
       table.time('duration').notNullable();
       table.timestamp('created_at', { useTz: true });
       table.timestamp('updated_at', { useTz: true });

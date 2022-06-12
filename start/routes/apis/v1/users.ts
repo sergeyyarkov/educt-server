@@ -7,7 +7,7 @@ Route.group(() => {
   Route.patch('/:id', 'Api/v1/UsersController.update').middleware('role:admin,teacher').as('users.update');
   Route.delete('/:id', 'Api/v1/UsersController.delete').middleware('role:admin,teacher').as('users.delete');
   Route.post('/:id/attach-roles', 'Api/v1/UsersController.attachRoles')
-    .middleware('role:admin,teacher')
+    .middleware('role:admin')
     .as('users.attach-role');
   Route.delete('/:id/detach-roles', 'Api/v1/UsersController.detachRoles')
     .middleware('role:admin')
