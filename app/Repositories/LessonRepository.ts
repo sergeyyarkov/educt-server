@@ -106,6 +106,7 @@ export default class LessonRepository {
       duration: data.duration.toFormat('HH:mm:ss'),
       display_order: Number.parseInt(course.$extras.lessons_count, 10) + 1,
       course_id: course.id,
+      linked_video_url: !data.video ? data.linked_video_url : null,
     });
 
     /**
@@ -116,7 +117,9 @@ export default class LessonRepository {
     /**
      * Move video file to disk and save to database
      */
-    await this.createVideo(lesson, data.video);
+    if (data.video) {
+      await this.createVideo(lesson, data.video);
+    }
 
     /**
      * Create materials
@@ -154,22 +157,28 @@ export default class LessonRepository {
       });
 
       /**
-       * Update video
+       * Update linked video url
        */
-      if (data.video) {
-        /**
-         * Delete video from drive and database
-         */
+      if (data.linked_video_url && !data.video) {
         if (lesson.video) {
           await this.Drive.delete(`videos/${lesson.video.name}`);
         }
 
         await lesson.related('video').query().delete();
+        lesson.merge({ linked_video_url: data.linked_video_url });
+      }
 
-        /**
-         * Upload new video to drive and save to database
-         */
+      /**
+       * Update file video
+       */
+      if (data.video) {
+        if (lesson.video) {
+          await this.Drive.delete(`videos/${lesson.video.name}`);
+        }
+
+        await lesson.related('video').query().delete();
         await this.createVideo(lesson, data.video);
+        lesson.merge({ linked_video_url: null });
       }
 
       /**

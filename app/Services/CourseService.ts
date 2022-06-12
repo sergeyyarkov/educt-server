@@ -312,23 +312,7 @@ export default class CourseService {
       };
     }
 
-    /**
-     * Collect all file names from lessons in course and delete files
-     */
-    const videos: string[] = course.lessons.map(lesson => lesson.video.name);
-    const materials: string[] = course.lessons.map(lesson => lesson.materials.map(m => m.name)).flat();
-
-    await Promise.all(
-      videos.map(async name => {
-        await Drive.delete(`videos/${name}`);
-      })
-    );
-
-    await Promise.all(
-      materials.map(async name => {
-        await Drive.delete(`materials/${name}`);
-      })
-    );
+    await this.deleteAllFiles([course]);
 
     return {
       success: true,
@@ -377,13 +361,13 @@ export default class CourseService {
 
       await teacher.load('roles');
 
-      const isTeacher = RoleHelper.userContainRoles(teacher.roles, [RoleEnum.TEACHER]);
+      const isTeacherOrAdmin = RoleHelper.userContainRoles(teacher.roles, [RoleEnum.ADMIN, RoleEnum.TEACHER]);
 
-      if (!isTeacher) {
+      if (!isTeacherOrAdmin) {
         return {
           success: false,
           status: HttpStatusEnum.BAD_REQUEST,
-          message: 'Author is not a teacher.',
+          message: 'Author is not a teacher or admin.',
           data: {},
           error: {
             code: 'E_BAD_REQUEST',
@@ -392,13 +376,13 @@ export default class CourseService {
       }
     }
 
-    await this.courseRepository.update(id, data);
+    const updated = await this.courseRepository.update(id, data);
 
     return {
       success: true,
       status: HttpStatusEnum.OK,
       message: 'Course updated.',
-      data: course,
+      data: updated || {},
     };
   }
 

@@ -13,6 +13,7 @@ export default class UpdateLessonValidator {
       size: '5000mb',
       extnames: ['mp4', 'mov', 'avi', 'wmv', 'webm', 'flv'],
     }),
+    linked_video_url: schema.string.optional([rules.regex(new RegExp('^(http|https|ftp)://'))]),
     materials: schema.array.nullableAndOptional().members(
       schema.file({
         size: '100mb',
