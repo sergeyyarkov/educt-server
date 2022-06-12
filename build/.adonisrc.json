@@ -1,0 +1,55 @@
+{
+  "typescript": false,
+  "commands": [
+    "./commands",
+    "@adonisjs/core/commands",
+    "@adonisjs/repl/build/commands",
+    "@adonisjs/lucid/build/commands",
+    "@adonisjs/mail/build/commands",
+    "@adonisjs/bouncer/build/commands"
+  ],
+  "exceptionHandlerNamespace": "App/Exceptions/Handler",
+  "namespaces": {
+    "models": "App/Models",
+    "middleware": "App/Middleware",
+    "exceptions": "App/Exceptions",
+    "validators": "App/Validators",
+    "httpControllers": "App/Controllers/Http",
+    "eventListeners": "App/Listeners",
+    "redisListeners": "App/Listeners"
+  },
+  "aliases": {
+    "App": "app",
+    "Config": "config",
+    "Database": "database",
+    "Contracts": "contracts"
+  },
+  "preloads": [
+    "./start/routes",
+    "./start/kernel",
+    "./start/event",
+    "./start/bouncer"
+  ],
+  "providers": [
+    "./providers/AppProvider",
+    "@adonisjs/core",
+    "@adonisjs/lucid",
+    "@adonisjs/auth",
+    "@adonisjs/redis",
+    "@adonisjs/mail",
+    "@adonisjs/view",
+    "@adonisjs/attachment-lite",
+    "@adonisjs/bouncer",
+    "@adonisjs/drive-s3"
+  ],
+  "aceProviders": [
+    "@adonisjs/repl"
+  ],
+  "metaFiles": [
+    {
+      "pattern": "resources/views/**/*.edge",
+      "reloadServer": false
+    }
+  ],
+  "lastCompiledAt": "2022-06-12T19:05:07.347Z"
+}

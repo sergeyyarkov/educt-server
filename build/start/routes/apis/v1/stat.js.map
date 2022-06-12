@@ -1,0 +1,1 @@
+{"version":3,"file":"stat.js","sourceRoot":"","sources":["../../../../../start/routes/apis/v1/stat.ts"],"names":[],"mappings":";;;;;AAAA,oFAA2C;AAE3C,eAAK,CAAC,KAAK,CAAC,GAAG,EAAE;IACf,eAAK,CAAC,GAAG,CAAC,GAAG,EAAE,6BAA6B,CAAC,CAAC,UAAU,CAAC,4BAA4B,CAAC,CAAC,EAAE,CAAC,YAAY,CAAC,CAAC;AAC1G,CAAC,CAAC;KACC,MAAM,CAAC,SAAS,CAAC;KACjB,UAAU,CAAC,MAAM,CAAC,CAAC"}
